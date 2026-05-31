@@ -3,7 +3,7 @@ export default function TokushoPage() {
     { label: '販売事業者', value: 'ITO Yuichi' },
     { label: '所在地', value: '請求があり次第、遅滞なく開示します' },
     { label: '電話番号', value: '請求があり次第、遅滞なく開示します' },
-    { label: 'メールアドレス', value: 'yuichi7759@gmail.com' },
+    { label: 'お問い合わせ', value: 'アプリ内お問い合わせフォームよりご連絡ください' },
     { label: 'サービス名', value: 'SpotCast' },
     { label: 'サービスの内容', value: '複数地点の気象管理サービス（Standardプラン：全機能利用可）' },
     { label: '販売価格', value: '月額980円（税込）' },
