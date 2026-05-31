@@ -13,7 +13,7 @@ export default function PrivacyPage() {
         <Section title="2. 収集する情報">
           <ul>
             <li><strong>アカウント情報</strong>: メールアドレス、パスワード（ハッシュ化）</li>
-            <li><strong>位置情報</strong>: ユーザーが登録した圃場・ポイントの緯度経度</li>
+            <li><strong>位置情報</strong>: ユーザーが登録したポイントの緯度経度</li>
             <li><strong>決済情報</strong>: クレジットカード情報はStripe社が管理し、当社は保持しません</li>
             <li><strong>利用情報</strong>: アクセスログ、機能の利用状況</li>
           </ul>

@@ -136,7 +136,7 @@ export default function DashboardPage() {
     setFields(prev => [field, ...prev])
     setShowModal(false); setPending(null)
     handleFieldClick(field)
-    toast.success(`「${field.name}」を登録しました`, field.crop ? `作物: ${field.crop}` : 'マップにピンが追加されました')
+    toast.success(`「${field.name}」を登録しました`, "マップにピンが追加されました")
   }
 
   // ─────────────────────────────────────────────────────────
