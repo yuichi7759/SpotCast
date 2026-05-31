@@ -110,7 +110,7 @@ export default function SettingsPage() {
             background: 'rgba(251,191,36,0.12)', border: '1px solid rgba(251,191,36,0.4)',
             color: '#fbbf24', fontSize: 13, fontWeight: 700,
           }}>
-            ⚡ Proプランへのアップグレードが完了しました！
+            ⚡ Standardプランへのアップグレードが完了しました！
           </div>
         )}
 
@@ -136,7 +136,7 @@ export default function SettingsPage() {
                   color: isPro ? '#fbbf24' : textMuted,
                   letterSpacing: '0.05em',
                 }}>
-                  {isPro ? '⚡ PRO' : 'FREE'}
+                  {isPro ? '⚡ STANDARD' : 'FREE'}
                 </span>
                 {!isPro && (
                   <div>
@@ -151,7 +151,7 @@ export default function SettingsPage() {
                         transition: 'all 0.15s',
                       }}
                     >
-                      {upgrading ? '処理中...' : '⚡ Proにアップグレード'}
+                      {upgrading ? '処理中...' : '⚡ Standardにアップグレード'}
                     </button>
                     {upgradeError && (
                       <div style={{ marginTop: 8, fontSize: 12, color: '#f87171' }}>⚠️ {upgradeError}</div>

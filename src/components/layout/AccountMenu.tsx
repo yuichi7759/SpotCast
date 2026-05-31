@@ -121,7 +121,7 @@ export default function AccountMenu() {
                 border: `1px solid ${isPro ? 'rgba(251,191,36,0.5)' : 'rgba(255,255,255,0.15)'}`,
                 color: isPro ? '#fbbf24' : 'rgba(255,255,255,0.5)',
               }}>
-                {isPro ? '⚡ PRO' : 'FREE'}
+                {isPro ? '⚡ STANDARD' : 'FREE'}
               </span>
             </div>
           </div>
@@ -141,7 +141,7 @@ export default function AccountMenu() {
                   transition: 'all 0.15s',
                 }}
               >
-                {upgrading ? '処理中...' : '⚡ Proにアップグレード'}
+                {upgrading ? '処理中...' : '⚡ Standardにアップグレード'}
               </button>
               {upgradeError && (
                 <div style={{ marginTop: 6, fontSize: 11, color: '#f87171', lineHeight: 1.4 }}>

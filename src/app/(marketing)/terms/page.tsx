@@ -21,7 +21,7 @@ export default function TermsPage() {
         <Section title="第3条（プランと料金）">
           <ul>
             <li><strong>Freeプラン</strong>: 無料。一部機能に制限があります。</li>
-            <li><strong>Proプラン</strong>: 月額980円（税込）。全機能が利用可能。</li>
+            <li><strong>Standardプラン</strong>: 月額980円（税込）。全機能が利用可能。</li>
             <li>料金はStripe社を通じてクレジットカードにより毎月自動決済されます。</li>
             <li>解約はいつでも可能で、解約後は当該月末まで利用できます。</li>
             <li>デジタルサービスの性質上、原則として返金はお受けできません。</li>
