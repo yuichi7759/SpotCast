@@ -5,7 +5,7 @@ export default function TokushoPage() {
     { label: '電話番号', value: '請求があり次第、遅滞なく開示します' },
     { label: 'メールアドレス', value: 'yuichi7759@gmail.com' },
     { label: 'サービス名', value: 'SpotCast' },
-    { label: 'サービスの内容', value: '農業向け気象・圃場管理ダッシュボード（Proプラン：全機能利用可）' },
+    { label: 'サービスの内容', value: '複数地点の気象管理サービス（Proプラン：全機能利用可）' },
     { label: '販売価格', value: '月額980円（税込）' },
     { label: '支払方法', value: 'クレジットカード（Stripe経由）' },
     { label: '支払時期', value: '申し込み時および毎月の更新日に自動決済' },
