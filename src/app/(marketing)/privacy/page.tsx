@@ -51,7 +51,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="8. 開示・訂正・削除">
-          <p>ユーザーは、保有する個人情報の開示・訂正・削除を請求できます。お問い合わせフォームまたは <a href="mailto:yuichi7759@gmail.com" style={{ color: '#60a5fa' }}>yuichi7759@gmail.com</a> までご連絡ください。</p>
+          <p>ユーザーは、保有する個人情報の開示・訂正・削除を請求できます。アプリ内お問い合わせフォームよりご連絡ください。</p>
         </Section>
 
         <Section title="9. 本ポリシーの変更">
@@ -59,7 +59,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="10. お問い合わせ">
-          <p>個人情報に関するご質問・ご要望は、<a href="mailto:yuichi7759@gmail.com" style={{ color: '#60a5fa' }}>yuichi7759@gmail.com</a> までお問い合わせください。</p>
+          <p>個人情報に関するご質問・ご要望は、アプリ内お問い合わせフォームよりご連絡ください。</p>
         </Section>
 
       </div>

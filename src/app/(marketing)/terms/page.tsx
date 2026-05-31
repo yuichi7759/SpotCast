@@ -69,7 +69,7 @@ export default function TermsPage() {
         </Section>
 
         <Section title="お問い合わせ">
-          <p><a href="mailto:yuichi7759@gmail.com" style={{ color: '#60a5fa' }}>yuichi7759@gmail.com</a></p>
+          <p>アプリ内お問い合わせフォームよりご連絡ください。</p>
         </Section>
 
       </div>
