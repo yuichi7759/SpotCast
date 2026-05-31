@@ -92,9 +92,10 @@ const LABEL_W  = 148  // px — sticky left column
 interface Props {
   allPoints: Field[]
   highlightPointId?: string
+  refreshKey?: number
 }
 
-export default function BestDayMatrix({ allPoints, highlightPointId }: Props) {
+export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey }: Props) {
   const [mode, setMode]           = useState<ScoreMode>('sunny')
   const [hourlyData, setHourly]   = useState<Record<string, HourlyWeather | null>>({})
   const [loadingIds, setLoading]  = useState<Set<string>>(new Set())
@@ -129,7 +130,13 @@ export default function BestDayMatrix({ allPoints, highlightPointId }: Props) {
     })
   }
 
-  // Fetch hourly for all geo-points
+  // Fetch hourly for all geo-points (re-fetch on refreshKey change)
+  useEffect(() => {
+    setHourly({})
+    setLoading(new Set())
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshKey])
+
   useEffect(() => {
     geoPoints.forEach(p => {
       if (p.id in hourlyData || loadingIds.has(p.id)) return
@@ -141,7 +148,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId }: Props) {
         .finally(() => setLoading(prev => { const n = new Set(prev); n.delete(p.id); return n }))
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [geoPoints.map(p => p.id).join(',')])
+  }, [geoPoints.map(p => p.id).join(','), hourlyData])
 
   // Collect date list from first loaded point
   const dates = useMemo(() => {

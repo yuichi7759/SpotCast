@@ -37,6 +37,8 @@ export default function DashboardPage() {
   const [searchPin,         setSearchPin]       = useState<{ lng: number; lat: number; label: string } | null>(null)
   const [mobileSnap,        setMobileSnap]      = useState<SheetSnap>('peek')
   const [showRainRadar,     setShowRainRadar]   = useState(false)
+  const [weatherRefreshKey, setWeatherRefreshKey] = useState(0)
+  const [refreshing,        setRefreshing]       = useState(false)
   const [leftPanelWidth,    setLeftPanelWidth]   = useState(240)
   const [bottomPanelHeight, setBottomPanelHeight] = useState(252)
   const isResizingLeft   = useRef(false)
@@ -337,6 +339,37 @@ export default function DashboardPage() {
                 >
                   🌧️ 雨雲
                 </button>
+                {/* Weather refresh */}
+                <button
+                  onClick={() => {
+                    setRefreshing(true)
+                    setWeatherRefreshKey(k => k + 1)
+                    setTimeout(() => setRefreshing(false), 1500)
+                  }}
+                  disabled={refreshing}
+                  title="天気データを更新"
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    width: 28, height: 28, borderRadius: '50%',
+                    background: 'rgba(6,10,16,0.72)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: 'rgba(255,255,255,0.5)',
+                    cursor: refreshing ? 'default' : 'pointer',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  <svg
+                    viewBox="0 0 16 16" width="13" height="13"
+                    fill="none" stroke="currentColor" strokeWidth="1.8"
+                    strokeLinecap="round" strokeLinejoin="round"
+                    style={{ animation: refreshing ? 'spinRefresh 0.8s linear infinite' : 'none' }}
+                  >
+                    <path d="M13.5 8A5.5 5.5 0 1 1 10 3.07"/>
+                    <polyline points="10,1 10,4 13,4"/>
+                  </svg>
+                  <style>{`@keyframes spinRefresh { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }`}</style>
+                </button>
                 <AccountMenu />
               </div>
             </div>
@@ -453,7 +486,7 @@ export default function DashboardPage() {
               width: 380, flexShrink: 0, height: '100%', overflow: 'hidden',
               borderLeft: '1px solid rgba(255,255,255,0.07)',
             }}>
-              <WeatherDetailPanel point={selectedField} onClose={() => setSelected(null)} />
+              <WeatherDetailPanel point={selectedField} onClose={() => setSelected(null)} refreshKey={weatherRefreshKey} />
             </div>
           )}
 
@@ -478,7 +511,7 @@ export default function DashboardPage() {
               onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(62,207,142,0.25)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
             />
-            <BestDayMatrix allPoints={fields} highlightPointId={selectedField?.id} />
+            <BestDayMatrix allPoints={fields} highlightPointId={selectedField?.id} refreshKey={weatherRefreshKey} />
           </div>
         )}
 
@@ -589,6 +622,7 @@ export default function DashboardPage() {
               <WeatherDetailPanel
                 point={selectedField}
                 onClose={() => { setSelected(null); setMobileSnap('list') }}
+                refreshKey={weatherRefreshKey}
               />
             ) : (
               <PointList

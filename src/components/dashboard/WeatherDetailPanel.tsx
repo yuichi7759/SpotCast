@@ -6,6 +6,7 @@ import type { HourlyWeather, HourlyPoint } from '@/app/api/weather/hourly/route'
 interface Props {
   point: Field | null
   onClose?: () => void
+  refreshKey?: number
 }
 
 const WEATHER_ICON: Record<string, string> = {
@@ -65,7 +66,7 @@ const RH = { time: 22, icon: 36, temp: 28, rain: 26 }
 const CELL_W = 44
 const LABEL_W = 36
 
-export default function WeatherDetailPanel({ point, onClose }: Props) {
+export default function WeatherDetailPanel({ point, onClose, refreshKey }: Props) {
   const [weather, setWeather]   = useState<WeatherData | null>(null)
   const [hourly,  setHourly]    = useState<HourlyWeather | null>(null)
   const [loadingW, setLoadingW] = useState(false)
@@ -85,7 +86,7 @@ export default function WeatherDetailPanel({ point, onClose }: Props) {
     fetch(`/api/weather/hourly?lat=${point.lat}&lng=${point.lng}`, { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null).then(d => { if (d?.hourly) setHourly(d) }).catch(() => {})
       .finally(() => setLoadingH(false))
-  }, [point?.id, point?.lat, point?.lng, hasCoords])
+  }, [point?.id, point?.lat, point?.lng, hasCoords, refreshKey])
 
   if (!point) return null
 

@@ -186,7 +186,7 @@ export default function PricingPage() {
       <footer style={{ borderTop: '1px solid #e9ecf0', padding: '24px 48px', background: '#f4f6f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <Link href="/" style={{ textDecoration: 'none' }}><Logo/></Link>
         <div style={{ display: 'flex', gap: 24 }}>
-          {[['トップ','/'],['ログイン','/login'],['新規登録','/signup']].map(([l,h]) => (
+          {[['トップ','/'],['ログイン','/login'],['新規登録','/signup'],['特定商取引法','/tokusho'],['プライバシーポリシー','/privacy'],['利用規約','/terms']].map(([l,h]) => (
             <Link key={h} href={h} style={{ fontSize: 13, color: '#94a3b8', textDecoration: 'none' }}>{l}</Link>
           ))}
         </div>

@@ -86,8 +86,8 @@ export async function GET(req: NextRequest) {
     `https://api.open-meteo.com/v1/forecast` +
     `?latitude=${lat}&longitude=${lng}` +
     `&hourly=temperature_2m,precipitation_probability,wind_speed_10m,wind_direction_10m,weather_code,relative_humidity_2m` +
-    `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max` +
-    `&timezone=Asia%2FTokyo&forecast_days=14`
+    `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_probability_mean,wind_speed_10m_max` +
+    `&timezone=Asia%2FTokyo&forecast_days=14&models=jma_seamless`
 
   try {
     const controller = new AbortController()
@@ -132,7 +132,7 @@ export async function GET(req: NextRequest) {
     const dailyTimes: string[] = d.daily?.time ?? []
     const dailyMaxTemps: number[] = d.daily?.temperature_2m_max ?? []
     const dailyMinTemps: number[] = d.daily?.temperature_2m_min ?? []
-    const dailyRainProbs: number[] = d.daily?.precipitation_probability_max ?? []
+    const dailyRainProbs: number[] = d.daily?.precipitation_probability_mean ?? []
     const dailyWeatherCodes: number[] = d.daily?.weather_code ?? []
     const dailyWindMax: number[] = d.daily?.wind_speed_10m_max ?? []
 
