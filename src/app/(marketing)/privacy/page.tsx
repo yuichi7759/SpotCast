@@ -7,7 +7,7 @@ export default function PrivacyPage() {
         <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 40 }}>最終更新: 2026年6月1日</p>
 
         <Section title="1. 事業者情報">
-          <p>ITO Yuichi（以下「当社」）は、SpotCast（以下「本サービス」）において、ユーザーの個人情報を適切に取り扱うため、本プライバシーポリシーを定めます。</p>
+          <p>SpotCast（以下「当社」）は、本サービスにおいて、ユーザーの個人情報を適切に取り扱うため、本プライバシーポリシーを定めます。</p>
         </Section>
 
         <Section title="2. 収集する情報">
