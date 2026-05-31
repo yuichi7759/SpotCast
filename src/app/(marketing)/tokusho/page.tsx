@@ -1,6 +1,6 @@
 export default function TokushoPage() {
   const rows = [
-    { label: '販売事業者', value: '伊藤悠一' },
+    { label: '販売事業者', value: 'ITO Yuichi' },
     { label: '所在地', value: '請求があり次第、遅滞なく開示します' },
     { label: '電話番号', value: '請求があり次第、遅滞なく開示します' },
     { label: 'メールアドレス', value: 'yuichi7759@gmail.com' },

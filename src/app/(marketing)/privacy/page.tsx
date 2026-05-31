@@ -7,7 +7,7 @@ export default function PrivacyPage() {
         <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 40 }}>最終更新: 2026年6月1日</p>
 
         <Section title="1. 事業者情報">
-          <p>伊藤悠一（以下「当社」）は、SpotCast（以下「本サービス」）において、ユーザーの個人情報を適切に取り扱うため、本プライバシーポリシーを定めます。</p>
+          <p>ITO Yuichi（以下「当社」）は、SpotCast（以下「本サービス」）において、ユーザーの個人情報を適切に取り扱うため、本プライバシーポリシーを定めます。</p>
         </Section>
 
         <Section title="2. 収集する情報">
@@ -38,14 +38,8 @@ export default function PrivacyPage() {
           </ul>
         </Section>
 
-        <Section title="5. 利用する外部サービス">
-          <ul>
-            <li><strong>Supabase</strong>: 認証・データベース管理（米国）</li>
-            <li><strong>Stripe</strong>: 決済処理（米国）</li>
-            <li><strong>Vercel</strong>: ホスティング（米国）</li>
-            <li><strong>Open-Meteo</strong>: 気象データ取得（スイス）</li>
-            <li><strong>Mapbox</strong>: 地図表示（米国）</li>
-          </ul>
+        <Section title="5. 業務委託先への提供">
+          <p>当社は、サービス提供のために必要な範囲で、業務委託先（クラウドサービス事業者等）に個人情報を提供することがあります。委託先に対しては適切な監督を行います。</p>
         </Section>
 
         <Section title="6. Cookieの利用">
