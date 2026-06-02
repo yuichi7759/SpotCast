@@ -19,29 +19,29 @@ const overlayStyle: React.CSSProperties = {
 }
 
 const modalStyle: React.CSSProperties = {
-  background: 'rgba(12,18,28,0.95)',
+  background: 'var(--dash-panel-solid)',
   backdropFilter: 'blur(24px)',
   WebkitBackdropFilter: 'blur(24px)',
-  border: '1px solid rgba(255,255,255,0.1)',
+  border: '1px solid var(--dash-border)',
   borderRadius: 20,
   padding: '24px 24px 20px',
   width: '100%', maxWidth: 420,
   boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
-  color: '#f0f0f0',
+  color: 'var(--dash-text)',
 }
 
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '10px 12px', borderRadius: 10,
-  border: '1px solid rgba(255,255,255,0.1)',
-  fontSize: 13, color: '#f0f0f0',
-  background: 'rgba(255,255,255,0.05)',
+  border: '1px solid var(--dash-border)',
+  fontSize: 13, color: 'var(--dash-text)',
+  background: 'var(--dash-surface)',
   outline: 'none', transition: 'border-color 0.15s',
   boxSizing: 'border-box',
 }
 
 const labelStyle: React.CSSProperties = {
   display: 'block', fontSize: 10, fontWeight: 700,
-  color: 'rgba(255,255,255,0.4)', marginBottom: 5,
+  color: 'var(--dash-text-3)', marginBottom: 5,
   textTransform: 'uppercase', letterSpacing: '0.07em',
 }
 
@@ -110,8 +110,8 @@ export default function AddFieldModal({ lat, lng, onSave, onClose }: Props) {
               fontSize: 16, boxShadow: '0 4px 12px rgba(29,78,216,0.35)',
             }}>📍</div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 15, color: '#fff', lineHeight: 1 }}>ポイントを追加</div>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
+              <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--dash-text)', lineHeight: 1 }}>ポイントを追加</div>
+              <div style={{ fontSize: 10, color: 'var(--dash-text-3)', marginTop: 2 }}>
                 {coordLat && coordLng ? `${parseFloat(coordLat).toFixed(4)}, ${parseFloat(coordLng).toFixed(4)}` : '座標未設定'}
               </div>
             </div>
@@ -119,10 +119,10 @@ export default function AddFieldModal({ lat, lng, onSave, onClose }: Props) {
           <button
             onClick={onClose}
             style={{
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
+              background: 'var(--dash-surface2)', border: '1px solid var(--dash-border)',
               borderRadius: 8, width: 30, height: 30,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'rgba(255,255,255,0.5)',
+              cursor: 'pointer', color: 'var(--dash-text-3)',
               transition: 'all 0.15s',
             }}
           >
@@ -226,9 +226,9 @@ export default function AddFieldModal({ lat, lng, onSave, onClose }: Props) {
               onClick={onClose}
               style={{
                 flex: 1, padding: '11px 0', borderRadius: 10,
-                border: '1px solid rgba(255,255,255,0.1)',
-                background: 'rgba(255,255,255,0.04)',
-                fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.5)', cursor: 'pointer',
+                border: '1px solid var(--dash-border)',
+                background: 'var(--dash-surface)',
+                fontSize: 13, fontWeight: 600, color: 'var(--dash-text-3)', cursor: 'pointer',
               }}
             >
               キャンセル
@@ -238,9 +238,9 @@ export default function AddFieldModal({ lat, lng, onSave, onClose }: Props) {
               disabled={saving}
               style={{
                 flex: 2, padding: '11px 0', borderRadius: 10, border: 'none',
-                background: saving ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #3ecf8e, #059669)',
+                background: saving ? 'var(--dash-border)' : 'linear-gradient(135deg, #3ecf8e, #059669)',
                 fontSize: 13, fontWeight: 700,
-                color: saving ? 'rgba(255,255,255,0.3)' : '#fff',
+                color: saving ? 'rgba(255,255,255,0.6)' : '#fff',
                 cursor: saving ? 'default' : 'pointer',
                 boxShadow: saving ? 'none' : '0 4px 16px rgba(29,78,216,0.35)',
                 transition: 'all 0.15s',

@@ -98,10 +98,10 @@ export default function MobileBottomSheet({ snap, onSnapChange, peekContent, chi
         bottom: 0, left: 0, right: 0,
         height,
         maxHeight: '92vh',
-        background: 'rgba(8,12,20,0.97)',
+        background: 'var(--dash-panel)',
         backdropFilter: 'blur(24px)',
         WebkitBackdropFilter: 'blur(24px)',
-        borderTop: '1px solid rgba(255,255,255,0.1)',
+        borderTop: '1px solid var(--dash-border)',
         borderRadius: '22px 22px 0 0',
         transition: transitioning ? 'height 0.32s cubic-bezier(0.32,0.72,0,1)' : 'none',
         zIndex: 30,
@@ -125,7 +125,7 @@ export default function MobileBottomSheet({ snap, onSnapChange, peekContent, chi
       >
         <div style={{
           width: 38, height: 4, borderRadius: 2,
-          background: 'rgba(255,255,255,0.22)',
+          background: 'var(--dash-border-strong)',
           margin: '0 auto',
         }}/>
       </div>
