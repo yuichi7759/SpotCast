@@ -65,7 +65,7 @@ function ShimmerBlock({ width, height, borderRadius = 6 }: { width: number | str
 // Row heights — must match between label column and data columns
 const RH = { time: 22, icon: 36, temp: 28, rain: 26 }
 const CELL_W = 44
-const LABEL_W = 36
+const LABEL_W = 88
 
 export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 'standard' }: Props) {
   const [weather, setWeather]   = useState<WeatherData | null>(null)
@@ -208,40 +208,7 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
       ) : (
         <div style={{ flex: 1, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-          {/* B. 現在の天気 */}
-          <div style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 12, padding: '14px 16px',
-          }}>
-            {loadingW ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <ShimmerBlock width={120} height={44} borderRadius={8} />
-                <ShimmerBlock width={200} height={16} />
-              </div>
-            ) : weather ? (
-              <>
-                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 10 }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4 }}>
-                    <span style={{ fontSize: 40, fontWeight: 800, color: '#fff', lineHeight: 1 }}>
-                      {weather.current.temp}
-                    </span>
-                    <span style={{ fontSize: 18, color: 'rgba(255,255,255,0.45)', marginBottom: 4 }}>°C</span>
-                  </div>
-                  <span style={{ fontSize: 32 }}>{weatherIcon(weather.current.weather_main)}</span>
-                </div>
-                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>💧 {weather.current.humidity}%</span>
-                  <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>💨 {weather.current.wind_speed}m/s</span>
-                  <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>体感 {weather.current.feels_like}°C</span>
-                </div>
-              </>
-            ) : (
-              <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>取得できません</div>
-            )}
-          </div>
-
-          {/* C. 時間別予報 — 横一列スクロール */}
+          {/* C. 時間別予報 — 横一列スクロール（左固定列に現在天気を統合） */}
           <div>
             <div style={{
               fontSize: 13, fontWeight: 700,
@@ -272,26 +239,47 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
                   background: 'rgba(255,255,255,0.02)',
                   display: 'flex',
                 }}>
-                  {/* 固定ラベル列 */}
+                  {/* 固定左列 — 現在の天気 */}
                   <div style={{ width: LABEL_W, flexShrink: 0, borderRight: `1px solid ${SEP}`, background: LABEL_BG, zIndex: 2 }}>
-                    {/* 日付ヘッダー行の高さ分の空白 */}
-                    <div style={{ height: 22, borderBottom: `1px solid ${SEP}` }} />
-                    {[
-                      { h: RH.time, label: '時刻' },
-                      { h: RH.icon, label: '天気' },
-                      { h: RH.temp, label: '気温' },
-                      { h: RH.rain, label: '降水' },
-                    ].map(({ h, label }, ri) => (
-                      <div key={ri} style={{
-                        height: h,
-                        display: 'flex', alignItems: 'center', paddingLeft: 6,
-                        borderBottom: ri < 3 ? `1px solid ${SEP}` : undefined,
-                      }}>
-                        <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', fontWeight: 600, letterSpacing: '0.02em' }}>
-                          {label}
-                        </span>
-                      </div>
-                    ))}
+                    {/* 日付ヘッダー行 */}
+                    <div style={{ height: 22, borderBottom: `1px solid ${SEP}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em' }}>現在</span>
+                    </div>
+                    {/* 時刻行 — "時刻"ラベルのみ */}
+                    <div style={{ height: RH.time, borderBottom: `1px solid ${SEP}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', fontWeight: 600 }}>時刻</span>
+                    </div>
+                    {/* 天気アイコン行 */}
+                    <div style={{ height: RH.icon, borderBottom: `1px solid ${SEP}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {loadingW
+                        ? <ShimmerBlock width={24} height={24} borderRadius={4} />
+                        : <span style={{ fontSize: 22, lineHeight: 1 }}>{weather ? weatherIcon(weather.current.weather_main) : '—'}</span>
+                      }
+                    </div>
+                    {/* 気温行 */}
+                    <div style={{ height: RH.temp, borderBottom: `1px solid ${SEP}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                      {loadingW
+                        ? <ShimmerBlock width={36} height={14} />
+                        : weather
+                          ? <>
+                              <span style={{ fontSize: 14, fontWeight: 800, color: tempColor(weather.current.temp), lineHeight: 1 }}>{weather.current.temp}°</span>
+                              <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>体感{weather.current.feels_like}°</span>
+                            </>
+                          : <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)' }}>—</span>
+                      }
+                    </div>
+                    {/* 降水行 — 湿度+風速 */}
+                    <div style={{ height: RH.rain, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                      {loadingW
+                        ? <ShimmerBlock width={40} height={14} />
+                        : weather
+                          ? <>
+                              <span style={{ fontSize: 9, color: 'rgba(147,197,253,0.8)', fontWeight: 600 }}>💧{weather.current.humidity}%</span>
+                              <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>💨{weather.current.wind_speed}m</span>
+                            </>
+                          : <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)' }}>—</span>
+                      }
+                    </div>
                   </div>
 
                   {/* 横スクロール列エリア */}
