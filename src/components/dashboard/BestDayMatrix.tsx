@@ -355,15 +355,13 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                   display: 'flex', alignItems: 'center',
                   borderBottom: '1px solid rgba(255,255,255,0.04)',
                   background: isHL ? 'rgba(29,78,216,0.04)' : 'transparent',
-                  opacity: isOn ? 1 : 0.38,
-                  transition: 'opacity 0.15s',
                 }}
               >
-                {/* Row label (sticky left) */}
+                {/* Row label (sticky left) — opacityをここにはかけない */}
                 <div style={{
                   width: LABEL_W, height: ROW_H, flexShrink: 0,
                   position: 'sticky', left: 0, zIndex: 1,
-                  background: isHL ? 'rgba(29,78,216,0.06)' : 'rgba(5,8,14,0.98)',
+                  background: isHL ? 'rgba(29,78,216,0.06)' : 'rgba(5,8,14,1)',
                   borderRight: '1px solid rgba(255,255,255,0.07)',
                   borderLeft: `2px solid ${isHL ? color : 'transparent'}`,
                   display: 'flex', alignItems: 'center', gap: 7, padding: '0 8px 0 10px',
@@ -402,7 +400,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                   </span>
                 </div>
 
-                {/* Score cells */}
+                {/* Score cells — チェックOFFは薄く */}
                 {dates.map((date, i) => {
                   const mIdx  = top3Idx.indexOf(i)
                   const isMed = mIdx >= 0
@@ -415,6 +413,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                         width: DATE_W, height: ROW_H, flexShrink: 0, marginRight: DATE_GAP,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         background: mc?.bg ?? 'transparent',
+                        opacity: isOn ? 1 : 0.35,
                       }}>
                         <div style={{
                           width: DATE_W - 10, height: ROW_H - 14, borderRadius: 6,
@@ -434,6 +433,8 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                       background: mc ? mc.bg : 'transparent',
                       borderLeft:  isMed ? `1px solid ${mc!.border}` : 'none',
                       borderRight: isMed ? `1px solid ${mc!.border}` : 'none',
+                      opacity: isOn ? 1 : 0.35,
+                      transition: 'opacity 0.15s',
                     }}>
                       <span style={{ fontSize: 15, lineHeight: 1 }}>{icon}</span>
                       <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', lineHeight: 1, fontWeight: 600 }}>
