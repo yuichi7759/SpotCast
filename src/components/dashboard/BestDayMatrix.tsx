@@ -93,9 +93,10 @@ interface Props {
   allPoints: Field[]
   highlightPointId?: string
   refreshKey?: number
+  plan?: 'free' | 'standard'
 }
 
-export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey }: Props) {
+export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey, plan = 'standard' }: Props) {
   const [mode, setMode]           = useState<ScoreMode>('sunny')
   const [hourlyData, setHourly]   = useState<Record<string, HourlyWeather | null>>({})
   const [loadingIds, setLoading]  = useState<Set<string>>(new Set())
@@ -194,8 +195,33 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey 
   }
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'rgba(5,8,14,0.98)' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'rgba(5,8,14,0.98)', position: 'relative' }}>
       <style>{`@keyframes bdmShim{0%,100%{opacity:.3}50%{opacity:.65}}`}</style>
+
+      {/* Freeプランロックオーバーレイ */}
+      {plan === 'free' && (
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 30,
+          background: 'rgba(5,8,14,0.82)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          gap: 12,
+        }}>
+          <div style={{ fontSize: 32 }}>🔒</div>
+          <div style={{ fontSize: 15, fontWeight: 800, color: '#fff' }}>Best Day機能</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', textAlign: 'center', lineHeight: 1.7 }}>
+            Standardプランで<br/>全ポイントのベストデイを比較できます
+          </div>
+          <a href="/settings" style={{
+            marginTop: 4, padding: '9px 20px', borderRadius: 10,
+            background: 'linear-gradient(135deg,#fbbf24,#f97316)',
+            color: '#000', fontSize: 13, fontWeight: 800,
+            textDecoration: 'none',
+          }}>
+            ⚡ アップグレード
+          </a>
+        </div>
+      )}
 
       {/* ── Header bar ── */}
       <div style={{

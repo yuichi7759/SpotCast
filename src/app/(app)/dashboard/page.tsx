@@ -14,7 +14,10 @@ import BestDayMatrix from '@/components/dashboard/BestDayMatrix'
 import MobileBottomSheet, { type SheetSnap } from '@/components/dashboard/MobileBottomSheet'
 import AccountMenu from '@/components/layout/AccountMenu'
 import { useToast } from '@/components/ToastProvider'
+import { createClient } from '@/lib/supabase/client'
 import type { IntelligenceEvent } from '@/lib/mockIntelligence'
+
+const FREE_POINT_LIMIT = 3
 
 const MapView = dynamic(() => import('@/components/dashboard/MapView'), { ssr: false })
 
@@ -40,7 +43,12 @@ export default function DashboardPage() {
   const [weatherRefreshKey, setWeatherRefreshKey] = useState(0)
   const [refreshing,        setRefreshing]       = useState(false)
   const [leftPanelWidth,    setLeftPanelWidth]   = useState(240)
-  const [bottomPanelHeight, setBottomPanelHeight] = useState(252)
+  const [bottomPanelHeight, setBottomPanelHeight] = useState(280)
+  const [rightPanelWidth,   setRightPanelWidth]  = useState(420)
+  const [plan,              setPlan]             = useState<'free' | 'standard'>('free')
+  const isResizingRight  = useRef(false)
+  const resizeStartXR    = useRef(0)
+  const resizeStartWR    = useRef(0)
   const isResizingLeft   = useRef(false)
   const resizeStartX     = useRef(0)
   const resizeStartW     = useRef(0)
@@ -57,6 +65,16 @@ export default function DashboardPage() {
     setLoadingFields(false)
   }, [])
   useEffect(() => { loadFields() }, [loadFields])
+
+  // プラン取得
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return
+      const { data: row } = await supabase.from('users').select('plan').eq('id', data.user.id).single()
+      if (row?.plan === 'pro') setPlan('standard')
+    })
+  }, [])
 
   function handleMapClick(_lat: number, _lng: number) {
     setCtxMenu(null)
@@ -139,6 +157,14 @@ export default function DashboardPage() {
     toast.success(`「${field.name}」を登録しました`, "マップにピンが追加されました")
   }
 
+  function handleAddClick() {
+    if (plan === 'free' && fields.length >= FREE_POINT_LIMIT) {
+      toast.info(`Freeプランは${FREE_POINT_LIMIT}件まで`, 'Standardプランにアップグレードすると無制限に登録できます')
+      return
+    }
+    setPending(null); setShowModal(true)
+  }
+
   // ─────────────────────────────────────────────────────────
   // Left panel resize
   // ─────────────────────────────────────────────────────────
@@ -156,6 +182,33 @@ export default function DashboardPage() {
     }
     function onUp() {
       isResizingLeft.current = false
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup',   onUp)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+    document.body.style.cursor     = 'col-resize'
+    document.body.style.userSelect = 'none'
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup',   onUp)
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // Right panel resize
+  // ─────────────────────────────────────────────────────────
+  function handleRightResizeMouseDown(e: React.MouseEvent) {
+    e.preventDefault()
+    isResizingRight.current = true
+    resizeStartXR.current   = e.clientX
+    resizeStartWR.current   = rightPanelWidth
+    function onMove(ev: MouseEvent) {
+      if (!isResizingRight.current) return
+      const delta = resizeStartXR.current - ev.clientX
+      const next  = Math.min(700, Math.max(300, resizeStartWR.current + delta))
+      setRightPanelWidth(next)
+    }
+    function onUp() {
+      isResizingRight.current = false
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup',   onUp)
       document.body.style.cursor = ''
@@ -237,7 +290,7 @@ export default function DashboardPage() {
               selectedPointId={selectedField?.id}
               onPointClick={handleFieldClick}
               onPointEdit={f => setEditingField(f)}
-              onAdd={() => { setPending(null); setShowModal(true) }}
+              onAdd={handleAddClick}
             />
             {/* Resize handle */}
             <div
@@ -323,7 +376,13 @@ export default function DashboardPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, pointerEvents: 'auto' }}>
                 {/* Rain radar toggle */}
                 <button
-                  onClick={() => setShowRainRadar(p => !p)}
+                  onClick={() => {
+                    if (plan === 'free') {
+                      toast.info('雨雲レーダーはStandardプランの機能です', 'アップグレードしてご利用ください')
+                      return
+                    }
+                    setShowRainRadar(p => !p)
+                  }}
                   title={showRainRadar ? '雨雲レーダーを非表示' : '雨雲レーダーを表示'}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 5,
@@ -480,38 +539,48 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Right panel — visible when a field is selected */}
-          {selectedField && (
+          {/* Right panel — BestDayMatrix (常時表示) */}
+          {fields.some(f => f.lat != null && f.lng != null) && (
             <div style={{
-              width: 380, flexShrink: 0, height: '100%', overflow: 'hidden',
+              width: rightPanelWidth, flexShrink: 0, height: '100%', overflow: 'hidden',
               borderLeft: '1px solid rgba(255,255,255,0.07)',
+              position: 'relative',
             }}>
-              <WeatherDetailPanel point={selectedField} onClose={() => setSelected(null)} refreshKey={weatherRefreshKey} />
+              {/* 左端リサイズハンドル */}
+              <div
+                onMouseDown={handleRightResizeMouseDown}
+                style={{
+                  position: 'absolute', top: 0, left: 0, width: 5, height: '100%',
+                  cursor: 'col-resize', zIndex: 20, background: 'transparent',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(62,207,142,0.25)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
+              />
+              <BestDayMatrix allPoints={fields} highlightPointId={selectedField?.id} refreshKey={weatherRefreshKey} plan={plan} />
             </div>
           )}
 
         </div>{/* end top row */}
 
-        {/* ── Bottom — BestDayMatrix 全ポイント比較 ── */}
-        {fields.some(f => f.lat != null && f.lng != null) && (
+        {/* ── Bottom — WeatherDetailPanel (ポイント選択時) ── */}
+        {selectedField && (
           <div style={{
             flexShrink: 0, height: bottomPanelHeight, overflow: 'hidden',
             borderTop: '1px solid rgba(255,255,255,0.07)',
             position: 'relative',
           }}>
-            {/* ── 上端リサイズハンドル ── */}
+            {/* 上端リサイズハンドル */}
             <div
               onMouseDown={handleBottomResizeMouseDown}
               style={{
                 position: 'absolute', top: 0, left: 0, right: 0, height: 5,
-                cursor: 'row-resize', zIndex: 20,
-                background: 'transparent',
+                cursor: 'row-resize', zIndex: 20, background: 'transparent',
                 borderTop: '1px solid rgba(255,255,255,0.07)',
               }}
               onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(62,207,142,0.25)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
             />
-            <BestDayMatrix allPoints={fields} highlightPointId={selectedField?.id} refreshKey={weatherRefreshKey} />
+            <WeatherDetailPanel point={selectedField} onClose={() => setSelected(null)} refreshKey={weatherRefreshKey} plan={plan} />
           </div>
         )}
 
@@ -623,6 +692,7 @@ export default function DashboardPage() {
                 point={selectedField}
                 onClose={() => { setSelected(null); setMobileSnap('list') }}
                 refreshKey={weatherRefreshKey}
+                plan={plan}
               />
             ) : (
               <PointList

@@ -7,6 +7,7 @@ interface Props {
   point: Field | null
   onClose?: () => void
   refreshKey?: number
+  plan?: 'free' | 'standard'
 }
 
 const WEATHER_ICON: Record<string, string> = {
@@ -66,7 +67,7 @@ const RH = { time: 22, icon: 36, temp: 28, rain: 26 }
 const CELL_W = 44
 const LABEL_W = 36
 
-export default function WeatherDetailPanel({ point, onClose, refreshKey }: Props) {
+export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 'standard' }: Props) {
   const [weather, setWeather]   = useState<WeatherData | null>(null)
   const [hourly,  setHourly]    = useState<HourlyWeather | null>(null)
   const [loadingW, setLoadingW] = useState(false)
@@ -254,7 +255,8 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey }: Props
             {loadingH ? (
               <ShimmerBlock width="100%" height={140} borderRadius={10} />
             ) : hourly && hourly.hourly && hourly.hourly.length > 0 ? (() => {
-              const groups = groupByDay(hourly.hourly.slice(0, 48))
+              const maxHours = plan === 'free' ? 24 : 48
+              const groups = groupByDay(hourly.hourly.slice(0, maxHours))
               const SEP = 'rgba(255,255,255,0.05)'
               const LABEL_BG = 'rgba(8,12,18,0.95)'
 
@@ -391,6 +393,17 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey }: Props
               )
             })() : (
               <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>取得できません</div>
+            )}
+
+            {/* Freeプランの制限バナー */}
+            {plan === 'free' && hourly && (
+              <div style={{
+                marginTop: 10, padding: '10px 14px', borderRadius: 10,
+                background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)',
+                fontSize: 12, color: 'rgba(251,191,36,0.9)', textAlign: 'center',
+              }}>
+                ⚡ Standardプランで48時間予報が利用できます
+              </div>
             )}
           </div>
 
