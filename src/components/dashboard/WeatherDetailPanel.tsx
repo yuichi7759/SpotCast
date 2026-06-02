@@ -150,213 +150,135 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
         .wdp-scroll::-webkit-scrollbar { display: none }
       `}</style>
 
-      {/* A. Header */}
+      {/* Header */}
       <div style={{
-        padding: '14px 16px 12px',
+        padding: '10px 14px',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
         flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-            <div style={{
-              width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
-              background: accentColor, boxShadow: `0 0 7px ${accentColor}99`,
-            }} />
-            <div style={{
-              fontSize: 19, fontWeight: 800, color: '#fff',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>
-              {point.name}
-            </div>
-          </div>
-          {onClose && (
-            <button
-              onClick={onClose}
-              style={{
-                flexShrink: 0,
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 8, width: 30, height: 30,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', color: 'rgba(255,255,255,0.5)',
-                transition: 'all 0.15s',
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#fff' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.5)' }}
-            >
-              <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/>
-              </svg>
-            </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
+          <div style={{ width: 9, height: 9, borderRadius: '50%', flexShrink: 0, background: accentColor, boxShadow: `0 0 6px ${accentColor}99` }} />
+          <span style={{ fontSize: 16, fontWeight: 800, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {point.name}
+          </span>
+          {point.lat != null && point.lng != null && (
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.38)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+              {point.lat.toFixed(4)}, {point.lng.toFixed(4)}
+            </span>
           )}
         </div>
-        {point.lat != null && point.lng != null && (
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4, paddingLeft: 18 }}>
-            {point.lat.toFixed(5)}, {point.lng.toFixed(5)}
-          </div>
+        {onClose && (
+          <button onClick={onClose} style={{ flexShrink: 0, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(255,255,255,0.5)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#fff' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.5)' }}
+          >
+            <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/>
+            </svg>
+          </button>
         )}
       </div>
 
       {!hasCoords ? (
-        <div style={{
-          flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: 24, textAlign: 'center',
-          color: 'rgba(255,255,255,0.35)', fontSize: 15, lineHeight: 1.7,
-        }}>
-          地図上でポイントを<br />設定してください
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.35)', fontSize: 14, textAlign: 'center', padding: 20 }}>
+          地図上でポイントを設定してください
         </div>
       ) : (
-        <div style={{ flex: 1, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ flex: 1, padding: '10px 12px', overflow: 'hidden' }}>
+          {loadingH ? (
+            <ShimmerBlock width="100%" height={160} borderRadius={10} />
+          ) : hourly && hourly.hourly && hourly.hourly.length > 0 ? (() => {
+            const maxHours = plan === 'free' ? 24 : 48
+            const groups   = groupByDay(hourly.hourly.slice(0, maxHours))
+            const allItems = groups.flatMap((g, gi) => g.items.map((h, hi) => ({ h, gi, hi, g })))
+            const SEP      = 'rgba(255,255,255,0.07)'
+            const DAY_SEP  = 'rgba(255,255,255,0.22)'
+            const LABEL_BG = 'rgba(8,12,18,0.98)'
+            const DAY_H    = 30  // 日別サマリー行の高さ
 
-          {/* C. 時間別予報 — 横一列スクロール（左固定列に現在天気を統合） */}
-          <div>
-            <div style={{
-              fontSize: 13, fontWeight: 700,
-              color: 'rgba(255,255,255,0.5)',
-              marginBottom: 10,
-              textTransform: 'uppercase', letterSpacing: '0.07em',
-            }}>
-              時間別予報
-            </div>
+            return (
+              <div style={{ border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, overflow: 'hidden', background: 'rgba(255,255,255,0.02)', display: 'flex', height: '100%' }}>
 
-            {loadingH ? (
-              <ShimmerBlock width="100%" height={140} borderRadius={10} />
-            ) : hourly && hourly.hourly && hourly.hourly.length > 0 ? (() => {
-              const maxHours = plan === 'free' ? 24 : 48
-              const groups = groupByDay(hourly.hourly.slice(0, maxHours))
-              const allItems = groups.flatMap((g, gi) =>
-                g.items.map((h, hi) => ({ h, gi, hi, g }))
-              )
-              const SEP     = 'rgba(255,255,255,0.06)'
-              const DAY_SEP = 'rgba(255,255,255,0.2)'
-              const LABEL_BG = 'rgba(8,12,18,0.98)'
-
-              // 日別サマリー
-              const daySummary = groups.map(g => {
-                const daily = hourly?.daily14?.find(d => {
-                  const today = new Date()
-                  const dd = new Date(today); dd.setDate(dd.getDate() + g.offset)
-                  const ddate = new Date(d.date)
-                  return ddate.getDate() === dd.getDate() && ddate.getMonth() === dd.getMonth()
-                })
-                return { ...g, daily }
-              })
-
-              return (
-                <>
-                {/* 日別サマリーバー */}
-                <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
-                  {daySummary.map((g, i) => (
-                    <div key={i} style={{
-                      display: 'flex', alignItems: 'center', gap: 6,
-                      padding: '5px 10px', borderRadius: 8,
-                      background: 'rgba(255,255,255,0.04)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      fontSize: 12,
-                    }}>
-                      <span style={{ fontWeight: 700, color: i === 0 ? '#60a5fa' : 'rgba(255,255,255,0.65)', minWidth: 24 }}>{g.dayLabel}</span>
-                      <span style={{ fontSize: 16 }}>{g.daily ? weatherIcon(wmoToMain(g.daily.weather_code)) : '—'}</span>
-                      <span style={{ color: '#f97316', fontWeight: 700 }}>{g.daily?.temp_max ?? '—'}°</span>
-                      <span style={{ color: '#93c5fd', fontWeight: 700 }}>{g.daily?.temp_min ?? '—'}°</span>
-                      {g.daily?.rain_prob != null && g.daily.rain_prob > 0 && (
-                        <span style={{ color: '#7dd3fc', fontWeight: 600 }}>{g.daily.rain_prob}%</span>
-                      )}
+                {/* 固定ラベル列 */}
+                <div style={{ width: LABEL_W, flexShrink: 0, borderRight: `1px solid ${SEP}`, background: LABEL_BG, zIndex: 2 }}>
+                  <div style={{ height: DAY_H, borderBottom: `1px solid ${SEP}` }} />
+                  {[{ h: RH.time, label: '時刻' }, { h: RH.icon, label: '天気' }, { h: RH.temp, label: '気温' }, { h: RH.rain, label: '降水' }].map(({ h, label }, ri) => (
+                    <div key={ri} style={{ height: h, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: ri < 3 ? `1px solid ${SEP}` : undefined }}>
+                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>{label}</span>
                     </div>
                   ))}
                 </div>
 
-                <div style={{
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 12,
-                  overflow: 'hidden',
-                  background: 'rgba(255,255,255,0.02)',
-                  display: 'flex',
-                }}>
-                  {/* 固定ラベル列 */}
-                  <div style={{ width: LABEL_W, flexShrink: 0, borderRight: `1px solid ${SEP}`, background: LABEL_BG, zIndex: 2 }}>
-                    <div style={{ height: 22, borderBottom: `1px solid ${SEP}` }} />
-                    {[
-                      { h: RH.time, label: '時刻' },
-                      { h: RH.icon, label: '天気' },
-                      { h: RH.temp, label: '気温' },
-                      { h: RH.rain, label: '降水' },
-                    ].map(({ h, label }, ri) => (
-                      <div key={ri} style={{
-                        height: h, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        borderBottom: ri < 3 ? `1px solid ${SEP}` : undefined,
-                      }}>
-                        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>{label}</span>
-                      </div>
-                    ))}
-                  </div>
+                {/* 横スクロール */}
+                <div className="wdp-scroll" style={{ overflowX: 'auto', flex: 1, scrollbarWidth: 'none' }}>
+                  <div style={{ display: 'flex', minWidth: 'max-content' }}>
+                    {allItems.map(({ h, gi, hi, g }, idx) => {
+                      const isDayStart = hi === 0
+                      const isNow      = idx === 0
+                      const timeLabel  = h.time.replace(':00', '').replace(/^0/, '') + '時'
+                      const icon       = weatherIcon(wmoToMain(h.weather_code))
+                      const borderL    = isDayStart && idx > 0 ? `2px solid ${DAY_SEP}` : idx > 0 ? `1px solid ${SEP}` : undefined
 
-                  {/* 横スクロール列エリア */}
-                  <div className="wdp-scroll" style={{ overflowX: 'auto', flex: 1, scrollbarWidth: 'none' }}>
-                    <div style={{ display: 'flex', minWidth: 'max-content' }}>
-                      {allItems.map(({ h, gi, hi, g }, idx) => {
-                        const isDayStart = hi === 0
-                        const isNow     = idx === 0
-                        const timeLabel = h.time.replace(':00', '').replace(/^0/, '') + '時'
-                        const icon      = weatherIcon(wmoToMain(h.weather_code))
-                        const borderL   = isDayStart && idx > 0 ? `2px solid ${DAY_SEP}` : idx > 0 ? `1px solid ${SEP}` : undefined
+                      return (
+                        <div key={idx} style={{ width: CELL_W, flexShrink: 0, borderLeft: borderL, background: isNow ? 'rgba(29,78,216,0.12)' : undefined, position: 'relative' }}>
 
-                        return (
-                          <div key={idx} style={{ width: CELL_W, flexShrink: 0, borderLeft: borderL, background: isNow ? 'rgba(29,78,216,0.12)' : undefined }}>
-                            {/* 日付ヘッダー行 */}
-                            <div style={{
-                              height: 22,
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              borderBottom: `1px solid ${SEP}`,
-                              background: isDayStart ? 'rgba(255,255,255,0.05)' : undefined,
-                            }}>
-                              {isDayStart && (
-                                <span style={{ fontSize: 11, fontWeight: 800, color: gi === 0 ? '#60a5fa' : 'rgba(255,255,255,0.7)', whiteSpace: 'nowrap' }}>
-                                  {g.dayLabel}
-                                </span>
-                              )}
-                            </div>
-                            {/* 時刻 */}
-                            <div style={{ height: RH.time, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: `1px solid ${SEP}` }}>
-                              <span style={{ fontSize: 12, fontWeight: isNow ? 800 : 600, color: isNow ? '#60a5fa' : 'rgba(255,255,255,0.7)' }}>{timeLabel}</span>
-                            </div>
-                            {/* 天気 */}
-                            <div style={{ height: RH.icon, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: `1px solid ${SEP}` }}>
-                              <span style={{ fontSize: 22, lineHeight: 1 }}>{icon}</span>
-                            </div>
-                            {/* 気温 */}
-                            <div style={{ height: RH.temp, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: `1px solid ${SEP}` }}>
-                              <span style={{ fontSize: 14, fontWeight: 700, color: tempColor(h.temp) }}>{h.temp}°</span>
-                            </div>
-                            {/* 降水% */}
-                            <div style={{ height: RH.rain, display: 'flex', alignItems: 'center', justifyContent: 'center', background: rainBg(h.rain_prob) }}>
-                              <span style={{ fontSize: 12, fontWeight: 700, color: h.rain_prob > 0 ? rainTextColor(h.rain_prob) : 'rgba(255,255,255,0.4)' }}>
-                                {h.rain_prob > 0 ? `${h.rain_prob}%` : '—'}
-                              </span>
-                            </div>
+                          {/* 日別サマリー行 — 日付が変わる列だけoverflowで横に伸ばす */}
+                          <div style={{ height: DAY_H, borderBottom: `1px solid ${SEP}`, background: isDayStart ? 'rgba(255,255,255,0.04)' : undefined, position: 'relative', overflow: 'visible' }}>
+                            {isDayStart && (() => {
+                              const daily = hourly?.daily14?.find(d => {
+                                const today = new Date(); const dd = new Date(today); dd.setDate(dd.getDate() + g.offset)
+                                const ddate = new Date(d.date)
+                                return ddate.getDate() === dd.getDate() && ddate.getMonth() === dd.getMonth()
+                              })
+                              return (
+                                <div style={{ position: 'absolute', left: 4, top: 0, height: DAY_H, display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap', zIndex: 1, pointerEvents: 'none' }}>
+                                  <span style={{ fontSize: 11, fontWeight: 800, color: gi === 0 ? '#60a5fa' : 'rgba(255,255,255,0.75)' }}>{g.dayLabel}</span>
+                                  {daily && <>
+                                    <span style={{ fontSize: 14 }}>{weatherIcon(wmoToMain(daily.weather_code))}</span>
+                                    <span style={{ fontSize: 11, fontWeight: 700, color: '#f97316' }}>{daily.temp_max}°</span>
+                                    <span style={{ fontSize: 11, fontWeight: 700, color: '#93c5fd' }}>{daily.temp_min}°</span>
+                                    {daily.rain_prob > 0 && <span style={{ fontSize: 11, fontWeight: 600, color: '#7dd3fc' }}>{daily.rain_prob}%</span>}
+                                  </>}
+                                </div>
+                              )
+                            })()}
                           </div>
-                        )
-                      })}
-                    </div>
+
+                          {/* 時刻 */}
+                          <div style={{ height: RH.time, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: `1px solid ${SEP}` }}>
+                            <span style={{ fontSize: 12, fontWeight: isNow ? 800 : 600, color: isNow ? '#60a5fa' : 'rgba(255,255,255,0.7)' }}>{timeLabel}</span>
+                          </div>
+                          {/* 天気 */}
+                          <div style={{ height: RH.icon, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: `1px solid ${SEP}` }}>
+                            <span style={{ fontSize: 22, lineHeight: 1 }}>{icon}</span>
+                          </div>
+                          {/* 気温 */}
+                          <div style={{ height: RH.temp, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: `1px solid ${SEP}` }}>
+                            <span style={{ fontSize: 14, fontWeight: 700, color: tempColor(h.temp) }}>{h.temp}°</span>
+                          </div>
+                          {/* 降水% */}
+                          <div style={{ height: RH.rain, display: 'flex', alignItems: 'center', justifyContent: 'center', background: rainBg(h.rain_prob) }}>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: h.rain_prob > 0 ? rainTextColor(h.rain_prob) : 'rgba(255,255,255,0.4)' }}>
+                              {h.rain_prob > 0 ? `${h.rain_prob}%` : '—'}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
-                </>
-              )
-            })() : (
-              <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>取得できません</div>
-            )}
-
-            {/* Freeプランの制限バナー */}
-            {plan === 'free' && hourly && (
-              <div style={{
-                marginTop: 10, padding: '10px 14px', borderRadius: 10,
-                background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)',
-                fontSize: 12, color: 'rgba(251,191,36,0.9)', textAlign: 'center',
-              }}>
-                ⚡ Standardプランで48時間予報が利用できます
               </div>
-            )}
-          </div>
+            )
+          })() : (
+            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, paddingTop: 12 }}>取得できません</div>
+          )}
 
+          {plan === 'free' && hourly && (
+            <div style={{ marginTop: 8, padding: '8px 12px', borderRadius: 8, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.22)', fontSize: 12, color: 'rgba(251,191,36,0.9)', textAlign: 'center' }}>
+              ⚡ Standardプランで48時間予報が利用できます
+            </div>
+          )}
         </div>
       )}
     </div>
