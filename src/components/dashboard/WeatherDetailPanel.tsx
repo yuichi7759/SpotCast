@@ -241,7 +241,7 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
             )}
           </div>
 
-          {/* C. 時間別予報 — tenki.jp スタイルのテーブル */}
+          {/* C. 時間別予報 — 横一列スクロール */}
           <div>
             <div style={{
               fontSize: 13, fontWeight: 700,
@@ -257,8 +257,12 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
             ) : hourly && hourly.hourly && hourly.hourly.length > 0 ? (() => {
               const maxHours = plan === 'free' ? 24 : 48
               const groups = groupByDay(hourly.hourly.slice(0, maxHours))
-              const SEP = 'rgba(255,255,255,0.05)'
-              const LABEL_BG = 'rgba(8,12,18,0.95)'
+              const allItems = groups.flatMap((g, gi) =>
+                g.items.map((h, hi) => ({ h, gi, hi, g }))
+              )
+              const SEP     = 'rgba(255,255,255,0.06)'
+              const DAY_SEP = 'rgba(255,255,255,0.2)'
+              const LABEL_BG = 'rgba(8,12,18,0.98)'
 
               return (
                 <div style={{
@@ -266,129 +270,78 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
                   borderRadius: 12,
                   overflow: 'hidden',
                   background: 'rgba(255,255,255,0.02)',
+                  display: 'flex',
                 }}>
-                  {groups.map((g, gi) => (
-                    <div key={gi} style={{
-                      borderTop: gi > 0 ? `1px solid rgba(255,255,255,0.08)` : undefined,
-                    }}>
-
-                      {/* Day header */}
-                      <div style={{
-                        padding: '6px 10px 6px',
-                        background: 'rgba(255,255,255,0.03)',
-                        borderBottom: `1px solid ${SEP}`,
-                        display: 'flex', alignItems: 'center', gap: 10,
+                  {/* 固定ラベル列 */}
+                  <div style={{ width: LABEL_W, flexShrink: 0, borderRight: `1px solid ${SEP}`, background: LABEL_BG, zIndex: 2 }}>
+                    {/* 日付ヘッダー行の高さ分の空白 */}
+                    <div style={{ height: 22, borderBottom: `1px solid ${SEP}` }} />
+                    {[
+                      { h: RH.time, label: '時刻' },
+                      { h: RH.icon, label: '天気' },
+                      { h: RH.temp, label: '気温' },
+                      { h: RH.rain, label: '降水' },
+                    ].map(({ h, label }, ri) => (
+                      <div key={ri} style={{
+                        height: h,
+                        display: 'flex', alignItems: 'center', paddingLeft: 6,
+                        borderBottom: ri < 3 ? `1px solid ${SEP}` : undefined,
                       }}>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>
-                          {g.dayLabel}
-                          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginLeft: 6 }}>
-                            {g.dateStr}
-                          </span>
+                        <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', fontWeight: 600, letterSpacing: '0.02em' }}>
+                          {label}
                         </span>
-                        {g.tempMax !== null && (
-                          <span style={{ fontSize: 12, fontWeight: 700, color: '#f97316' }}>
-                            ↑{g.tempMax}°
-                          </span>
-                        )}
-                        {g.tempMin !== null && (
-                          <span style={{ fontSize: 12, fontWeight: 700, color: '#93c5fd' }}>
-                            ↓{g.tempMin}°
-                          </span>
-                        )}
                       </div>
+                    ))}
+                  </div>
 
-                      {/* Table: fixed label col + scrollable data cols */}
-                      <div style={{ display: 'flex' }}>
+                  {/* 横スクロール列エリア */}
+                  <div className="wdp-scroll" style={{ overflowX: 'auto', flex: 1, scrollbarWidth: 'none' }}>
+                    <div style={{ display: 'flex', minWidth: 'max-content' }}>
+                      {allItems.map(({ h, gi, hi, g }, idx) => {
+                        const isDayStart = hi === 0
+                        const isNow     = idx === 0
+                        const timeLabel = h.time.replace(':00', '').replace(/^0/, '') + '時'
+                        const icon      = weatherIcon(wmoToMain(h.weather_code))
+                        const borderL   = isDayStart && idx > 0 ? `2px solid ${DAY_SEP}` : idx > 0 ? `1px solid ${SEP}` : undefined
 
-                        {/* Label column */}
-                        <div style={{
-                          width: LABEL_W, flexShrink: 0,
-                          borderRight: `1px solid ${SEP}`,
-                          background: LABEL_BG,
-                        }}>
-                          {[
-                            { h: RH.time, label: '時刻' },
-                            { h: RH.icon, label: '天気' },
-                            { h: RH.temp, label: '気温' },
-                            { h: RH.rain, label: '降水' },
-                          ].map(({ h, label }, ri) => (
-                            <div key={ri} style={{
-                              height: h,
-                              display: 'flex', alignItems: 'center',
-                              paddingLeft: 6,
-                              borderBottom: ri < 3 ? `1px solid ${SEP}` : undefined,
+                        return (
+                          <div key={idx} style={{ width: CELL_W, flexShrink: 0, borderLeft: borderL, background: isNow ? 'rgba(29,78,216,0.12)' : undefined }}>
+                            {/* 日付ヘッダー行（日付が変わる列だけ表示） */}
+                            <div style={{
+                              height: 22,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              borderBottom: `1px solid ${SEP}`,
+                              background: isDayStart ? 'rgba(255,255,255,0.04)' : undefined,
                             }}>
-                              <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', fontWeight: 600, letterSpacing: '0.02em' }}>
-                                {label}
+                              {isDayStart && (
+                                <span style={{ fontSize: 10, fontWeight: 700, color: gi === 0 ? '#60a5fa' : 'rgba(255,255,255,0.55)', whiteSpace: 'nowrap', paddingLeft: 2 }}>
+                                  {g.dayLabel}
+                                </span>
+                              )}
+                            </div>
+                            {/* 時刻 */}
+                            <div style={{ height: RH.time, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: `1px solid ${SEP}` }}>
+                              <span style={{ fontSize: 11, fontWeight: isNow ? 800 : 600, color: isNow ? '#60a5fa' : 'rgba(255,255,255,0.55)' }}>{timeLabel}</span>
+                            </div>
+                            {/* 天気 */}
+                            <div style={{ height: RH.icon, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: `1px solid ${SEP}` }}>
+                              <span style={{ fontSize: 20, lineHeight: 1 }}>{icon}</span>
+                            </div>
+                            {/* 気温 */}
+                            <div style={{ height: RH.temp, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: `1px solid ${SEP}` }}>
+                              <span style={{ fontSize: 13, fontWeight: 700, color: tempColor(h.temp) }}>{h.temp}°</span>
+                            </div>
+                            {/* 降水% */}
+                            <div style={{ height: RH.rain, display: 'flex', alignItems: 'center', justifyContent: 'center', background: rainBg(h.rain_prob) }}>
+                              <span style={{ fontSize: 11, fontWeight: 600, color: rainTextColor(h.rain_prob) }}>
+                                {h.rain_prob > 0 ? `${h.rain_prob}%` : '—'}
                               </span>
                             </div>
-                          ))}
-                        </div>
-
-                        {/* Scrollable data columns */}
-                        <div
-                          className="wdp-scroll"
-                          style={{ overflowX: 'auto', flex: 1, scrollbarWidth: 'none' }}
-                        >
-                          <div style={{ display: 'flex', minWidth: 'max-content' }}>
-                            {g.items.map((h, hi) => {
-                              const timeLabel = h.time.replace(':00', '').replace(/^0/, '') + '時'
-                              const icon = weatherIcon(wmoToMain(h.weather_code))
-                              const isNow = gi === 0 && hi === 0
-                              return (
-                                <div key={hi} style={{
-                                  width: CELL_W, flexShrink: 0,
-                                  borderLeft: hi > 0 ? `1px solid ${SEP}` : undefined,
-                                  background: isNow ? 'rgba(29,78,216,0.12)' : undefined,
-                                }}>
-                                  {/* 時刻 */}
-                                  <div style={{
-                                    height: RH.time,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    borderBottom: `1px solid ${SEP}`,
-                                  }}>
-                                    <span style={{
-                                      fontSize: 11, fontWeight: isNow ? 800 : 600,
-                                      color: isNow ? '#60a5fa' : 'rgba(255,255,255,0.55)',
-                                    }}>{timeLabel}</span>
-                                  </div>
-                                  {/* 天気 */}
-                                  <div style={{
-                                    height: RH.icon,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    borderBottom: `1px solid ${SEP}`,
-                                  }}>
-                                    <span style={{ fontSize: 20, lineHeight: 1 }}>{icon}</span>
-                                  </div>
-                                  {/* 気温 */}
-                                  <div style={{
-                                    height: RH.temp,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    borderBottom: `1px solid ${SEP}`,
-                                  }}>
-                                    <span style={{ fontSize: 13, fontWeight: 700, color: tempColor(h.temp) }}>
-                                      {h.temp}°
-                                    </span>
-                                  </div>
-                                  {/* 降水% */}
-                                  <div style={{
-                                    height: RH.rain,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    background: rainBg(h.rain_prob),
-                                  }}>
-                                    <span style={{ fontSize: 11, fontWeight: 600, color: rainTextColor(h.rain_prob) }}>
-                                      {h.rain_prob > 0 ? `${h.rain_prob}%` : '—'}
-                                    </span>
-                                  </div>
-                                </div>
-                              )
-                            })}
                           </div>
-                        </div>
-
-                      </div>
+                        )
+                      })}
                     </div>
-                  ))}
+                  </div>
                 </div>
               )
             })() : (
