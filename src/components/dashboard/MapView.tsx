@@ -5,6 +5,14 @@ import { calcFieldStatus } from '@/lib/fieldStatus'
 import type { IntelligenceEvent } from '@/lib/mockIntelligence'
 import { EVENT_CFG, SEVERITY_CFG } from '@/lib/mockIntelligence'
 
+type MapStyleId = 'satellite' | 'dark' | 'light' | 'streets'
+const MAP_STYLES: Record<MapStyleId, { url: string; label: string; icon: string }> = {
+  satellite: { url: 'mapbox://styles/mapbox/satellite-streets-v12', label: '航空写真', icon: '🛰️' },
+  streets:   { url: 'mapbox://styles/mapbox/streets-v12',           label: '地図',     icon: '🗺️' },
+  light:     { url: 'mapbox://styles/mapbox/light-v11',             label: 'ライト',   icon: '☀️' },
+  dark:      { url: 'mapbox://styles/mapbox/dark-v11',              label: 'ダーク',   icon: '🌙' },
+}
+
 interface Props {
   fields: Field[]
   intelligenceEvents?: IntelligenceEvent[]
@@ -38,6 +46,8 @@ export default function MapView({
   const [frames,     setFrames]     = useState<Array<{ time: number; path: string }>>([])
   const [frameIndex, setFrameIndex] = useState(0)
   const [isPlaying,  setIsPlaying]  = useState(false)
+  const [mapStyleId, setMapStyleId] = useState<MapStyleId>('satellite')
+  const appliedStyleRef = useRef<MapStyleId>('satellite')   // マップに実際に適用済みのスタイル
 
   const containerRef = useRef<HTMLDivElement>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -161,7 +171,7 @@ export default function MapView({
 
       const map = new mgl.Map({
         container: containerRef.current!,
-        style: 'mapbox://styles/mapbox/satellite-streets-v12',
+        style: MAP_STYLES.satellite.url,
         center: center ?? [136.7, 35.7],
         zoom:   zoom   ?? 5,
         projection: { name: 'mercator' },  // Globe投影だとズームで南にズレる
@@ -213,9 +223,13 @@ export default function MapView({
         console.error('[MapView]', e?.error ?? e)
       })
 
-      // スタイルが再ロードされたときも Mercator を維持
+      // スタイルが再ロードされたとき（setStyle後）も Mercator を維持し、
+      // カスタムレイヤー（フィールド・インテリ）を再構築する。
+      // setStyle はカスタムソース/レイヤーを破棄するため再追加が必要。
       map.on('style.load', () => {
         try { map.setProjection({ name: 'mercator' }) } catch (e) { console.warn('setProjection failed', e) }
+        rebuildFieldMarkers()
+        rebuildIntelMarkers()
       })
     })
 
@@ -227,6 +241,15 @@ export default function MapView({
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapToken])
+
+  // ── 1b. Map style switcher ────────────────────────────────
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    if (appliedStyleRef.current === mapStyleId) return   // 既に適用済み（初期スタイル含む）
+    appliedStyleRef.current = mapStyleId
+    try { map.setStyle(MAP_STYLES[mapStyleId].url) } catch (e) { console.warn('setStyle failed', e) }
+  }, [mapStyleId])
 
   // ── 2. FlyTo when center changes ───────────────────────────
   useEffect(() => {
@@ -343,7 +366,7 @@ export default function MapView({
       setIsPlaying(false)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showRainRadar])
+  }, [showRainRadar, mapStyleId])
 
   // ── 4c. フレーム切り替え（opacity のみ変更 → 瞬時切り替え）────
   useEffect(() => {
@@ -777,6 +800,39 @@ export default function MapView({
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
       <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
+
+      {/* ── マップスタイル切替 ── */}
+      <div style={{
+        position: 'absolute', top: 52, left: 10, zIndex: 10,
+        display: 'flex', gap: 2, padding: 3,
+        background: 'rgba(6,10,16,0.78)', backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
+        boxShadow: '0 2px 10px rgba(0,0,0,0.35)',
+      }}>
+        {(Object.keys(MAP_STYLES) as MapStyleId[]).map(id => {
+          const active = id === mapStyleId
+          return (
+            <button
+              key={id}
+              onClick={() => setMapStyleId(id)}
+              title={MAP_STYLES[id].label}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                padding: '4px 8px', borderRadius: 7, height: 26,
+                background: active ? 'rgba(96,165,250,0.22)' : 'transparent',
+                border: `1px solid ${active ? 'rgba(96,165,250,0.5)' : 'transparent'}`,
+                color: active ? '#bfdbfe' : 'rgba(255,255,255,0.5)',
+                fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                transition: 'all 0.15s', whiteSpace: 'nowrap',
+              }}
+            >
+              <span style={{ fontSize: 12 }}>{MAP_STYLES[id].icon}</span>
+              {active && <span>{MAP_STYLES[id].label}</span>}
+            </button>
+          )
+        })}
+      </div>
 
       {/* ── 雨雲レーダー タイムプレーヤー ── */}
       {showRainRadar && frames.length > 0 && (
