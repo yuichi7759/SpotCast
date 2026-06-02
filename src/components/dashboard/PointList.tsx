@@ -145,7 +145,7 @@ export default function PointList({ points, selectedPointId, onPointClick, onPoi
         flexShrink: 0,
       }}>
         <div style={{ fontSize: 15, fontWeight: 800, color: '#fff', letterSpacing: '-0.01em' }}>
-          My Places
+          My Spots
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <Link
