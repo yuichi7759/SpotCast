@@ -78,7 +78,11 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', fontSize: 13, color: '#64748b', marginTop: 20 }}>
+        <p style={{ textAlign: 'center', fontSize: 13, color: '#64748b', marginTop: 12 }}>
+          <Link href="/auth/forgot-password" style={{ color: '#64748b', textDecoration: 'none' }}>パスワードをお忘れの方</Link>
+        </p>
+
+        <p style={{ textAlign: 'center', fontSize: 13, color: '#64748b', marginTop: 8 }}>
           アカウントをお持ちでない方は{' '}
           <Link href="/signup" style={{ color: '#1d4ed8', textDecoration: 'none', fontWeight: 700 }}>新規登録</Link>
         </p>
