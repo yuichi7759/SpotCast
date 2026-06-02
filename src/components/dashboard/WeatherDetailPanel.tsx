@@ -49,14 +49,14 @@ function rainBg(p: number): string {
 function rainTextColor(p: number): string {
   if (p >= 50) return '#93c5fd'
   if (p >= 30) return '#bfdbfe'
-  return 'rgba(255,255,255,0.3)'
+  return 'var(--dash-text-4)'
 }
 
 function ShimmerBlock({ width, height, borderRadius = 6 }: { width: number | string; height: number; borderRadius?: number }) {
   return (
     <div style={{
       width, height, borderRadius,
-      background: 'rgba(255,255,255,0.07)',
+      background: 'var(--dash-border)',
       animation: 'shimmerWDP 1.5s infinite',
     }} />
   )
@@ -141,7 +141,7 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      background: 'rgba(8,12,18,0.94)',
+      background: 'var(--dash-panel)',
       overflowY: 'auto',
       scrollbarWidth: 'none',
     }}>
@@ -153,25 +153,25 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
       {/* Header */}
       <div style={{
         padding: '10px 14px',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        borderBottom: '1px solid var(--dash-border)',
         flexShrink: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
           <div style={{ width: 9, height: 9, borderRadius: '50%', flexShrink: 0, background: accentColor, boxShadow: `0 0 6px ${accentColor}99` }} />
-          <span style={{ fontSize: 16, fontWeight: 800, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--dash-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {point.name}
           </span>
           {point.lat != null && point.lng != null && (
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.38)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+            <span style={{ fontSize: 11, color: 'var(--dash-text-4)', whiteSpace: 'nowrap', flexShrink: 0 }}>
               {point.lat.toFixed(4)}, {point.lng.toFixed(4)}
             </span>
           )}
         </div>
         {onClose && (
-          <button onClick={onClose} style={{ flexShrink: 0, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(255,255,255,0.5)' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#fff' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.5)' }}
+          <button onClick={onClose} style={{ flexShrink: 0, background: 'var(--dash-surface2)', border: '1px solid var(--dash-border)', borderRadius: 7, width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--dash-text-3)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--dash-text)' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--dash-text-3)' }}
           >
             <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/>
@@ -181,7 +181,7 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
       </div>
 
       {!hasCoords ? (
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.35)', fontSize: 14, textAlign: 'center', padding: 20 }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dash-text-4)', fontSize: 14, textAlign: 'center', padding: 20 }}>
           地図上でポイントを設定してください
         </div>
       ) : (
@@ -192,20 +192,20 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
             const maxHours = plan === 'free' ? 24 : 48
             const groups   = groupByDay(hourly.hourly.slice(0, maxHours))
             const allItems = groups.flatMap((g, gi) => g.items.map((h, hi) => ({ h, gi, hi, g })))
-            const SEP      = 'rgba(255,255,255,0.07)'
-            const DAY_SEP  = 'rgba(255,255,255,0.22)'
-            const LABEL_BG = 'rgba(8,12,18,0.98)'
+            const SEP      = 'var(--dash-border)'
+            const DAY_SEP  = 'var(--dash-border-strong)'
+            const LABEL_BG = 'var(--dash-panel-solid)'
             const DAY_H    = 30  // 日別サマリー行の高さ
 
             return (
-              <div style={{ border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, overflow: 'hidden', background: 'rgba(255,255,255,0.02)', display: 'flex', height: '100%' }}>
+              <div style={{ border: '1px solid var(--dash-border)', borderRadius: 10, overflow: 'hidden', background: 'var(--dash-surface)', display: 'flex', height: '100%' }}>
 
                 {/* 固定ラベル列 */}
                 <div style={{ width: LABEL_W, flexShrink: 0, borderRight: `1px solid ${SEP}`, background: LABEL_BG, zIndex: 2 }}>
                   <div style={{ height: DAY_H, borderBottom: `1px solid ${SEP}` }} />
                   {[{ h: RH.time, label: '時刻' }, { h: RH.icon, label: '天気' }, { h: RH.temp, label: '気温' }, { h: RH.rain, label: '降水' }].map(({ h, label }, ri) => (
                     <div key={ri} style={{ height: h, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: ri < 3 ? `1px solid ${SEP}` : undefined }}>
-                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>{label}</span>
+                      <span style={{ fontSize: 10, color: 'var(--dash-text-3)', fontWeight: 700 }}>{label}</span>
                     </div>
                   ))}
                 </div>
@@ -221,10 +221,10 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
                       const borderL    = isDayStart && idx > 0 ? `2px solid ${DAY_SEP}` : idx > 0 ? `1px solid ${SEP}` : undefined
 
                       return (
-                        <div key={idx} style={{ width: CELL_W, flexShrink: 0, borderLeft: borderL, background: isNow ? 'rgba(29,78,216,0.12)' : undefined, position: 'relative' }}>
+                        <div key={idx} style={{ width: CELL_W, flexShrink: 0, borderLeft: borderL, background: isNow ? 'var(--dash-accent-bg)' : undefined, position: 'relative' }}>
 
                           {/* 日別サマリー行 — 日付が変わる列だけoverflowで横に伸ばす */}
-                          <div style={{ height: DAY_H, borderBottom: `1px solid ${SEP}`, background: isDayStart ? 'rgba(255,255,255,0.04)' : undefined, position: 'relative', overflow: 'visible' }}>
+                          <div style={{ height: DAY_H, borderBottom: `1px solid ${SEP}`, background: isDayStart ? 'var(--dash-surface)' : undefined, position: 'relative', overflow: 'visible' }}>
                             {isDayStart && (() => {
                               const daily = hourly?.daily14?.find(d => {
                                 const today = new Date(); const dd = new Date(today); dd.setDate(dd.getDate() + g.offset)
@@ -233,7 +233,7 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
                               })
                               return (
                                 <div style={{ position: 'absolute', left: 4, top: 0, height: DAY_H, display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap', zIndex: 1, pointerEvents: 'none' }}>
-                                  <span style={{ fontSize: 11, fontWeight: 800, color: gi === 0 ? '#60a5fa' : 'rgba(255,255,255,0.75)' }}>{g.dayLabel}</span>
+                                  <span style={{ fontSize: 11, fontWeight: 800, color: gi === 0 ? '#60a5fa' : 'var(--dash-text-2)' }}>{g.dayLabel}</span>
                                   {daily && <>
                                     <span style={{ fontSize: 14 }}>{weatherIcon(wmoToMain(daily.weather_code))}</span>
                                     <span style={{ fontSize: 11, fontWeight: 700, color: '#f97316' }}>{daily.temp_max}°</span>
@@ -247,7 +247,7 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
 
                           {/* 時刻 */}
                           <div style={{ height: RH.time, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: `1px solid ${SEP}` }}>
-                            <span style={{ fontSize: 12, fontWeight: isNow ? 800 : 600, color: isNow ? '#60a5fa' : 'rgba(255,255,255,0.7)' }}>{timeLabel}</span>
+                            <span style={{ fontSize: 12, fontWeight: isNow ? 800 : 600, color: isNow ? '#60a5fa' : 'var(--dash-text-2)' }}>{timeLabel}</span>
                           </div>
                           {/* 天気 */}
                           <div style={{ height: RH.icon, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: `1px solid ${SEP}` }}>
@@ -259,7 +259,7 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
                           </div>
                           {/* 降水% */}
                           <div style={{ height: RH.rain, display: 'flex', alignItems: 'center', justifyContent: 'center', background: rainBg(h.rain_prob) }}>
-                            <span style={{ fontSize: 12, fontWeight: 700, color: h.rain_prob > 0 ? rainTextColor(h.rain_prob) : 'rgba(255,255,255,0.4)' }}>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: h.rain_prob > 0 ? rainTextColor(h.rain_prob) : 'var(--dash-text-3)' }}>
                               {h.rain_prob > 0 ? `${h.rain_prob}%` : '—'}
                             </span>
                           </div>
@@ -271,7 +271,7 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
               </div>
             )
           })() : (
-            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, paddingTop: 12 }}>取得できません</div>
+            <div style={{ color: 'var(--dash-text-4)', fontSize: 13, paddingTop: 12 }}>取得できません</div>
           )}
 
           {plan === 'free' && hourly && (

@@ -187,7 +187,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
     return (
       <div style={{
         height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: 'rgba(255,255,255,0.25)', fontSize: 14,
+        color: 'var(--dash-text-4)', fontSize: 14,
       }}>
         座標登録済みのポイントがありません
       </div>
@@ -195,21 +195,21 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
   }
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'rgba(5,8,14,0.98)', position: 'relative' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--dash-panel-solid)', position: 'relative' }}>
       <style>{`@keyframes bdmShim{0%,100%{opacity:.3}50%{opacity:.65}}`}</style>
 
       {/* Freeプランロックオーバーレイ */}
       {plan === 'free' && (
         <div style={{
           position: 'absolute', inset: 0, zIndex: 30,
-          background: 'rgba(5,8,14,0.82)',
+          background: 'var(--dash-panel)',
           backdropFilter: 'blur(4px)',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           gap: 12,
         }}>
           <div style={{ fontSize: 32 }}>🔒</div>
-          <div style={{ fontSize: 15, fontWeight: 800, color: '#fff' }}>Best Day機能</div>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', textAlign: 'center', lineHeight: 1.7 }}>
+          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--dash-text)' }}>Best Day機能</div>
+          <div style={{ fontSize: 13, color: 'var(--dash-text-3)', textAlign: 'center', lineHeight: 1.7 }}>
             Standardプランで<br/>全ポイントのベストデイを比較できます
           </div>
           <a href="/settings" style={{
@@ -228,10 +228,10 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
         flexShrink: 0, height: 42,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 16px',
-        borderBottom: '1px solid rgba(255,255,255,0.07)',
+        borderBottom: '1px solid var(--dash-border)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ fontSize: 13, fontWeight: 800, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--dash-text-3)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
             🏆 Best Day
           </div>
           {(['sunny', 'rainy'] as ScoreMode[]).map(m => {
@@ -243,9 +243,9 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                 onClick={() => setMode(m)}
                 style={{
                   padding: '4px 14px', borderRadius: 20,
-                  border: `1px solid ${active ? accent + '99' : 'rgba(255,255,255,0.1)'}`,
+                  border: `1px solid ${active ? accent + '99' : 'var(--dash-border-strong)'}`,
                   background: active ? `${accent}18` : 'transparent',
-                  color: active ? accent : 'rgba(255,255,255,0.3)',
+                  color: active ? accent : 'var(--dash-text-4)',
                   fontSize: 12, fontWeight: 700, cursor: 'pointer',
                   transition: 'all 0.15s',
                   boxShadow: active ? `0 0 10px ${accent}22` : 'none',
@@ -262,7 +262,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
       {/* ── Matrix (scrollable x+y) ── */}
       <div style={{
         flex: 1, overflow: 'auto', scrollbarWidth: 'thin',
-        scrollbarColor: 'rgba(255,255,255,0.1) transparent',
+        scrollbarColor: 'var(--dash-border-strong) transparent',
       }}>
         {/* Table wrapper — inline-flex so it grows with content */}
         <div style={{ display: 'inline-flex', flexDirection: 'column', minWidth: '100%' }}>
@@ -276,9 +276,9 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
             <div style={{
               width: LABEL_W, flexShrink: 0,
               position: 'sticky', left: 0, zIndex: 5,
-              background: 'rgba(5,8,14,0.98)',
-              borderRight: '1px solid rgba(255,255,255,0.07)',
-              borderBottom: '1px solid rgba(255,255,255,0.07)',
+              background: 'var(--dash-panel-solid)',
+              borderRight: '1px solid var(--dash-border)',
+              borderBottom: '1px solid var(--dash-border)',
             }} />
 
             {/* Date column headers */}
@@ -299,19 +299,19 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                     width: DATE_W, flexShrink: 0, marginRight: DATE_GAP,
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                     padding: '6px 2px',
-                    background: mc?.bg ?? 'rgba(5,8,14,0.98)',
-                    borderBottom: `2px solid ${mc?.border ?? 'rgba(255,255,255,0.06)'}`,
+                    background: mc?.bg ?? 'var(--dash-panel-solid)',
+                    borderBottom: `2px solid ${mc?.border ?? 'var(--dash-surface2)'}`,
                     gap: 1,
                   }}
                 >
                   {isMed && <span style={{ fontSize: 13, lineHeight: 1 }}>{MEDALS[mIdx]}</span>}
                   <span style={{
                     fontSize: 13, fontWeight: 800, lineHeight: 1,
-                    color: isMed ? mc!.text : (isSun ? '#f87171' : isSat ? '#93c5fd' : 'rgba(255,255,255,0.65)'),
+                    color: isMed ? mc!.text : (isSun ? '#f87171' : isSat ? '#93c5fd' : 'var(--dash-text-2)'),
                   }}>{label}</span>
                   <span style={{
                     fontSize: 11, lineHeight: 1,
-                    color: isSun ? 'rgba(248,113,113,0.6)' : isSat ? 'rgba(147,197,253,0.6)' : 'rgba(255,255,255,0.28)',
+                    color: isSun ? 'rgba(248,113,113,0.6)' : isSat ? 'rgba(147,197,253,0.6)' : 'var(--dash-text-4)',
                   }}>{dow}</span>
                 </div>
               )
@@ -321,20 +321,20 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
           {/* ─── Loading shimmer ─── */}
           {initialLoading && (
             Array.from({ length: Math.max(activePoints.length, 2) }).map((_, ri) => (
-              <div key={ri} style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+              <div key={ri} style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--dash-surface)' }}>
                 <div style={{
                   width: LABEL_W, height: ROW_H, flexShrink: 0,
                   position: 'sticky', left: 0, zIndex: 1,
-                  background: 'rgba(5,8,14,0.98)',
-                  borderRight: '1px solid rgba(255,255,255,0.07)',
+                  background: 'var(--dash-panel-solid)',
+                  borderRight: '1px solid var(--dash-border)',
                   display: 'flex', alignItems: 'center', padding: '0 12px', gap: 8,
                 }}>
-                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', animation: 'bdmShim 1.5s infinite' }} />
-                  <div style={{ width: 80, height: 12, borderRadius: 4, background: 'rgba(255,255,255,0.07)', animation: 'bdmShim 1.5s infinite' }} />
+                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--dash-border-strong)', animation: 'bdmShim 1.5s infinite' }} />
+                  <div style={{ width: 80, height: 12, borderRadius: 4, background: 'var(--dash-border)', animation: 'bdmShim 1.5s infinite' }} />
                 </div>
                 {Array.from({ length: 14 }).map((_, ci) => (
                   <div key={ci} style={{ width: DATE_W, height: ROW_H, flexShrink: 0, marginRight: DATE_GAP, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ width: DATE_W - 8, height: ROW_H - 12, borderRadius: 6, background: 'rgba(255,255,255,0.05)', animation: 'bdmShim 1.5s infinite', animationDelay: `${ci * 0.04}s` }} />
+                    <div style={{ width: DATE_W - 8, height: ROW_H - 12, borderRadius: 6, background: 'var(--dash-surface)', animation: 'bdmShim 1.5s infinite', animationDelay: `${ci * 0.04}s` }} />
                   </div>
                 ))}
               </div>
@@ -353,16 +353,16 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                 key={p.id}
                 style={{
                   display: 'flex', alignItems: 'center',
-                  borderBottom: '1px solid rgba(255,255,255,0.04)',
-                  background: isHL ? 'rgba(29,78,216,0.04)' : 'transparent',
+                  borderBottom: '1px solid var(--dash-surface)',
+                  background: isHL ? 'var(--dash-accent-bg)' : 'transparent',
                 }}
               >
                 {/* Row label (sticky left) — opacityをここにはかけない */}
                 <div style={{
                   width: LABEL_W, height: ROW_H, flexShrink: 0,
                   position: 'sticky', left: 0, zIndex: 1,
-                  background: isHL ? 'rgba(29,78,216,0.06)' : 'rgba(5,8,14,1)',
-                  borderRight: '1px solid rgba(255,255,255,0.07)',
+                  background: isHL ? 'var(--dash-accent-bg)' : 'var(--dash-panel-solid)',
+                  borderRight: '1px solid var(--dash-border)',
                   borderLeft: `2px solid ${isHL ? color : 'transparent'}`,
                   display: 'flex', alignItems: 'center', gap: 7, padding: '0 8px 0 10px',
                 }}>
@@ -373,7 +373,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                     style={{
                       flexShrink: 0,
                       width: 16, height: 16, borderRadius: 4,
-                      border: `1.5px solid ${isOn ? color : 'rgba(255,255,255,0.2)'}`,
+                      border: `1.5px solid ${isOn ? color : 'var(--dash-border-strong)'}`,
                       background: isOn ? color + '33' : 'transparent',
                       cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -392,7 +392,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                   }} />
                   <span style={{
                     fontSize: 12, fontWeight: 700,
-                    color: isHL ? '#fff' : 'rgba(255,255,255,0.65)',
+                    color: isHL ? 'var(--dash-text)' : 'var(--dash-text-2)',
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     flex: 1,
                   }}>
@@ -417,7 +417,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                       }}>
                         <div style={{
                           width: DATE_W - 10, height: ROW_H - 14, borderRadius: 6,
-                          background: 'rgba(255,255,255,0.05)',
+                          background: 'var(--dash-surface)',
                           animation: isLoading ? 'bdmShim 1.5s infinite' : 'none',
                         }} />
                       </div>
@@ -437,12 +437,12 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                       transition: 'opacity 0.15s',
                     }}>
                       <span style={{ fontSize: 15, lineHeight: 1 }}>{icon}</span>
-                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', lineHeight: 1, fontWeight: 600 }}>
+                      <span style={{ fontSize: 10, color: 'var(--dash-text-2)', lineHeight: 1, fontWeight: 600 }}>
                         <span style={{ color: '#fca5a5' }}>{day.temp_max}°</span>
-                        <span style={{ color: 'rgba(255,255,255,0.3)', margin: '0 1px' }}>/</span>
+                        <span style={{ color: 'var(--dash-text-4)', margin: '0 1px' }}>/</span>
                         <span style={{ color: '#93c5fd' }}>{day.temp_min}°</span>
                       </span>
-                      <span style={{ fontSize: 10, lineHeight: 1, color: day.rain_prob >= 50 ? '#93c5fd' : 'rgba(255,255,255,0.35)', fontWeight: 600 }}>
+                      <span style={{ fontSize: 10, lineHeight: 1, color: day.rain_prob >= 50 ? '#93c5fd' : 'var(--dash-text-4)', fontWeight: 600 }}>
                         {day.rain_prob}%
                       </span>
                     </div>
@@ -456,20 +456,20 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
           {!initialLoading && dates.length > 0 && (
             <div style={{
               display: 'flex', alignItems: 'center',
-              borderTop: '2px solid rgba(255,255,255,0.12)',
-              background: 'rgba(14,20,32,1)',
+              borderTop: '2px solid var(--dash-border-strong)',
+              background: 'var(--dash-panel-solid)',
               position: 'sticky', bottom: 0, zIndex: 3,
             }}>
               {/* Label */}
               <div style={{
                 width: LABEL_W, height: ROW_H + 8, flexShrink: 0,
                 position: 'sticky', left: 0, zIndex: 4,
-                background: 'rgba(10,14,22,0.99)',
-                borderRight: '1px solid rgba(255,255,255,0.1)',
-                borderLeft: '2px solid rgba(255,255,255,0.15)',
+                background: 'var(--dash-panel-solid)',
+                borderRight: '1px solid var(--dash-border-strong)',
+                borderLeft: '2px solid var(--dash-border-strong)',
                 display: 'flex', alignItems: 'center', gap: 8, padding: '0 10px',
               }}>
-                <span style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.04em' }}>
+                <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--dash-text-2)', letterSpacing: '0.04em' }}>
                   デイスコア
                 </span>
               </div>
@@ -479,14 +479,14 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                 const mIdx  = top3Idx.indexOf(i)
                 const isMed = mIdx >= 0
                 const mc    = isMed ? MEDAL_COLORS[mIdx] : null
-                const avgColor = avg >= 0 ? scoreColor(avg) : 'rgba(255,255,255,0.2)'
+                const avgColor = avg >= 0 ? scoreColor(avg) : 'var(--dash-border-strong)'
                 function solidScoreBg(s: number): string {
                   if (s >= 80) return 'rgba(62,207,142,0.28)'
                   if (s >= 60) return 'rgba(96,165,250,0.22)'
                   if (s >= 40) return 'rgba(251,191,36,0.22)'
                   return 'rgba(248,113,113,0.18)'
                 }
-                const avgBg = avg >= 0 ? solidScoreBg(avg) : 'rgba(14,20,32,1)'
+                const avgBg = avg >= 0 ? solidScoreBg(avg) : 'var(--dash-panel-solid)'
                 return (
                   <div key={dates[i] ?? i} style={{
                     width: DATE_W, height: ROW_H + 8, flexShrink: 0, marginRight: DATE_GAP,
@@ -509,7 +509,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                         </span>
                       </>
                     ) : (
-                      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.18)' }}>–</span>
+                      <span style={{ fontSize: 11, color: 'var(--dash-border-strong)' }}>–</span>
                     )}
                   </div>
                 )

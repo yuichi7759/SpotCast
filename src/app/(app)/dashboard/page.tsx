@@ -270,7 +270,7 @@ export default function DashboardPage() {
   )
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#060a10' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: 'var(--dash-base)' }}>
 
       {/* ══════════════════════════════════════════════════
           DESKTOP LAYOUT  (hidden on mobile)
@@ -299,7 +299,7 @@ export default function DashboardPage() {
                 position: 'absolute', top: 0, right: 0, width: 5, height: '100%',
                 cursor: 'col-resize', zIndex: 20,
                 background: 'transparent',
-                borderRight: '1px solid rgba(255,255,255,0.07)',
+                borderRight: '1px solid var(--dash-border)',
               }}
               onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(62,207,142,0.25)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
@@ -543,7 +543,7 @@ export default function DashboardPage() {
           {fields.some(f => f.lat != null && f.lng != null) && (
             <div style={{
               width: rightPanelWidth, flexShrink: 0, height: '100%', overflow: 'hidden',
-              borderLeft: '1px solid rgba(255,255,255,0.07)',
+              borderLeft: '1px solid var(--dash-border)',
               position: 'relative',
             }}>
               {/* 左端リサイズハンドル */}
@@ -566,7 +566,7 @@ export default function DashboardPage() {
         {selectedField && (
           <div style={{
             flexShrink: 0, height: bottomPanelHeight, overflow: 'hidden',
-            borderTop: '1px solid rgba(255,255,255,0.07)',
+            borderTop: '1px solid var(--dash-border)',
             position: 'relative',
           }}>
             {/* 上端リサイズハンドル */}
@@ -575,7 +575,7 @@ export default function DashboardPage() {
               style={{
                 position: 'absolute', top: 0, left: 0, right: 0, height: 5,
                 cursor: 'row-resize', zIndex: 20, background: 'transparent',
-                borderTop: '1px solid rgba(255,255,255,0.07)',
+                borderTop: '1px solid var(--dash-border)',
               }}
               onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(62,207,142,0.25)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}

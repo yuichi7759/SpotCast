@@ -53,8 +53,8 @@ function PointCard({
         position: 'relative',
         padding: '12px 10px 12px 14px',
         borderRadius: 10,
-        background: selected ? 'rgba(29,78,216,0.08)' : 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.07)',
+        background: selected ? 'var(--dash-accent-bg)' : 'var(--dash-surface)',
+        border: '1px solid var(--dash-border)',
         borderLeft: selected ? `3px solid ${accentColor}` : '3px solid transparent',
         cursor: 'pointer',
         transition: 'all 0.15s',
@@ -63,10 +63,10 @@ function PointCard({
         gap: 10,
       }}
       onMouseEnter={e => {
-        if (!selected) (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.06)'
+        if (!selected) (e.currentTarget as HTMLDivElement).style.background = 'var(--dash-surface2)'
       }}
       onMouseLeave={e => {
-        if (!selected) (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.03)'
+        if (!selected) (e.currentTarget as HTMLDivElement).style.background = 'var(--dash-surface)'
       }}
     >
       {/* Color dot */}
@@ -79,13 +79,13 @@ function PointCard({
       {/* Name + location */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          fontSize: 15, fontWeight: 700, color: '#fff',
+          fontSize: 15, fontWeight: 700, color: 'var(--dash-text)',
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>
           {point.name}
         </div>
         {!hasCoords && (
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+          <div style={{ fontSize: 12, color: 'var(--dash-text-4)', marginTop: 2 }}>
             📍 地点未設定
           </div>
         )}
@@ -99,7 +99,7 @@ function PointCard({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{ fontSize: 16 }}>{weatherIcon(weather.current.weather_main)}</span>
-            <span style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>{weather.current.temp}°</span>
+            <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--dash-text)' }}>{weather.current.temp}°</span>
           </div>
         </div>
       )}
@@ -111,13 +111,13 @@ function PointCard({
           flexShrink: 0,
           background: 'none', border: 'none',
           cursor: 'pointer',
-          color: 'rgba(255,255,255,0.3)',
+          color: 'var(--dash-text-4)',
           fontSize: 18, lineHeight: 1,
           padding: '2px 4px', borderRadius: 6,
           transition: 'color 0.15s',
         }}
-        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.7)' }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.3)' }}
+        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--dash-text-2)' }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--dash-text-4)' }}
         title="編集"
       >
         <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
@@ -135,16 +135,16 @@ export default function PointList({ points, selectedPointId, onPointClick, onPoi
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      background: 'rgba(6,10,16,0.92)',
+      background: 'var(--dash-panel)',
     }}>
       {/* Header */}
       <div style={{
         padding: '16px 12px 12px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        borderBottom: '1px solid var(--dash-surface2)',
         flexShrink: 0,
       }}>
-        <div style={{ fontSize: 15, fontWeight: 800, color: '#fff', letterSpacing: '-0.01em' }}>
+        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--dash-text)', letterSpacing: '-0.01em' }}>
           My Spots
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -154,19 +154,19 @@ export default function PointList({ points, selectedPointId, onPointClick, onPoi
           style={{
             width: 28, height: 28, borderRadius: 8,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            color: 'rgba(255,255,255,0.4)',
+            background: 'var(--dash-surface)',
+            border: '1px solid var(--dash-border-strong)',
+            color: 'var(--dash-text-3)',
             transition: 'all 0.15s',
             textDecoration: 'none',
           }}
           onMouseEnter={e => {
             const el = e.currentTarget as HTMLAnchorElement
-            el.style.color = '#fff'; el.style.borderColor = 'rgba(255,255,255,0.25)'
+            el.style.color = 'var(--dash-text)'; el.style.borderColor = 'var(--dash-border-strong)'
           }}
           onMouseLeave={e => {
             const el = e.currentTarget as HTMLAnchorElement
-            el.style.color = 'rgba(255,255,255,0.4)'; el.style.borderColor = 'rgba(255,255,255,0.1)'
+            el.style.color = 'var(--dash-text-3)'; el.style.borderColor = 'var(--dash-border-strong)'
           }}
         >
           <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -179,7 +179,7 @@ export default function PointList({ points, selectedPointId, onPointClick, onPoi
           style={{
             width: 30, height: 30,
             borderRadius: 8,
-            background: 'rgba(29,78,216,0.15)',
+            background: 'var(--dash-accent-bg)',
             border: '1px solid rgba(29,78,216,0.35)',
             color: '#60a5fa',
             fontSize: 20, lineHeight: '1',
@@ -192,7 +192,7 @@ export default function PointList({ points, selectedPointId, onPointClick, onPoi
             (e.currentTarget as HTMLButtonElement).style.background = 'rgba(29,78,216,0.28)'
           }}
           onMouseLeave={e => {
-            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(29,78,216,0.15)'
+            (e.currentTarget as HTMLButtonElement).style.background = 'var(--dash-accent-bg)'
           }}
           title="ポイントを追加"
         >
@@ -213,7 +213,7 @@ export default function PointList({ points, selectedPointId, onPointClick, onPoi
           <div style={{
             padding: '24px 12px',
             textAlign: 'center',
-            color: 'rgba(255,255,255,0.25)',
+            color: 'var(--dash-border-strong)',
             fontSize: 14,
             lineHeight: 1.6,
           }}>

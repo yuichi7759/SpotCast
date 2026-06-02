@@ -15,6 +15,23 @@
   --input-bg: rgba(255,255,255,.04);
   --sidebar-bg: #0d0d0d;
   --placeholder: #3a3a3a;
+
+  /* ── Dashboard semantic tokens (dark) ── */
+  --dash-base: #060a10;          /* app base / map letterbox */
+  --dash-panel: rgba(8,12,18,0.94);
+  --dash-panel-solid: #0a0e16;   /* sticky cells — must be opaque */
+  --dash-header: rgba(8,12,20,0.95);
+  --dash-surface: rgba(255,255,255,0.04);
+  --dash-surface2: rgba(255,255,255,0.06);
+  --dash-hover: rgba(255,255,255,0.08);
+  --dash-border: rgba(255,255,255,0.07);
+  --dash-border-strong: rgba(255,255,255,0.14);
+  --dash-text: #ffffff;
+  --dash-text-2: rgba(255,255,255,0.7);
+  --dash-text-3: rgba(255,255,255,0.5);
+  --dash-text-4: rgba(255,255,255,0.35);
+  --dash-accent: #60a5fa;
+  --dash-accent-bg: rgba(29,78,216,0.12);
 }
 
 [data-theme="light"] {
@@ -32,6 +49,23 @@
   --input-bg: rgba(0,0,0,.04);
   --sidebar-bg: #ffffff;
   --placeholder: #aaa;
+
+  /* ── Dashboard semantic tokens (light) ── */
+  --dash-base: #dce3ec;
+  --dash-panel: rgba(255,255,255,0.96);
+  --dash-panel-solid: #ffffff;
+  --dash-header: rgba(255,255,255,0.96);
+  --dash-surface: rgba(15,23,42,0.04);
+  --dash-surface2: rgba(15,23,42,0.07);
+  --dash-hover: rgba(15,23,42,0.06);
+  --dash-border: rgba(15,23,42,0.10);
+  --dash-border-strong: rgba(15,23,42,0.20);
+  --dash-text: #0f172a;
+  --dash-text-2: #334155;
+  --dash-text-3: #64748b;
+  --dash-text-4: #94a3b8;
+  --dash-accent: #2563eb;
+  --dash-accent-bg: rgba(37,99,235,0.10);
 }
 
 * { box-sizing: border-box; }
