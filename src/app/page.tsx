@@ -1,25 +1,20 @@
 import Link from 'next/link'
 
 function Logo({ dark = false, size = 30 }: { dark?: boolean; size?: number }) {
+  const h = Math.round(size * 1.33)
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
+      <svg width={size} height={h} viewBox="0 0 60 80" fill="none">
         <defs>
-          <radialGradient id="lgMain" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#38bdf8"/>
-            <stop offset="100%" stopColor="#2563eb"/>
-          </radialGradient>
+          <linearGradient id="lgMain" x1="10%" y1="0%" x2="90%" y2="100%">
+            <stop offset="0%" stopColor="#fcd34d"/>
+            <stop offset="42%" stopColor="#b8cad8"/>
+            <stop offset="100%" stopColor="#1d4ed8"/>
+          </linearGradient>
         </defs>
-        <circle cx="20" cy="20" r="19"
-          fill={dark ? 'rgba(255,255,255,0.08)' : 'rgba(37,99,235,0.07)'}
-          stroke={dark ? 'rgba(255,255,255,0.14)' : 'rgba(37,99,235,0.18)'}
-          strokeWidth="1"/>
-        <path d="M9 20 A13 13 0 0 1 20 7"  stroke="#38bdf8" strokeWidth="2"   strokeLinecap="round" opacity="0.55"/>
-        <path d="M31 20 A13 13 0 0 0 20 7" stroke="#2563eb" strokeWidth="2"   strokeLinecap="round" opacity="0.38"/>
-        <path d="M12.5 23.5 A9 9 0 0 1 20 13" stroke="#38bdf8" strokeWidth="1.5" strokeLinecap="round" opacity="0.65"/>
-        <path d="M27.5 23.5 A9 9 0 0 0 20 13" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round" opacity="0.42"/>
-        <path d="M20 13.5 C17 13.5 14.5 16 14.5 19 C14.5 22.8 20 28.5 20 28.5 C20 28.5 25.5 22.8 25.5 19 C25.5 16 23 13.5 20 13.5Z" fill="url(#lgMain)"/>
-        <circle cx="20" cy="19" r="2.5" fill="white" opacity="0.95"/>
+        <path d="M30 3 C14 3 2 14 2 28 C2 38 7 46 15 54 C20 59 26 65 30 74 C34 65 40 59 45 54 C53 46 58 38 58 28 C58 14 46 3 30 3Z" fill="url(#lgMain)"/>
+        <ellipse cx="22" cy="16" rx="8" ry="10" fill="white" opacity="0.2" transform="rotate(-20 22 16)"/>
+        <circle cx="30" cy="28" r="11" fill="white" opacity="0.93"/>
       </svg>
       <div>
         <div style={{ fontSize: 17, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1, color: dark ? '#fff' : '#0f172a' }}>SpotCast</div>
