@@ -369,7 +369,10 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                 <div style={{
                   width: LABEL_W, height: ROW_H, flexShrink: 0,
                   position: 'sticky', left: 0, zIndex: 1,
-                  background: isHL ? 'var(--dash-accent-bg)' : 'var(--dash-panel-solid)',
+                  // ハイライト行もアクセント色を不透明ベースに重ねて透けないようにする
+                  background: isHL
+                    ? 'linear-gradient(var(--dash-accent-bg), var(--dash-accent-bg)), var(--dash-panel-solid)'
+                    : 'var(--dash-panel-solid)',
                   borderRight: '1px solid var(--dash-border)',
                   borderLeft: `2px solid ${isHL ? color : 'transparent'}`,
                   display: 'flex', alignItems: 'center', gap: 7, padding: '0 8px 0 10px',
