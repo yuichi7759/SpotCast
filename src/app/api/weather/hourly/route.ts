@@ -87,7 +87,9 @@ export async function GET(req: NextRequest) {
     `?latitude=${lat}&longitude=${lng}` +
     `&hourly=temperature_2m,precipitation_probability,wind_speed_10m,wind_direction_10m,weather_code,relative_humidity_2m` +
     `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_probability_mean,wind_speed_10m_max` +
-    `&timezone=Asia%2FTokyo&forecast_days=14&models=jma_seamless`
+    `&timezone=Asia%2FTokyo&forecast_days=14`
+    // 注: models=jma_seamless（気象庁）は降水確率を一切提供しない(null)ため指定しない。
+    //     デフォルトのベストマッチモデルを使う。
 
   try {
     const controller = new AbortController()
