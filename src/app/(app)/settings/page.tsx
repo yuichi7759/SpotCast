@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTheme } from '@/components/ThemeProvider'
 import { MARKER_SIZE_OPTIONS, loadMarkerSize, saveMarkerSize, type MarkerSize } from '@/lib/markerSize'
+import { useLocale } from '@/components/LocaleProvider'
+import { LOCALES } from '@/lib/i18n/dictionaries'
 
 export default function SettingsPage() {
   const [email, setEmail]         = useState('')
@@ -13,6 +15,7 @@ export default function SettingsPage() {
   const [loggingOut, setLoggingOut] = useState(false)
   const [markerSize, setMarkerSize] = useState<MarkerSize>('md')
   const { theme, toggle } = useTheme()
+  const { locale, setLocale, t } = useLocale()
   const router = useRouter()
 
   // Show success banner if redirected from Stripe
@@ -170,14 +173,14 @@ export default function SettingsPage() {
         {/* Appearance */}
         <section style={{ marginBottom: 24 }}>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: textMuted, marginBottom: 10 }}>
-            外観
+            {t('settings.appearance')}
           </div>
           <div style={{ background: surfaceBg, border: `1px solid ${borderColor}`, borderRadius: 14, overflow: 'hidden' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: `1px solid ${borderColor}` }}>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>テーマ</div>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>{t('settings.theme')}</div>
                 <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>
-                  {isLight ? 'ライトモード' : 'ダークモード'}
+                  {isLight ? t('settings.themeLight') : t('settings.themeDark')}
                 </div>
               </div>
               <button
@@ -198,10 +201,10 @@ export default function SettingsPage() {
               </button>
             </div>
             {/* マーカーサイズ */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: 12, borderBottom: `1px solid ${borderColor}` }}>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>マップのマーカーサイズ</div>
-                <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>地図上のポイントの大きさ</div>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>{t('settings.markerSize')}</div>
+                <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>{t('settings.markerSizeHint')}</div>
               </div>
               <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
                 {MARKER_SIZE_OPTIONS.map(opt => {
@@ -219,6 +222,30 @@ export default function SettingsPage() {
                       }}
                     >
                       {opt.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+            {/* 言語 */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: 12 }}>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>{t('lang.label')}</div>
+              <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                {LOCALES.map(l => {
+                  const active = locale === l.id
+                  return (
+                    <button
+                      key={l.id}
+                      onClick={() => setLocale(l.id)}
+                      style={{
+                        minWidth: 64, padding: '6px 12px', borderRadius: 8,
+                        background: active ? (isLight ? '#3b82f6' : 'rgba(59,130,246,0.25)') : (isLight ? '#eef1f5' : 'rgba(255,255,255,0.06)'),
+                        border: `1px solid ${active ? '#3b82f6' : borderColor}`,
+                        color: active ? (isLight ? '#fff' : '#93c5fd') : textMuted,
+                        fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s',
+                      }}
+                    >
+                      {t(l.labelKey)}
                     </button>
                   )
                 })}
