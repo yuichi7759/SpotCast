@@ -15,6 +15,7 @@ import MobileBottomSheet, { type SheetSnap } from '@/components/dashboard/Mobile
 import AccountMenu from '@/components/layout/AccountMenu'
 import { useToast } from '@/components/ToastProvider'
 import { createClient } from '@/lib/supabase/client'
+import { loadOrder, saveOrder } from '@/lib/spotOrder'
 import type { IntelligenceEvent } from '@/lib/mockIntelligence'
 
 const FREE_POINT_LIMIT = 3
@@ -46,6 +47,8 @@ export default function DashboardPage() {
   const [bottomPanelHeight, setBottomPanelHeight] = useState(280)
   const [rightPanelWidth,   setRightPanelWidth]  = useState(420)
   const [plan,              setPlan]             = useState<'free' | 'standard'>('free')
+  const [orderIds,          setOrderIds]         = useState<string[]>([])
+  const [mobileTab,         setMobileTab]        = useState<'spots' | 'bestday'>('spots')
   const isResizingRight  = useRef(false)
   const resizeStartXR    = useRef(0)
   const resizeStartWR    = useRef(0)
@@ -65,6 +68,13 @@ export default function DashboardPage() {
     setLoadingFields(false)
   }, [])
   useEffect(() => { loadFields() }, [loadFields])
+
+  // スポット並び順をロード
+  useEffect(() => { setOrderIds(loadOrder()) }, [])
+  function handleReorder(ids: string[]) {
+    setOrderIds(ids)
+    saveOrder(ids)
+  }
 
   // プラン取得
   useEffect(() => {
@@ -121,7 +131,8 @@ export default function DashboardPage() {
       setCenter([field.lng, field.lat])
       setZoom(15)
     }
-    setMobileSnap('detail')
+    // モバイル：タブは勝手に最大化しない。peek（地図が見えない）の時だけ中段(list)へ。
+    setMobileSnap(prev => (prev === 'peek' ? 'list' : prev))
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -291,6 +302,8 @@ export default function DashboardPage() {
               onPointClick={handleFieldClick}
               onPointEdit={f => setEditingField(f)}
               onAdd={handleAddClick}
+              orderIds={orderIds}
+              onReorder={handleReorder}
             />
             {/* Resize handle */}
             <div
@@ -556,7 +569,7 @@ export default function DashboardPage() {
                 onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(62,207,142,0.25)' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
               />
-              <BestDayMatrix allPoints={fields} highlightPointId={selectedField?.id} refreshKey={weatherRefreshKey} plan={plan} />
+              <BestDayMatrix allPoints={fields} highlightPointId={selectedField?.id} refreshKey={weatherRefreshKey} plan={plan} orderIds={orderIds} />
             </div>
           )}
 
@@ -640,7 +653,7 @@ export default function DashboardPage() {
 
         {/* FAB — add point */}
         <button
-          onClick={() => { setPending(null); setShowModal(true) }}
+          onClick={handleAddClick}
           style={{
             position: 'absolute', bottom: 160, right: 16, zIndex: 25,
             width: 52, height: 52, borderRadius: 26,
@@ -686,22 +699,53 @@ export default function DashboardPage() {
             </div>
           }
         >
-          {mobileSnap === 'detail' && selectedField
+          {selectedField
             ? (
               <WeatherDetailPanel
                 point={selectedField}
-                onClose={() => { setSelected(null); setMobileSnap('list') }}
+                onClose={() => { setSelected(null) }}
                 refreshKey={weatherRefreshKey}
                 plan={plan}
               />
             ) : (
-              <PointList
-                points={fields}
-                selectedPointId={selectedField?.id}
-                onPointClick={handleFieldClick}
-                onPointEdit={f => setEditingField(f)}
-                onAdd={() => { setPending(null); setShowModal(true) }}
-              />
+              <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                {/* タブ切替: スポット / ベストデイ */}
+                <div style={{ display: 'flex', gap: 6, padding: '4px 12px 10px', flexShrink: 0 }}>
+                  {([['spots', 'My Spots'], ['bestday', 'Best Day']] as const).map(([id, label]) => {
+                    const active = mobileTab === id
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => setMobileTab(id)}
+                        style={{
+                          flex: 1, padding: '8px 0', borderRadius: 9,
+                          background: active ? 'var(--dash-accent-bg)' : 'var(--dash-surface)',
+                          border: `1px solid ${active ? 'var(--dash-accent)' : 'var(--dash-border)'}`,
+                          color: active ? 'var(--dash-accent)' : 'var(--dash-text-3)',
+                          fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                        }}
+                      >
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+                <div style={{ flex: 1, minHeight: 0 }}>
+                  {mobileTab === 'spots' ? (
+                    <PointList
+                      points={fields}
+                      selectedPointId={undefined}
+                      onPointClick={handleFieldClick}
+                      onPointEdit={f => setEditingField(f)}
+                      onAdd={handleAddClick}
+                      orderIds={orderIds}
+                      onReorder={handleReorder}
+                    />
+                  ) : (
+                    <BestDayMatrix allPoints={fields} highlightPointId={undefined} refreshKey={weatherRefreshKey} plan={plan} orderIds={orderIds} />
+                  )}
+                </div>
+              </div>
             )
           }
         </MobileBottomSheet>

@@ -2,8 +2,7 @@
 import Link from 'next/link'
 import { useEffect, useState, useRef } from 'react'
 import type { Field, WeatherData } from '@/types/field'
-
-const ORDER_KEY = 'spotcast:spotOrder'
+import { applyOrder } from '@/lib/spotOrder'
 
 interface Props {
   points: Field[]
@@ -11,6 +10,8 @@ interface Props {
   onPointClick: (p: Field) => void
   onPointEdit: (p: Field) => void
   onAdd: () => void
+  orderIds: string[]
+  onReorder: (ids: string[]) => void
 }
 
 const WEATHER_ICON: Record<string, string> = {
@@ -49,6 +50,7 @@ function PointCard({
   onDragEnd: () => void
 }) {
   const [weather, setWeather] = useState<WeatherData | null>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
   const accentColor = point.color ?? '#60a5fa'
   const hasCoords = point.lat != null && point.lng != null
 
@@ -62,6 +64,7 @@ function PointCard({
 
   return (
     <div
+      ref={cardRef}
       onClick={onPointClick}
       onDragOver={onCardDragOver}
       onDrop={onCardDrop}
@@ -70,32 +73,42 @@ function PointCard({
         position: 'relative',
         padding: '12px 10px 12px 6px',
         borderRadius: 10,
-        background: selected ? 'var(--dash-accent-bg)' : 'var(--dash-surface)',
+        background: dragOver ? 'var(--dash-accent-bg)' : selected ? 'var(--dash-accent-bg)' : 'var(--dash-surface)',
         border: '1px solid var(--dash-border)',
         borderTop: dragOver ? '2px solid var(--dash-accent)' : '1px solid var(--dash-border)',
         borderLeft: selected ? `3px solid ${accentColor}` : '3px solid transparent',
-        cursor: 'pointer',
-        transition: 'background 0.15s',
-        opacity: dragging ? 0.4 : 1,
+        cursor: dragging ? 'grabbing' : 'pointer',
+        transition: dragging ? 'none' : 'background 0.15s, transform 0.12s',
+        opacity: dragging ? 0.35 : 1,
+        transform: dragOver ? 'scale(1.015)' : 'none',
+        boxShadow: dragOver ? '0 4px 16px rgba(0,0,0,0.25)' : 'none',
         display: 'flex',
         alignItems: 'center',
         gap: 8,
       }}
       onMouseEnter={e => {
-        if (!selected) (e.currentTarget as HTMLDivElement).style.background = 'var(--dash-surface2)'
+        if (!selected && !dragOver) (e.currentTarget as HTMLDivElement).style.background = 'var(--dash-surface2)'
       }}
       onMouseLeave={e => {
-        if (!selected) (e.currentTarget as HTMLDivElement).style.background = 'var(--dash-surface)'
+        if (!selected && !dragOver) (e.currentTarget as HTMLDivElement).style.background = 'var(--dash-surface)'
       }}
     >
       {/* Drag grip */}
       <span
         draggable
-        onDragStart={onGripDragStart}
+        onDragStart={e => {
+          // カード全体をドラッグゴーストにして「掴んでる感」を出す
+          if (cardRef.current) {
+            const r = cardRef.current.getBoundingClientRect()
+            try { e.dataTransfer.setDragImage(cardRef.current, e.clientX - r.left, e.clientY - r.top) } catch {}
+          }
+          onGripDragStart(e)
+        }}
         onClick={e => e.stopPropagation()}
         title="ドラッグして並べ替え"
         style={{
-          flexShrink: 0, cursor: 'grab', color: 'var(--dash-text-4)',
+          flexShrink: 0, cursor: dragging ? 'grabbing' : 'grab',
+          color: dragging ? 'var(--dash-accent)' : 'var(--dash-text-4)',
           display: 'flex', alignItems: 'center', padding: '0 1px',
           touchAction: 'none',
         }}
@@ -166,34 +179,11 @@ function PointCard({
   )
 }
 
-export default function PointList({ points, selectedPointId, onPointClick, onPointEdit, onAdd }: Props) {
-  // 保存済みの並び順（localStorage）
-  const [orderIds, setOrderIds] = useState<string[]>([])
-  const [dragId,   setDragId]   = useState<string | null>(null)
-  const [overId,   setOverId]   = useState<string | null>(null)
-  const loadedRef = useRef(false)
+export default function PointList({ points, selectedPointId, onPointClick, onPointEdit, onAdd, orderIds, onReorder }: Props) {
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [overId, setOverId] = useState<string | null>(null)
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(ORDER_KEY)
-      if (raw) setOrderIds(JSON.parse(raw))
-    } catch {}
-    loadedRef.current = true
-  }, [])
-
-  function persist(ids: string[]) {
-    setOrderIds(ids)
-    try { localStorage.setItem(ORDER_KEY, JSON.stringify(ids)) } catch {}
-  }
-
-  // 保存順に従って並べ替え。未知のID（新規）は末尾に元の順で残す。
-  const rank = new Map(orderIds.map((id, i) => [id, i]))
-  const ordered = [...points].sort((a, b) => {
-    const ra = rank.has(a.id) ? rank.get(a.id)! : Infinity
-    const rb = rank.has(b.id) ? rank.get(b.id)! : Infinity
-    if (ra !== rb) return ra - rb
-    return 0  // 未知同士は元の順を維持（安定ソート）
-  })
+  const ordered = applyOrder(points, orderIds)
 
   function reorder(srcId: string, targetId: string) {
     if (srcId === targetId) return
@@ -203,8 +193,16 @@ export default function PointList({ points, selectedPointId, onPointClick, onPoi
     if (from < 0 || to < 0) return
     ids.splice(from, 1)
     ids.splice(to, 0, srcId)
-    persist(ids)
+    onReorder(ids)
   }
+
+  // ドラッグ中は body のカーソルを grabbing に
+  useEffect(() => {
+    if (dragId) {
+      document.body.style.cursor = 'grabbing'
+      return () => { document.body.style.cursor = '' }
+    }
+  }, [dragId])
 
   return (
     <div style={{

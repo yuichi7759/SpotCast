@@ -2,6 +2,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import type { Field } from '@/types/field'
 import type { HourlyWeather } from '@/app/api/weather/hourly/route'
+import { applyOrder } from '@/lib/spotOrder'
 
 export type ScoreMode = 'sunny' | 'rainy'
 
@@ -94,9 +95,10 @@ interface Props {
   highlightPointId?: string
   refreshKey?: number
   plan?: 'free' | 'standard'
+  orderIds?: string[]
 }
 
-export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey, plan = 'standard' }: Props) {
+export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey, plan = 'standard', orderIds = [] }: Props) {
   const [mode, setMode]           = useState<ScoreMode>('sunny')
   const [hourlyData, setHourly]   = useState<Record<string, HourlyWeather | null>>({})
   const [loadingIds, setLoading]  = useState<Set<string>>(new Set())
@@ -115,6 +117,12 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
       return next
     })
   }, [geoPoints.map(p => p.id).join(',')])  // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 保存済みの並び順に従って行を並べ替え（My Spots と連動）
+  const orderedPoints = useMemo(
+    () => applyOrder(geoPoints, orderIds),
+    [geoPoints, orderIds],
+  )
 
   // Points shown in matrix (selected subset)
   const activePoints = useMemo(
@@ -342,7 +350,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
           )}
 
           {/* ─── Point rows (all geo-points; unchecked rows are dimmed) ─── */}
-          {!initialLoading && geoPoints.map(p => {
+          {!initialLoading && orderedPoints.map(p => {
             const isHL      = p.id === highlightPointId
             const color     = p.color ?? '#60a5fa'
             const isLoading = loadingIds.has(p.id)
