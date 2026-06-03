@@ -2,8 +2,15 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Field } from '@/types/field'
 import { calcFieldStatus } from '@/lib/fieldStatus'
+import { markerScale } from '@/lib/markerSize'
 import type { IntelligenceEvent } from '@/lib/mockIntelligence'
 import { EVENT_CFG, SEVERITY_CFG } from '@/lib/mockIntelligence'
+
+// マーカー半径のズーム補間式（サイズ倍率 s を掛ける）
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function radiusExpr(base5: number, base15: number, s: number): any {
+  return ['interpolate', ['linear'], ['zoom'], 5, base5 * s, 15, base15 * s]
+}
 
 type MapStyleId = 'satellite' | 'dark' | 'light' | 'streets'
 const MAP_STYLES: Record<MapStyleId, { url: string; label: string; icon: string }> = {
@@ -250,6 +257,22 @@ export default function MapView({
     appliedStyleRef.current = mapStyleId
     try { map.setStyle(MAP_STYLES[mapStyleId].url) } catch (e) { console.warn('setStyle failed', e) }
   }, [mapStyleId])
+
+  // ── 1c. マーカーサイズ変更を反映 ──────────────────────────
+  useEffect(() => {
+    function onChange() {
+      const map = mapRef.current
+      if (!map) return
+      const s = markerScale()
+      try {
+        if (map.getLayer('field-glow'))     map.setPaintProperty('field-glow',     'circle-radius', radiusExpr(10, 22, s))
+        if (map.getLayer('field-dot'))      map.setPaintProperty('field-dot',      'circle-radius', radiusExpr(5, 11, s))
+        if (map.getLayer('field-selected')) map.setPaintProperty('field-selected', 'circle-radius', radiusExpr(9, 17, s))
+      } catch {}
+    }
+    window.addEventListener('spotcast:markerSizeChange', onChange)
+    return () => window.removeEventListener('spotcast:markerSizeChange', onChange)
+  }, [])
 
   // ── 2. FlyTo when center changes ───────────────────────────
   useEffect(() => {
@@ -646,9 +669,11 @@ export default function MapView({
     // ── 初回: ソース＋レイヤーを追加 ──
     map.addSource('field-pts', { type: 'geojson', data: geojson })
 
+    const ms = markerScale()
+
     // 外側グロー
     map.addLayer({ id: 'field-glow', type: 'circle', source: 'field-pts', paint: {
-      'circle-radius':  ['interpolate', ['linear'], ['zoom'], 5, 10, 15, 22],
+      'circle-radius':  radiusExpr(10, 22, ms),
       'circle-color':   ['get', 'color'],
       'circle-opacity': 0.18,
       'circle-blur':    1,
@@ -656,7 +681,7 @@ export default function MapView({
 
     // メインドット
     map.addLayer({ id: 'field-dot', type: 'circle', source: 'field-pts', paint: {
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 5, 5, 15, 11],
+      'circle-radius': radiusExpr(5, 11, ms),
       'circle-color':  ['get', 'color'],
       'circle-stroke-width': 2,
       'circle-stroke-color': 'rgba(255,255,255,0.92)',
@@ -666,7 +691,7 @@ export default function MapView({
     map.addLayer({ id: 'field-selected', type: 'circle', source: 'field-pts',
       filter: ['==', ['get', 'selected'], 1],
       paint: {
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 5, 9, 15, 17],
+        'circle-radius': radiusExpr(9, 17, ms),
         'circle-color':  'transparent',
         'circle-stroke-width': 3,
         'circle-stroke-color': 'rgba(255,255,255,0.95)',

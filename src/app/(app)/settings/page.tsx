@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTheme } from '@/components/ThemeProvider'
+import { MARKER_SIZE_OPTIONS, loadMarkerSize, saveMarkerSize, type MarkerSize } from '@/lib/markerSize'
 
 export default function SettingsPage() {
   const [email, setEmail]         = useState('')
@@ -10,6 +11,7 @@ export default function SettingsPage() {
   const [upgrading, setUpgrading] = useState(false)
   const [upgradeError, setUpgradeError] = useState('')
   const [loggingOut, setLoggingOut] = useState(false)
+  const [markerSize, setMarkerSize] = useState<MarkerSize>('md')
   const { theme, toggle } = useTheme()
   const router = useRouter()
 
@@ -17,6 +19,8 @@ export default function SettingsPage() {
   const [upgraded, setUpgraded] = useState(false)
   const isUpgradedReturn = typeof window !== 'undefined'
     && new URLSearchParams(window.location.search).get('upgraded') === '1'
+
+  useEffect(() => { setMarkerSize(loadMarkerSize()) }, [])
 
   useEffect(() => {
     if (isUpgradedReturn) {
@@ -168,8 +172,8 @@ export default function SettingsPage() {
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: textMuted, marginBottom: 10 }}>
             外観
           </div>
-          <div style={{ background: surfaceBg, border: `1px solid ${borderColor}`, borderRadius: 14, padding: '14px 16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ background: surfaceBg, border: `1px solid ${borderColor}`, borderRadius: 14, overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: `1px solid ${borderColor}` }}>
               <div>
                 <div style={{ fontSize: 14, fontWeight: 600 }}>テーマ</div>
                 <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>
@@ -192,6 +196,33 @@ export default function SettingsPage() {
                   transition: 'left 0.2s',
                 }}/>
               </button>
+            </div>
+            {/* マーカーサイズ */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>マップのマーカーサイズ</div>
+                <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>地図上のポイントの大きさ</div>
+              </div>
+              <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                {MARKER_SIZE_OPTIONS.map(opt => {
+                  const active = markerSize === opt.id
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() => { setMarkerSize(opt.id); saveMarkerSize(opt.id) }}
+                      style={{
+                        minWidth: 44, padding: '6px 10px', borderRadius: 8,
+                        background: active ? (isLight ? '#3b82f6' : 'rgba(59,130,246,0.25)') : (isLight ? '#eef1f5' : 'rgba(255,255,255,0.06)'),
+                        border: `1px solid ${active ? '#3b82f6' : borderColor}`,
+                        color: active ? (isLight ? '#fff' : '#93c5fd') : textMuted,
+                        fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s',
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </div>
         </section>
