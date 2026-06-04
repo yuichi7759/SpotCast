@@ -28,6 +28,21 @@ export async function POST(req: NextRequest) {
 
   if (!name) return NextResponse.json({ error: 'name is required' }, { status: 400 })
 
+  // Freeプランの登録上限（5件）をサーバー側でも強制
+  const { data: urow } = await supabase.from('users').select('plan').eq('id', user.id).single()
+  if ((urow?.plan ?? 'free') !== 'pro') {
+    const { count } = await supabase
+      .from('fields')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+    if ((count ?? 0) >= 5) {
+      return NextResponse.json(
+        { error: 'Freeプランは5件までです。Standardプランで無制限に登録できます。' },
+        { status: 403 },
+      )
+    }
+  }
+
   const { data, error } = await supabase
     .from('fields')
     .insert({

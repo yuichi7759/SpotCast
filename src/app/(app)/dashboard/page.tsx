@@ -18,7 +18,7 @@ import { createClient } from '@/lib/supabase/client'
 import { loadOrder, saveOrder } from '@/lib/spotOrder'
 import type { IntelligenceEvent } from '@/lib/mockIntelligence'
 
-const FREE_POINT_LIMIT = 3
+const FREE_POINT_LIMIT = 5
 
 const MapView = dynamic(() => import('@/components/dashboard/MapView'), { ssr: false })
 
@@ -97,6 +97,11 @@ export default function DashboardPage() {
 
   async function handleCtxAddField() {
     if (!ctxMenu) return
+    if (plan === 'free' && fields.length >= FREE_POINT_LIMIT) {
+      setCtxMenu(null)
+      toast.info(`Freeプランは${FREE_POINT_LIMIT}件まで`, 'Standardプランにアップグレードすると無制限に登録できます')
+      return
+    }
     setPending({ lat: ctxMenu.lat, lng: ctxMenu.lng })
     setShowModal(true)
     setCtxMenu(null)
@@ -464,7 +469,13 @@ export default function DashboardPage() {
                   {searchPin.label}
                 </span>
                 <button
-                  onClick={() => { setPending({ lat: searchPin.lat, lng: searchPin.lng }); setShowModal(true); setSearchPin(null) }}
+                  onClick={() => {
+                    if (plan === 'free' && fields.length >= FREE_POINT_LIMIT) {
+                      toast.info(`Freeプランは${FREE_POINT_LIMIT}件まで`, 'Standardプランにアップグレードすると無制限に登録できます')
+                      return
+                    }
+                    setPending({ lat: searchPin.lat, lng: searchPin.lng }); setShowModal(true); setSearchPin(null)
+                  }}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 5,
                     padding: '5px 11px', borderRadius: 8,

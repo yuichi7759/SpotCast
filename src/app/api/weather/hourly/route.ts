@@ -61,27 +61,60 @@ function calcScore(weatherCode: number, rainProb: number, tempMax: number, tempM
   return Math.max(0, Math.min(100, s))
 }
 
-// 逆ジオコーディング（OpenStreetMap Nominatim）で地名取得
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
+
+// 逆ジオコーディング（OpenStreetMap Nominatim）で地名取得（タイムアウト付き・失敗時は座標）
 async function getCityName(lat: number, lng: number): Promise<string> {
+  const fallback = `${lat.toFixed(2)}, ${lng.toFixed(2)}`
   try {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 4000)
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ja`,
-      { headers: { 'User-Agent': 'agri-chat/1.0' }, cache: 'no-store' }
+      { headers: { 'User-Agent': 'spotcast/1.0' }, cache: 'no-store', signal: controller.signal }
     )
+    clearTimeout(timer)
     if (!res.ok) throw new Error()
     const data = await res.json()
     const a = data.address ?? {}
-    return a.city ?? a.town ?? a.village ?? a.county ?? a.state ?? `${lat.toFixed(2)}, ${lng.toFixed(2)}`
+    return a.city ?? a.town ?? a.village ?? a.county ?? a.state ?? fallback
   } catch {
-    return `${lat.toFixed(2)}, ${lng.toFixed(2)}`
+    return fallback
   }
 }
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url)
-  const lat = parseFloat(searchParams.get('lat') ?? '35.6762')
-  const lng = parseFloat(searchParams.get('lng') ?? '139.6503')
+// Open-Meteo 取得（429/5xx は指数バックオフでリトライ、各試行10秒でタイムアウト）
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function fetchOpenMeteo(url: string): Promise<any> {
+  let lastErr: unknown = new Error('unknown')
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 10000)
+    try {
+      const res = await fetch(url, { cache: 'no-store', signal: controller.signal })
+      clearTimeout(timer)
+      if (res.status === 429 || res.status >= 500) {
+        lastErr = new Error(`Open-Meteo ${res.status}`)
+        await sleep(500 + attempt * 800)
+        continue
+      }
+      if (!res.ok) throw new Error(`Open-Meteo ${res.status}`)
+      return await res.json()
+    } catch (e) {
+      clearTimeout(timer)
+      lastErr = e
+      await sleep(500 + attempt * 800)
+    }
+  }
+  throw lastErr
+}
 
+// ── インメモリキャッシュ＋同時リクエスト集約 ──
+const CACHE_TTL = 10 * 60 * 1000   // 10分
+const cache    = new Map<string, { data: HourlyWeather; ts: number }>()
+const inflight = new Map<string, Promise<HourlyWeather>>()
+
+async function buildForecast(lat: number, lng: number): Promise<HourlyWeather> {
   const url =
     `https://api.open-meteo.com/v1/forecast` +
     `?latitude=${lat}&longitude=${lng}` +
@@ -89,20 +122,11 @@ export async function GET(req: NextRequest) {
     `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_probability_mean,wind_speed_10m_max` +
     `&timezone=Asia%2FTokyo&forecast_days=14`
     // 注: models=jma_seamless（気象庁）は降水確率を一切提供しない(null)ため指定しない。
-    //     デフォルトのベストマッチモデルを使う。
 
-  try {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 5000)
-
-    const [weatherRes, city] = await Promise.all([
-      fetch(url, { cache: 'no-store', signal: controller.signal }),
+    const [d, city] = await Promise.all([
+      fetchOpenMeteo(url),
       getCityName(lat, lng),
     ])
-    clearTimeout(timer)
-
-    if (!weatherRes.ok) throw new Error(`Open-Meteo error: ${weatherRes.status}`)
-    const d = await weatherRes.json()
 
     // hourly: その地点の現在時刻（含む現在の1時間）から48時間分をフィルタ。
     // Open-Meteo の time 文字列は地点ローカルの壁時計（オフセット無し）なので、
@@ -158,10 +182,36 @@ export async function GET(req: NextRequest) {
       }
     })
 
-    const result: HourlyWeather = { city, hourly, daily14 }
-    return NextResponse.json(result)
+    return { city, hourly, daily14 }
+}
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url)
+  const lat = parseFloat(searchParams.get('lat') ?? '35.6762')
+  const lng = parseFloat(searchParams.get('lng') ?? '139.6503')
+
+  // 0.01度（≒1km）に丸めてキャッシュキーに（BestDayと詳細で同一地点を共有）
+  const key = `${lat.toFixed(2)},${lng.toFixed(2)}`
+
+  const hit = cache.get(key)
+  if (hit && Date.now() - hit.ts < CACHE_TTL) {
+    return NextResponse.json(hit.data)
+  }
+
+  let p = inflight.get(key)
+  if (!p) {
+    p = buildForecast(lat, lng)
+      .then(r => { cache.set(key, { data: r, ts: Date.now() }); return r })
+      .finally(() => inflight.delete(key))
+    inflight.set(key, p)
+  }
+
+  try {
+    return NextResponse.json(await p)
   } catch (err) {
     console.error('[weather/hourly]', err)
+    // 取得失敗時は古いキャッシュがあればそれを返す（エラーよりマシ）
+    if (hit) return NextResponse.json(hit.data)
     return NextResponse.json({ error: 'Failed to fetch weather data' }, { status: 500 })
   }
 }
