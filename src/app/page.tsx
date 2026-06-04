@@ -241,9 +241,25 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Right — 実際のアプリを再現したダークモック */}
-          <div style={{ flex: 1, minWidth: 300, maxWidth: 500 }}>
-            <AppMockup/>
+          {/* Right — 実際のアプリのデモ動画 */}
+          <div style={{ flex: 1, minWidth: 300, maxWidth: 560 }}>
+            <div style={{
+              borderRadius: 16, overflow: 'hidden',
+              border: '1px solid #d3dbe6',
+              boxShadow: '0 24px 60px rgba(15,23,42,0.22), 0 4px 14px rgba(15,23,42,0.08)',
+              background: '#0a0e16', lineHeight: 0,
+            }}>
+              <video
+                src="/hero.mp4"
+                poster="/hero-poster.jpg"
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                style={{ width: '100%', height: 'auto', display: 'block' }}
+              />
+            </div>
           </div>
         </div>
       </section>
