@@ -104,8 +104,11 @@ export async function GET(req: NextRequest) {
     if (!weatherRes.ok) throw new Error(`Open-Meteo error: ${weatherRes.status}`)
     const d = await weatherRes.json()
 
-    // hourly: 現在時刻から48時間分をフィルタ
-    const now = new Date()
+    // hourly: その地点の現在時刻（含む現在の1時間）から48時間分をフィルタ。
+    // Open-Meteo の time 文字列は地点ローカルの壁時計（オフセット無し）なので、
+    // サーバーのTZに依存しないよう utc_offset_seconds を使って同じ基準で比較する。
+    const offsetMs = (d.utc_offset_seconds ?? 0) * 1000
+    const nowWall  = Date.now() + offsetMs          // 地点ローカルの現在(UTC枠で表現)
     const hourlyTimes: string[] = d.hourly?.time ?? []
     const temps: number[] = d.hourly?.temperature_2m ?? []
     const rainProbs: number[] = d.hourly?.precipitation_probability ?? []
@@ -116,8 +119,9 @@ export async function GET(req: NextRequest) {
 
     const hourly: HourlyPoint[] = []
     for (let i = 0; i < hourlyTimes.length && hourly.length < 48; i++) {
-      const t = new Date(hourlyTimes[i])
-      if (t < now) continue
+      // 壁時計文字列を UTC として解釈 → nowWall と同じ枠で比較
+      const t = new Date(hourlyTimes[i] + 'Z').getTime()
+      if (t <= nowWall - 3600_000) continue   // その時間が完全に過ぎたものだけ除外（現在の1時間は残す）
       const hhmm = hourlyTimes[i].slice(11, 16) // "HH:MM"
       hourly.push({
         time: hhmm,
