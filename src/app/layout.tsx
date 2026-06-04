@@ -28,21 +28,23 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     locale: 'ja_JP',
-    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'SpotCast — 気になる場所の天気をワンクリックで' }],
+    // OG画像は opengraph-image.tsx（動的生成）が自動付与される
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['/og.jpg'],
   },
   robots: {
     index: true,
     follow: true,
     googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
   },
-  icons: { icon: '/favicon.ico', apple: '/favicon.ico' },
   category: 'weather',
+  // Google Search Console のHTMLタグ確認用（任意・環境変数で設定）
+  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+    : undefined,
 }
 
 // 構造化データ（JSON-LD）— 検索エンジン・AI回答エンジン向け
