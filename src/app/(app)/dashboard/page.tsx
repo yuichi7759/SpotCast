@@ -18,7 +18,7 @@ import { createClient } from '@/lib/supabase/client'
 import { loadOrder, saveOrder } from '@/lib/spotOrder'
 import type { IntelligenceEvent } from '@/lib/mockIntelligence'
 
-const FREE_POINT_LIMIT = 5
+const FREE_POINT_LIMIT = 3
 
 const MapView = dynamic(() => import('@/components/dashboard/MapView'), { ssr: false })
 

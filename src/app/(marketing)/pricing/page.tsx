@@ -32,7 +32,7 @@ const plans = [
     period: '/ 月',
     desc: '個人のお試しに',
     highlight: false,
-    features: ['ポイント登録 最大5件','天気予報 7日間','BestDay機能（基本）','雨雲レーダー閲覧'],
+    features: ['ポイント登録 最大3件','天気予報 7日間','BestDay機能（基本）','雨雲レーダー閲覧'],
     notIncluded: ['天気予報 14日間','AIアシスタント','メールサポート'],
     cta: '無料で始める',
     href: '/signup',

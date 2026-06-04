@@ -229,7 +229,7 @@ export default function LandingPage() {
 
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               {[
-                { v: '無料', s: '5ポイントまで', bg: '#dbeafe', c: '#1e40af' },
+                { v: '無料', s: '3ポイントまで', bg: '#dbeafe', c: '#1e40af' },
                 { v: '14日間', s: '週間予報', bg: '#dcfce7', c: '#15803d' },
                 { v: 'LIVE', s: '雨雲レーダー', bg: '#ede9fe', c: '#6d28d9' },
               ].map(p => (
@@ -399,7 +399,7 @@ export default function LandingPage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20 }}>
             {[
-              { name: 'Free', price: '¥0', period: '/ 月', desc: '個人のお試しに', highlight: false, features: ['ポイント登録 最大5件','天気予報 7日間','BestDay機能（基本）','雨雲レーダー閲覧'], cta: '無料で始める', href: '/signup' },
+              { name: 'Free', price: '¥0', period: '/ 月', desc: '個人のお試しに', highlight: false, features: ['ポイント登録 最大3件','天気予報 7日間','BestDay機能（基本）','雨雲レーダー閲覧'], cta: '無料で始める', href: '/signup' },
               { name: 'Standard', price: '¥980', period: '/ 月', desc: 'ヘビーユーザー・業務利用に', highlight: true, features: ['ポイント登録 無制限','天気予報 14日間','BestDay機能（全機能）','雨雲レーダー アニメーション','AIアシスタント','メールサポート'], cta: 'Standardを始める', href: '/signup?plan=standard' },
             ].map(p => (
               <div key={p.name} style={{ position: 'relative', padding: '30px 26px', borderRadius: 20, border: p.highlight ? '2px solid #1d4ed8' : '1px solid #e2e8f0', background: '#fff', boxShadow: p.highlight ? '0 8px 32px rgba(29,78,216,0.1)' : '0 2px 8px rgba(15,23,42,0.04)' }}>

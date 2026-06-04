@@ -139,25 +139,37 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
     })
   }
 
-  // Fetch hourly for all geo-points (re-fetch on refreshKey change)
+  // Fetch hourly for all geo-points.
+  // 同時リクエストは MAX_CONCURRENT 件までに制限し、Open-Meteo の 429 を避ける
+  // （多数スポットを持つProユーザーでも安定。サーバー側キャッシュで再取得は即時）。
   useEffect(() => {
-    setHourly({})
-    setLoading(new Set())
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshKey])
+    const points = geoPoints.slice()
+    if (points.length === 0) { setHourly({}); setLoading(new Set()); return }
 
-  useEffect(() => {
-    geoPoints.forEach(p => {
-      if (p.id in hourlyData || loadingIds.has(p.id)) return
-      setLoading(prev => new Set(prev).add(p.id))
-      fetch(`/api/weather/hourly?lat=${p.lat}&lng=${p.lng}`, { cache: 'no-store' })
-        .then(r => r.ok ? r.json() : null)
-        .then((data: HourlyWeather | null) => setHourly(prev => ({ ...prev, [p.id]: data?.daily14 ? data : null })))
-        .catch(() => setHourly(prev => ({ ...prev, [p.id]: null })))
-        .finally(() => setLoading(prev => { const n = new Set(prev); n.delete(p.id); return n }))
-    })
+    let cancelled = false
+    const MAX_CONCURRENT = 4
+    setLoading(new Set(points.map(p => p.id)))
+
+    let idx = 0
+    async function worker() {
+      while (idx < points.length && !cancelled) {
+        const p = points[idx++]
+        try {
+          const r = await fetch(`/api/weather/hourly?lat=${p.lat}&lng=${p.lng}`, { cache: 'no-store' })
+          const data: HourlyWeather | null = r.ok ? await r.json() : null
+          if (!cancelled) setHourly(prev => ({ ...prev, [p.id]: data?.daily14 ? data : null }))
+        } catch {
+          if (!cancelled) setHourly(prev => ({ ...prev, [p.id]: null }))
+        } finally {
+          if (!cancelled) setLoading(prev => { const n = new Set(prev); n.delete(p.id); return n })
+        }
+      }
+    }
+    Promise.all(Array.from({ length: Math.min(MAX_CONCURRENT, points.length) }, () => worker()))
+
+    return () => { cancelled = true }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [geoPoints.map(p => p.id).join(','), hourlyData])
+  }, [geoPoints.map(p => p.id).join(','), refreshKey])
 
   // Collect date list from first loaded point
   const dates = useMemo(() => {
