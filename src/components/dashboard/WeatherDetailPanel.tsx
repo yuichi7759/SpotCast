@@ -197,22 +197,42 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
             const LABEL_BG = 'var(--dash-panel-solid)'
             const DAY_H    = 30  // 日別サマリー行の高さ
 
+            // ── 統合チャート（気温=赤線 / 降水量mm=水色棒）用の計算 ──
+            const CHART_H = 76
+            const padT = 14, padB = 10
+            const plotH = CHART_H - padT - padB
+            const tempVals = allItems.map(a => a.h.temp)
+            const tMin = Math.min(...tempVals)
+            const tMax = Math.max(...tempVals)
+            const tRange = Math.max(1, tMax - tMin)
+            const precVals = allItems.map(a => a.h.precip ?? 0)
+            const pMax = Math.max(4, ...precVals)   // 最低4mmスケール（小雨でも見える）
+            const tx = (i: number) => i * CELL_W + CELL_W / 2
+            const ty = (t: number) => padT + (1 - (t - tMin) / tRange) * plotH
+            const linePts = allItems.map((a, i) => `${tx(i)},${ty(a.h.temp)}`).join(' ')
+
             return (
-              <div style={{ border: '1px solid var(--dash-border)', borderRadius: 10, overflow: 'hidden', background: 'var(--dash-surface)', display: 'flex', height: '100%' }}>
+              <div style={{ border: '1px solid var(--dash-border)', borderRadius: 10, overflow: 'hidden', background: 'var(--dash-surface)', display: 'flex' }}>
 
                 {/* 固定ラベル列 */}
                 <div style={{ width: LABEL_W, flexShrink: 0, borderRight: `1px solid ${SEP}`, background: LABEL_BG, zIndex: 2 }}>
                   <div style={{ height: DAY_H, borderBottom: `1px solid ${SEP}` }} />
                   {[{ h: RH.time, label: '時刻' }, { h: RH.icon, label: '天気' }, { h: RH.temp, label: '気温' }, { h: RH.rain, label: '降水' }].map(({ h, label }, ri) => (
-                    <div key={ri} style={{ height: h, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: ri < 3 ? `1px solid ${SEP}` : undefined }}>
+                    <div key={ri} style={{ height: h, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: `1px solid ${SEP}` }}>
                       <span style={{ fontSize: 10, color: 'var(--dash-text-3)', fontWeight: 700 }}>{label}</span>
                     </div>
                   ))}
+                  {/* チャート凡例 */}
+                  <div style={{ height: CHART_H, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                    <span style={{ fontSize: 9, fontWeight: 800, color: '#ef4444' }}>気温</span>
+                    <span style={{ fontSize: 9, fontWeight: 800, color: '#38bdf8' }}>雨mm</span>
+                  </div>
                 </div>
 
                 {/* 横スクロール */}
                 <div className="wdp-scroll" style={{ overflowX: 'auto', flex: 1, scrollbarWidth: 'none' }}>
-                  <div style={{ display: 'flex', minWidth: 'max-content' }}>
+                  <div style={{ minWidth: 'max-content' }}>
+                  <div style={{ display: 'flex' }}>
                     {allItems.map(({ h, gi, hi, g }, idx) => {
                       const isDayStart = hi === 0
                       const isNow      = idx === 0
@@ -266,6 +286,38 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
                         </div>
                       )
                     })}
+                  </div>
+
+                  {/* 統合チャート: 気温=赤線 / 降水量mm=水色棒（列幅・横スクロール連動） */}
+                  <svg
+                    width={allItems.length * CELL_W}
+                    height={CHART_H}
+                    style={{ display: 'block', borderTop: `1px solid ${SEP}` }}
+                  >
+                    {/* 降水量バー */}
+                    {allItems.map((a, i) => {
+                      const p = a.h.precip ?? 0
+                      if (p <= 0) return null
+                      const bh = (p / pMax) * plotH
+                      return (
+                        <rect
+                          key={`b${i}`}
+                          x={i * CELL_W + CELL_W * 0.28}
+                          y={CHART_H - padB - bh}
+                          width={CELL_W * 0.44}
+                          height={bh}
+                          rx={1}
+                          fill="#38bdf8"
+                          opacity={0.7}
+                        />
+                      )
+                    })}
+                    {/* 気温の折れ線 */}
+                    <polyline points={linePts} fill="none" stroke="#ef4444" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+                    {allItems.map((a, i) => (
+                      <circle key={`c${i}`} cx={tx(i)} cy={ty(a.h.temp)} r={1.7} fill="#ef4444" />
+                    ))}
+                  </svg>
                   </div>
                 </div>
               </div>

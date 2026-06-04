@@ -5,7 +5,8 @@ export const runtime = 'nodejs'
 export interface HourlyPoint {
   time: string       // "06:00" 形式
   temp: number
-  rain_prob: number
+  rain_prob: number  // 降水確率(%)
+  precip: number     // 降水量(mm)
   wind_speed: number
   wind_dir: number
   weather_code: number
@@ -118,7 +119,7 @@ async function buildForecast(lat: number, lng: number): Promise<HourlyWeather> {
   const url =
     `https://api.open-meteo.com/v1/forecast` +
     `?latitude=${lat}&longitude=${lng}` +
-    `&hourly=temperature_2m,precipitation_probability,wind_speed_10m,wind_direction_10m,weather_code,relative_humidity_2m` +
+    `&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,wind_direction_10m,weather_code,relative_humidity_2m` +
     `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_probability_mean,wind_speed_10m_max` +
     `&timezone=Asia%2FTokyo&forecast_days=14`
     // 注: models=jma_seamless（気象庁）は降水確率を一切提供しない(null)ため指定しない。
@@ -136,6 +137,7 @@ async function buildForecast(lat: number, lng: number): Promise<HourlyWeather> {
     const hourlyTimes: string[] = d.hourly?.time ?? []
     const temps: number[] = d.hourly?.temperature_2m ?? []
     const rainProbs: number[] = d.hourly?.precipitation_probability ?? []
+    const precips: number[] = d.hourly?.precipitation ?? []
     const windSpeeds: number[] = d.hourly?.wind_speed_10m ?? []
     const windDirs: number[] = d.hourly?.wind_direction_10m ?? []
     const weatherCodes: number[] = d.hourly?.weather_code ?? []
@@ -151,6 +153,7 @@ async function buildForecast(lat: number, lng: number): Promise<HourlyWeather> {
         time: hhmm,
         temp: Math.round(temps[i] ?? 0),
         rain_prob: rainProbs[i] ?? 0,
+        precip: Math.round((precips[i] ?? 0) * 10) / 10,
         wind_speed: Math.round((windSpeeds[i] ?? 0) * 10) / 10,
         wind_dir: windDirs[i] ?? 0,
         weather_code: weatherCodes[i] ?? 0,

@@ -44,7 +44,7 @@ export default function DashboardPage() {
   const [weatherRefreshKey, setWeatherRefreshKey] = useState(0)
   const [refreshing,        setRefreshing]       = useState(false)
   const [leftPanelWidth,    setLeftPanelWidth]   = useState(240)
-  const [bottomPanelHeight, setBottomPanelHeight] = useState(280)
+  const [bottomPanelHeight, setBottomPanelHeight] = useState(360)
   const [rightPanelWidth,   setRightPanelWidth]  = useState(420)
   const [plan,              setPlan]             = useState<'free' | 'standard'>('free')
   const [orderIds,          setOrderIds]         = useState<string[]>([])
