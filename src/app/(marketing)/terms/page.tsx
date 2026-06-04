@@ -1,3 +1,11 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: '利用規約',
+  description: 'SpotCastの利用規約。アカウント、プランと料金、禁止事項、免責事項、規約の変更などについて。',
+  alternates: { canonical: '/terms' },
+}
+
 export default function TermsPage() {
   return (
     <div style={{ minHeight: '100vh', background: '#080c14', color: '#f0f0f0', padding: '48px 20px' }}>

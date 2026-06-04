@@ -1,3 +1,11 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: '特定商取引法に基づく表記',
+  description: 'SpotCastの特定商取引法に基づく表記。販売事業者・販売価格・支払方法・解約・返金ポリシーなど。',
+  alternates: { canonical: '/tokusho' },
+}
+
 export default function TokushoPage() {
   const rows = [
     { label: '販売事業者', value: 'ITO Yuichi' },

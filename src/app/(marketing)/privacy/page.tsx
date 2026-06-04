@@ -1,3 +1,11 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'プライバシーポリシー',
+  description: 'SpotCastのプライバシーポリシー。収集する情報、利用目的、第三者提供、Cookie、開示・訂正・削除の手続きについて。',
+  alternates: { canonical: '/privacy' },
+}
+
 export default function PrivacyPage() {
   return (
     <div style={{ minHeight: '100vh', background: '#080c14', color: '#f0f0f0', padding: '48px 20px' }}>
