@@ -194,7 +194,7 @@ export async function GET(req: NextRequest) {
   const lng = parseFloat(searchParams.get('lng') ?? '139.6503')
 
   // 0.01度（≒1km）に丸めてキャッシュキーに（BestDayと詳細で同一地点を共有）
-  const key = `${lat.toFixed(2)},${lng.toFixed(2)}`
+  const key = `${lat.toFixed(4)},${lng.toFixed(4)}`
 
   const hit = cache.get(key)
   if (hit && Date.now() - hit.ts < CACHE_TTL) {

@@ -58,7 +58,7 @@ function PointCard({
     if (!hasCoords) return
     fetch(`/api/weather?lat=${point.lat}&lng=${point.lng}`, { cache: 'no-store' })
       .then(r => r.json())
-      .then(setWeather)
+      .then(d => { if (d && d.current) setWeather(d) })   // エラー応答({error})は無視
       .catch(() => {})
   }, [point.lat, point.lng, hasCoords])
 

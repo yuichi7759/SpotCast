@@ -81,7 +81,7 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
     setWeather(null);  setHourly(null)
 
     fetch(`/api/weather?lat=${point.lat}&lng=${point.lng}`, { cache: 'no-store' })
-      .then(r => r.json()).then(setWeather).catch(() => {})
+      .then(r => r.json()).then(d => { if (d && d.current) setWeather(d) }).catch(() => {})
       .finally(() => setLoadingW(false))
 
     fetch(`/api/weather/hourly?lat=${point.lat}&lng=${point.lng}`, { cache: 'no-store' })
