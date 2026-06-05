@@ -18,8 +18,8 @@ function Logo() {
         <circle cx="30" cy="28" r="11" fill="white" opacity="0.93"/>
       </svg>
       <div>
-        <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1, color: '#0f172a' }}>SpotCast</div>
-        <div style={{ fontSize: 8, letterSpacing: '0.12em', fontWeight: 600, color: 'rgba(15,23,42,0.32)', textTransform: 'uppercase', marginTop: 1 }}>Weather Intelligence</div>
+        <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1, color: '#0f172a' }}>SpotCast</div>
+        <div style={{ fontSize: 10, letterSpacing: '0.14em', fontWeight: 600, color: 'rgba(15,23,42,0.32)', textTransform: 'uppercase', marginTop: 1 }}>Weather Intelligence</div>
       </div>
     </div>
   )

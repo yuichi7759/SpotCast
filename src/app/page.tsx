@@ -17,8 +17,8 @@ function Logo({ dark = false, size = 30 }: { dark?: boolean; size?: number }) {
         <circle cx="30" cy="28" r="11" fill="white" opacity="0.93"/>
       </svg>
       <div>
-        <div style={{ fontSize: 17, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1, color: dark ? '#fff' : '#0f172a' }}>SpotCast</div>
-        <div style={{ fontSize: 8, letterSpacing: '0.12em', fontWeight: 600, color: dark ? 'rgba(255,255,255,0.3)' : 'rgba(15,23,42,0.32)', textTransform: 'uppercase', marginTop: 1 }}>
+        <div style={{ fontSize: 21, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1, color: dark ? '#fff' : '#0f172a' }}>SpotCast</div>
+        <div style={{ fontSize: 10, letterSpacing: '0.14em', fontWeight: 600, color: dark ? 'rgba(255,255,255,0.3)' : 'rgba(15,23,42,0.32)', textTransform: 'uppercase', marginTop: 1 }}>
           Weather Intelligence
         </div>
       </div>
