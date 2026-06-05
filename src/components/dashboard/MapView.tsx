@@ -13,11 +13,51 @@ function radiusExpr(base5: number, base15: number, s: number): any {
 }
 
 type MapStyleId = 'satellite' | 'dark' | 'light' | 'streets'
-const MAP_STYLES: Record<MapStyleId, { url: string; label: string; icon: string }> = {
-  satellite: { url: 'mapbox://styles/mapbox/satellite-streets-v12', label: '航空写真', icon: '🛰️' },
-  streets:   { url: 'mapbox://styles/mapbox/streets-v12',           label: '地図',     icon: '🗺️' },
-  light:     { url: 'mapbox://styles/mapbox/light-v11',             label: 'ライト',   icon: '☀️' },
-  dark:      { url: 'mapbox://styles/mapbox/dark-v11',              label: 'ダーク',   icon: '🌙' },
+const MAP_STYLES: Record<MapStyleId, { url: string; label: string }> = {
+  satellite: { url: 'mapbox://styles/mapbox/satellite-streets-v12', label: '航空写真' },
+  streets:   { url: 'mapbox://styles/mapbox/streets-v12',           label: '地図' },
+  light:     { url: 'mapbox://styles/mapbox/light-v11',             label: 'ライト' },
+  dark:      { url: 'mapbox://styles/mapbox/dark-v11',              label: 'ダーク' },
+}
+
+// 洗練されたラインアイコン（16px / currentColor）
+function StyleIcon({ id }: { id: MapStyleId }) {
+  const common = {
+    viewBox: '0 0 16 16', width: 15, height: 15, fill: 'none',
+    stroke: 'currentColor', strokeWidth: 1.5,
+    strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const,
+  }
+  if (id === 'satellite') {  // 地球儀
+    return (
+      <svg {...common}>
+        <circle cx="8" cy="8" r="6.2" />
+        <ellipse cx="8" cy="8" rx="2.7" ry="6.2" />
+        <line x1="1.9" y1="8" x2="14.1" y2="8" />
+        <path d="M3 4.4 Q8 6 13 4.4" /><path d="M3 11.6 Q8 10 13 11.6" />
+      </svg>
+    )
+  }
+  if (id === 'streets') {    // 地図グリッド
+    return (
+      <svg {...common}>
+        <rect x="2" y="2.6" width="12" height="10.8" rx="2.2" />
+        <path d="M6.2 2.6 V13.4" /><path d="M2 6.2 H14" />
+      </svg>
+    )
+  }
+  if (id === 'light') {      // 太陽
+    return (
+      <svg {...common}>
+        <circle cx="8" cy="8" r="3" />
+        <path d="M8 1.4v1.6M8 13v1.6M1.4 8h1.6M13 8h1.6M3.3 3.3l1.1 1.1M11.6 11.6l1.1 1.1M12.7 3.3l-1.1 1.1M4.4 11.6l-1.1 1.1" />
+      </svg>
+    )
+  }
+  return (                    // 月
+    <svg {...common}>
+      <path d="M13.2 9.6 A5.6 5.6 0 1 1 6.7 2.3 A4.4 4.4 0 0 0 13.2 9.6 Z" />
+    </svg>
+  )
 }
 
 interface Props {
@@ -255,7 +295,8 @@ export default function MapView({
     if (!map) return
     if (appliedStyleRef.current === mapStyleId) return   // 既に適用済み（初期スタイル含む）
     appliedStyleRef.current = mapStyleId
-    try { map.setStyle(MAP_STYLES[mapStyleId].url) } catch (e) { console.warn('setStyle failed', e) }
+    // diff:false で全カスタムソース/レイヤーを破棄 → style.load で確実に再構築
+    try { map.setStyle(MAP_STYLES[mapStyleId].url, { diff: false }) } catch (e) { console.warn('setStyle failed', e) }
   }, [mapStyleId])
 
   // ── 1c. マーカーサイズ変更を反映 ──────────────────────────
@@ -852,7 +893,7 @@ export default function MapView({
                 transition: 'all 0.15s', whiteSpace: 'nowrap',
               }}
             >
-              <span style={{ fontSize: 12 }}>{MAP_STYLES[id].icon}</span>
+              <StyleIcon id={id} />
               {active && <span>{MAP_STYLES[id].label}</span>}
             </button>
           )
