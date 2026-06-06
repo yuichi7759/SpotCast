@@ -25,13 +25,19 @@ export default function LocaleProvider({ children }: { children: React.ReactNode
   const [locale, setLocaleState] = useState<Locale>('ja')
 
   useEffect(() => {
-    const saved = (typeof window !== 'undefined'
-      ? localStorage.getItem(LOCALE_KEY)
-      : null) as Locale | null
+    // 1) 手動で選んだ言語があれば最優先
+    const saved = localStorage.getItem(LOCALE_KEY) as Locale | null
     if (saved && saved in dictionaries) {
       setLocaleState(saved)
       document.documentElement.lang = saved
+      return
     }
+    // 2) 未設定ならブラウザの言語から自動判定（保存はしない＝手動切替で上書き可）
+    const langs = navigator.languages ?? [navigator.language]
+    const isJa = langs.some(l => l?.toLowerCase().startsWith('ja'))
+    const detected: Locale = isJa ? 'ja' : 'en'
+    setLocaleState(detected)
+    document.documentElement.lang = detected
   }, [])
 
   const setLocale = useCallback((l: Locale) => {
