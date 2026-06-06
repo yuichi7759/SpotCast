@@ -178,6 +178,9 @@ export const dictionaries = {
     'support.validation':  '件名とメッセージを入力してください',
     'support.failed':      '送信に失敗しました',
 
+    // ── メタ（SEO） ──
+    'meta.title': 'SpotCast — 気になる場所の天気をワンクリックで',
+    'meta.desc':  '地図をクリックするだけで、世界中の好きな場所の天気を登録・管理できる気象サービス。リアルタイム天気・最大14日予報・雨雲レーダー・複数地点のBest Day比較を、ひとつのダッシュボードで。',
     // ── ランディングページ ──
     'lp.nav.pricing': '料金',
     'lp.nav.login':   'ログイン',
@@ -427,6 +430,8 @@ export const dictionaries = {
     'support.validation':  'Please enter a subject and message',
     'support.failed':      'Failed to send',
 
+    'meta.title': 'SpotCast — Pinpoint weather, one click away',
+    'meta.desc':  'Click the map to register and manage weather for any place worldwide. Real-time weather, up to 14-day forecast, rain radar and multi-point Best Day comparison in one dashboard.',
     'lp.nav.pricing': 'Pricing',
     'lp.nav.login':   'Log in',
     'lp.nav.start':   'Get started free',

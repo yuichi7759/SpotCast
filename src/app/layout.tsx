@@ -2,13 +2,15 @@ import type { Metadata } from 'next'
 import './globals.css'
 import ThemeProvider from '@/components/ThemeProvider'
 import LocaleProvider from '@/components/LocaleProvider'
+import { getLocale, st } from '@/lib/i18n/server'
 
 const SITE_URL = 'https://spotcast.evident-ai.org'
-const TITLE = 'SpotCast — 気になる場所の天気をワンクリックで'
-const DESCRIPTION =
-  '地図をクリックするだけで、世界中の好きな場所の天気を登録・管理できる気象サービス。リアルタイム天気・最大14日予報・雨雲レーダー・複数地点のBest Day比較を、ひとつのダッシュボードで。'
 
-export const metadata: Metadata = {
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale()
+  const TITLE = st(locale, 'meta.title')
+  const DESCRIPTION = st(locale, 'meta.desc')
+  return {
   metadataBase: new URL(SITE_URL),
   title: { default: TITLE, template: '%s | SpotCast' },
   description: DESCRIPTION,
@@ -45,46 +47,30 @@ export const metadata: Metadata = {
   verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
     ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
     : undefined,
+  }
 }
 
-// 構造化データ（JSON-LD）— 検索エンジン・AI回答エンジン向け
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'Organization',
-      '@id': `${SITE_URL}/#organization`,
-      name: 'SpotCast',
-      url: SITE_URL,
-      logo: `${SITE_URL}/og.jpg`,
-    },
-    {
-      '@type': 'WebSite',
-      '@id': `${SITE_URL}/#website`,
-      url: SITE_URL,
-      name: 'SpotCast',
-      description: DESCRIPTION,
-      inLanguage: 'ja',
-      publisher: { '@id': `${SITE_URL}/#organization` },
-    },
-    {
-      '@type': 'SoftwareApplication',
-      name: 'SpotCast',
-      applicationCategory: 'WeatherApplication',
-      operatingSystem: 'Web',
-      url: SITE_URL,
-      description: DESCRIPTION,
-      offers: [
-        { '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'JPY' },
-        { '@type': 'Offer', name: 'Standard', price: '980', priceCurrency: 'JPY' },
-      ],
-    },
-  ],
-}
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale()
+  const desc = st(locale, 'meta.desc')
+  // 構造化データ（JSON-LD）— 検索エンジン・AI回答エンジン向け
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'Organization', '@id': `${SITE_URL}/#organization`, name: 'SpotCast', url: SITE_URL, logo: `${SITE_URL}/og.jpg` },
+      { '@type': 'WebSite', '@id': `${SITE_URL}/#website`, url: SITE_URL, name: 'SpotCast', description: desc, inLanguage: locale, publisher: { '@id': `${SITE_URL}/#organization` } },
+      {
+        '@type': 'SoftwareApplication', name: 'SpotCast', applicationCategory: 'WeatherApplication',
+        operatingSystem: 'Web', url: SITE_URL, description: desc,
+        offers: [
+          { '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'JPY' },
+          { '@type': 'Offer', name: 'Standard', price: '980', priceCurrency: 'JPY' },
+        ],
+      },
+    ],
+  }
   return (
-    <html lang="ja" className="h-full">
+    <html lang={locale} className="h-full">
       <body className="min-h-full flex flex-col">
         <script
           type="application/ld+json"
