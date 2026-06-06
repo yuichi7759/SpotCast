@@ -43,6 +43,8 @@ export default function LocaleProvider({ children }: { children: React.ReactNode
   const setLocale = useCallback((l: Locale) => {
     setLocaleState(l)
     try { localStorage.setItem(LOCALE_KEY, l) } catch {}
+    // サーバー側（LP等のSSR）でも反映できるよう cookie にも保存
+    try { document.cookie = `spotcast_locale=${l}; path=/; max-age=31536000; samesite=lax` } catch {}
     document.documentElement.lang = l
   }, [])
 

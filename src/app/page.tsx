@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getLocale, st } from '@/lib/i18n/server'
 
 function Logo({ dark = false, size = 30 }: { dark?: boolean; size?: number }) {
   const h = Math.round(size * 1.33)
@@ -167,7 +168,9 @@ function AppMockup() {
   )
 }
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const locale = await getLocale()
+  const T = (key: string, vars?: Record<string, string | number>) => st(locale, key, vars)
   return (
     // 白すぎず、純白でもない — f5f7fa (slate-50 より少しグレー)
     <main style={{ background: '#f4f6f9', color: '#0f172a', overflowX: 'hidden' }}>
@@ -183,10 +186,10 @@ export default function LandingPage() {
       }}>
         <Logo dark={false}/>
         <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-          <Link href="/pricing" style={{ fontSize: 14, color: '#64748b', fontWeight: 500, textDecoration: 'none' }}>料金</Link>
-          <Link href="/login"   style={{ fontSize: 14, color: '#64748b', fontWeight: 500, textDecoration: 'none' }}>ログイン</Link>
+          <Link href="/pricing" style={{ fontSize: 14, color: '#64748b', fontWeight: 500, textDecoration: 'none' }}>{T('lp.nav.pricing')}</Link>
+          <Link href="/login"   style={{ fontSize: 14, color: '#64748b', fontWeight: 500, textDecoration: 'none' }}>{T('lp.nav.login')}</Link>
           <Link href="/signup" style={{ fontSize: 14, fontWeight: 700, textDecoration: 'none', padding: '10px 22px', borderRadius: 12, background: '#1d4ed8', color: '#fff', boxShadow: '0 4px 14px rgba(29,78,216,0.32)' }}>
-            無料で始める →
+            {T('lp.cta.startFree')}
           </Link>
         </div>
       </nav>
@@ -203,35 +206,34 @@ export default function LandingPage() {
           <div style={{ flex: 1, minWidth: 280 }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 999, marginBottom: 28, background: 'rgba(29,78,216,0.07)', border: '1px solid rgba(29,78,216,0.15)', color: '#1d4ed8', fontSize: 12, fontWeight: 700 }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#1d4ed8', display: 'inline-block' }}/>
-              地図から登録する、あなた専用の天気予報
+              {T('lp.hero.badge')}
             </div>
 
-            {/* ── 変更後のキャッチコピー ── */}
             <h1 style={{ fontSize: 60, fontWeight: 900, lineHeight: 1.06, letterSpacing: '-0.03em', marginBottom: 24, color: '#0f172a' }}>
-              世界中の<br/>
-              気になる場所の天気<br/>
-              <span style={{ color: '#1d4ed8' }}>ワンクリックで。</span>
+              {T('lp.hero.l1')}<br/>
+              {T('lp.hero.l2')}<br/>
+              <span style={{ color: '#1d4ed8' }}>{T('lp.hero.l3')}</span>
             </h1>
 
             <p style={{ fontSize: 17, color: '#475569', lineHeight: 1.78, marginBottom: 38, maxWidth: 440 }}>
-              地図をクリックするだけ。農地・工場・観測点・旅先どこでも—<br/>
-              <strong style={{ color: '#1e3a8a' }}>リアルタイム天気と14日予報</strong>をすぐ確認。
+              {T('lp.hero.sub')}<br/>
+              <strong style={{ color: '#1e3a8a' }}>{T('lp.hero.subStrong')}</strong>{T('lp.hero.subEnd')}
             </p>
 
             <div style={{ display: 'flex', gap: 14, marginBottom: 48, flexWrap: 'wrap' }}>
               <Link href="/signup" style={{ padding: '14px 32px', borderRadius: 14, textDecoration: 'none', background: '#1d4ed8', color: '#fff', fontSize: 15, fontWeight: 900, boxShadow: '0 6px 20px rgba(29,78,216,0.35)' }}>
-                無料で始める →
+                {T('lp.cta.startFree')}
               </Link>
               <Link href="/pricing" style={{ padding: '14px 32px', borderRadius: 14, textDecoration: 'none', border: '1.5px solid #cbd5e1', color: '#475569', fontSize: 15, fontWeight: 700, background: 'rgba(255,255,255,0.7)' }}>
-                料金を見る
+                {T('lp.cta.seePricing')}
               </Link>
             </div>
 
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               {[
-                { v: '無料', s: '3ポイントまで', bg: '#dbeafe', c: '#1e40af' },
-                { v: '14日間', s: '週間予報', bg: '#dcfce7', c: '#15803d' },
-                { v: 'LIVE', s: '雨雲レーダー', bg: '#ede9fe', c: '#6d28d9' },
+                { v: T('lp.stat.free'), s: T('lp.stat.freeSub'), bg: '#dbeafe', c: '#1e40af' },
+                { v: T('lp.stat.days'), s: T('lp.stat.daysSub'), bg: '#dcfce7', c: '#15803d' },
+                { v: T('lp.stat.live'), s: T('lp.stat.liveSub'), bg: '#ede9fe', c: '#6d28d9' },
               ].map(p => (
                 <div key={p.v} style={{ padding: '10px 18px', borderRadius: 14, background: p.bg }}>
                   <div style={{ fontSize: 20, fontWeight: 900, color: p.c, lineHeight: 1 }}>{p.v}</div>
@@ -269,15 +271,15 @@ export default function LandingPage() {
       <section style={{ padding: '88px 48px', background: '#f4f6f9' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 52 }}>
-            <p style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', marginBottom: 10 }}>できること</p>
-            <p style={{ fontSize: 16, color: '#64748b' }}>場所を登録するだけで、天気のすべてがわかる</p>
+            <p style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', marginBottom: 10 }}>{T('lp.feat.title')}</p>
+            <p style={{ fontSize: 16, color: '#64748b' }}>{T('lp.feat.sub')}</p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16 }}>
             {[
-              { icon: '📍', title: 'ポイント登録', c: '#1d4ed8', bg: '#fff', border: '#e2e8f0', desc: '地図をクリックするだけ。農地・工場・観測点・旅先など、どんな場所でも登録できます。' },
-              { icon: '🌤', title: '天気予報',    c: '#15803d', bg: '#fff', border: '#e2e8f0', desc: '各ポイントの最大14日間予報。気温・降水確率・風速を時間単位で確認できます。' },
-              { icon: '⭐', title: 'Best Day',   c: '#b45309', bg: '#fff', border: '#e2e8f0', desc: '「晴れに最適な日」「雨が期待できる日」を0〜100スコアで一覧比較。全ポイント×14日間。', badge: '目玉' },
-              { icon: '🌧️', title: '雨雲レーダー', c: '#6d28d9', bg: '#fff', border: '#e2e8f0', desc: 'リアルタイム雨雲をマップに重ねて表示。過去2時間のアニメーション再生にも対応。' },
+              { icon: '📍', title: T('lp.feat.point'), c: '#1d4ed8', bg: '#fff', border: '#e2e8f0', desc: T('lp.feat.pointDesc') },
+              { icon: '🌤', title: T('lp.feat.fc'),    c: '#15803d', bg: '#fff', border: '#e2e8f0', desc: T('lp.feat.fcDesc') },
+              { icon: '⭐', title: 'Best Day',   c: '#b45309', bg: '#fff', border: '#e2e8f0', desc: T('lp.feat.bdDesc'), badge: T('lp.feat.badge') },
+              { icon: '🌧️', title: T('lp.feat.radar'), c: '#6d28d9', bg: '#fff', border: '#e2e8f0', desc: T('lp.feat.radarDesc') },
             ].map(f => (
               <div key={f.title} style={{ position: 'relative', padding: '26px 22px', borderRadius: 16, background: f.bg, border: `1px solid ${f.border}`, boxShadow: '0 2px 10px rgba(15,23,42,0.05)' }}>
                 {f.badge && (
@@ -297,20 +299,20 @@ export default function LandingPage() {
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', gap: 72, alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: 280 }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 999, background: '#fffbeb', border: '1px solid #fde68a', color: '#b45309', fontSize: 12, fontWeight: 700, marginBottom: 20 }}>
-              ⭐ Best Day 機能
+              {T('lp.bd.badge')}
             </div>
             <h2 style={{ fontSize: 40, fontWeight: 900, lineHeight: 1.08, letterSpacing: '-0.02em', marginBottom: 16, color: '#0f172a' }}>
-              「いつ行く？」に<br/><span style={{ color: '#1d4ed8' }}>即答します。</span>
+              {T('lp.bd.h1')}<br/><span style={{ color: '#1d4ed8' }}>{T('lp.bd.h2')}</span>
             </h2>
             <p style={{ fontSize: 15, color: '#64748b', lineHeight: 1.78, marginBottom: 22, maxWidth: 400 }}>
-              登録したすべてのポイントについて、向こう14日間の「ベスト日」をひと目で確認。
+              {T('lp.bd.sub')}
             </p>
             <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: 11 }}>
               {[
-                ['☀️', '晴れモード：屋外作業・撮影・イベントに最適な日を提案'],
-                ['🌧️', '雨モード：水やり不要・恵みの雨が期待できる日を表示'],
-                ['📊', '0〜100スコアで良し悪しを直感的に把握'],
-                ['📍', '複数ポイントを横並び比較。場所ごとの差も一目瞭然'],
+                ['☀️', T('lp.bd.li1')],
+                ['🌧️', T('lp.bd.li2')],
+                ['📊', T('lp.bd.li3')],
+                ['📍', T('lp.bd.li4')],
               ].map(([icon, text]) => (
                 <li key={text as string} style={{ display: 'flex', gap: 10, fontSize: 14, color: '#475569' }}>
                   <span style={{ flexShrink: 0 }}>{icon}</span>{text}
@@ -325,20 +327,20 @@ export default function LandingPage() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                 <span style={{ fontSize: 14, fontWeight: 900, color: '#0f172a' }}>Best Day</span>
                 <div style={{ display: 'flex', gap: 4 }}>
-                  <span style={{ padding: '4px 10px', borderRadius: 8, background: '#fef3c7', border: '1px solid #fde68a', color: '#92400e', fontSize: 11, fontWeight: 700 }}>☀️ 晴れ</span>
-                  <span style={{ padding: '4px 10px', borderRadius: 8, background: '#f8fafc', border: '1px solid #e2e8f0', color: '#94a3b8', fontSize: 11 }}>🌧️ 雨</span>
+                  <span style={{ padding: '4px 10px', borderRadius: 8, background: '#fef3c7', border: '1px solid #fde68a', color: '#92400e', fontSize: 11, fontWeight: 700 }}>{T('bestday.sunny')}</span>
+                  <span style={{ padding: '4px 10px', borderRadius: 8, background: '#f8fafc', border: '1px solid #e2e8f0', color: '#94a3b8', fontSize: 11 }}>{T('bestday.rainy')}</span>
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '76px repeat(7,1fr)', gap: 2, marginBottom: 4 }}>
                 <div/>
-                {['今日','明','水','木','金','土','日'].map(d => (
+                {(locale === 'en' ? ['Today','Th','Fr','Sa','Su','Mo','Tu'] : ['今日','明','水','木','金','土','日']).map(d => (
                   <div key={d} style={{ textAlign: 'center', fontSize: 9, color: '#94a3b8', fontWeight: 700 }}>{d}</div>
                 ))}
               </div>
               {[
-                { name: '工場屋上', scores: [92,74,46,95,62,85,33] },
-                { name: '北側農地', scores: [85,70,43,88,57,80,29] },
-                { name: '観測点A',  scores: [78,91,58,73,87,63,44] },
+                { name: T('lp.demo.r1'), scores: [92,74,46,95,62,85,33] },
+                { name: T('lp.demo.r2'), scores: [85,70,43,88,57,80,29] },
+                { name: T('lp.demo.r3'), scores: [78,91,58,73,87,63,44] },
               ].map(row => (
                 <div key={row.name} style={{ display: 'grid', gridTemplateColumns: '76px repeat(7,1fr)', gap: 2, marginBottom: 2 }}>
                   <div style={{ fontSize: 10, color: '#64748b', display: 'flex', alignItems: 'center', paddingRight: 4, overflow: 'hidden' }}>{row.name}</div>
@@ -369,13 +371,13 @@ export default function LandingPage() {
       <section style={{ padding: '80px 48px', background: '#f4f6f9' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 44 }}>
-            <p style={{ fontSize: 30, fontWeight: 900, color: '#0f172a' }}>使い方は3ステップ</p>
+            <p style={{ fontSize: 30, fontWeight: 900, color: '#0f172a' }}>{T('lp.howto.title')}</p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 16 }}>
             {[
-              { step: '01', icon: '🔐', title: 'アカウント作成',    desc: 'メールまたはGoogleで無料登録。クレジットカード不要。30秒で完了。',    bg: '#eff6ff', border: '#bfdbfe' },
-              { step: '02', icon: '📍', title: '地図でポイント登録', desc: 'マップを開いて場所をクリック。名前をつけて保存するだけ。',              bg: '#f0fdf4', border: '#bbf7d0' },
-              { step: '03', icon: '☀️', title: '天気・BestDayを確認', desc: '各ポイントの予報とBestDayスコアがすぐに表示されます。',              bg: '#fffbeb', border: '#fde68a' },
+              { step: '01', icon: '🔐', title: T('lp.howto.s1'), desc: T('lp.howto.s1d'), bg: '#eff6ff', border: '#bfdbfe' },
+              { step: '02', icon: '📍', title: T('lp.howto.s2'), desc: T('lp.howto.s2d'), bg: '#f0fdf4', border: '#bbf7d0' },
+              { step: '03', icon: '☀️', title: T('lp.howto.s3'), desc: T('lp.howto.s3d'), bg: '#fffbeb', border: '#fde68a' },
             ].map((s, i) => (
               <div key={s.step} style={{ display: 'flex', gap: 16, padding: '22px 20px', borderRadius: 16, background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(15,23,42,0.04)' }}>
                 <div style={{ flexShrink: 0, width: 42, height: 42, borderRadius: 12, background: s.bg, border: `1.5px solid ${s.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>{s.icon}</div>
@@ -394,17 +396,17 @@ export default function LandingPage() {
       <section style={{ padding: '80px 48px', background: '#fff', borderTop: '1px solid #e9ecf0' }}>
         <div style={{ maxWidth: 780, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <p style={{ fontSize: 30, fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>シンプルな料金</p>
-            <p style={{ fontSize: 15, color: '#64748b' }}>まずは無料で試してみてください</p>
+            <p style={{ fontSize: 30, fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>{T('lp.price.badge')}</p>
+            <p style={{ fontSize: 15, color: '#64748b' }}>{T('lp.price.title')}</p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20 }}>
             {[
-              { name: 'Free', price: '¥0', period: '/ 月', desc: '個人のお試しに', highlight: false, features: ['ポイント登録 最大3件','現在の天気・時間別予報（24時間）','日別予報'], cta: '無料で始める', href: '/signup' },
-              { name: 'Standard', price: '¥980', period: '/ 月', desc: 'ヘビーユーザー・業務利用に', highlight: true, features: ['ポイント登録 無制限','時間別予報 48時間','Best Day（全ポイント比較）','雨雲レーダー（アニメーション対応）'], cta: 'Standardを始める', href: '/signup?plan=standard' },
+              { name: 'Free', price: '¥0', period: T('lp.plan.period'), desc: T('lp.plan.freeDesc'), highlight: false, features: [T('lp.plan.f.points3'),T('lp.plan.f.hourly24'),T('lp.plan.f.daily')], cta: T('lp.plan.ctaFree'), href: '/signup' },
+              { name: 'Standard', price: '¥980', period: T('lp.plan.period'), desc: T('lp.plan.stdDesc'), highlight: true, features: [T('lp.plan.f.unlimited'),T('lp.plan.f.hourly48'),T('lp.plan.f.bestday'),T('lp.plan.f.radar')], cta: T('lp.plan.ctaStd'), href: '/signup?plan=standard' },
             ].map(p => (
               <div key={p.name} style={{ position: 'relative', padding: '30px 26px', borderRadius: 20, border: p.highlight ? '2px solid #1d4ed8' : '1px solid #e2e8f0', background: '#fff', boxShadow: p.highlight ? '0 8px 32px rgba(29,78,216,0.1)' : '0 2px 8px rgba(15,23,42,0.04)' }}>
                 {p.highlight && (
-                  <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', padding: '4px 16px', borderRadius: 999, background: '#1d4ed8', color: '#fff', fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap', boxShadow: '0 2px 10px rgba(29,78,216,0.35)' }}>おすすめ</div>
+                  <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', padding: '4px 16px', borderRadius: 999, background: '#1d4ed8', color: '#fff', fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap', boxShadow: '0 2px 10px rgba(29,78,216,0.35)' }}>{T('lp.plan.recommended')}</div>
                 )}
                 <p style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{p.name}</p>
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, marginBottom: 4 }}>
@@ -435,14 +437,14 @@ export default function LandingPage() {
       <section style={{ padding: '88px 48px', background: 'linear-gradient(160deg,#eff6ff 0%,#dbeafe 100%)', textAlign: 'center', borderTop: '1px solid #e9ecf0' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '7px 16px', borderRadius: 999, marginBottom: 22, background: 'rgba(29,78,216,0.09)', border: '1px solid rgba(29,78,216,0.18)', color: '#1d4ed8', fontSize: 13, fontWeight: 600 }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#1d4ed8', display: 'inline-block' }}/>
-          今すぐ無料で始められます
+          {T('lp.final.badge')}
         </div>
         <h2 style={{ fontSize: 44, fontWeight: 900, color: '#0f172a', marginBottom: 14, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
-          場所を登録して、<br/><span style={{ color: '#1d4ed8' }}>天気を味方につけよう</span>
+          {T('lp.final.h1')}<br/><span style={{ color: '#1d4ed8' }}>{T('lp.final.h2')}</span>
         </h2>
-        <p style={{ fontSize: 15, color: '#64748b', marginBottom: 34 }}>クレジットカード不要 · 30秒で登録完了</p>
+        <p style={{ fontSize: 15, color: '#64748b', marginBottom: 34 }}>{T('lp.final.sub')}</p>
         <Link href="/signup" style={{ display: 'inline-flex', padding: '16px 48px', borderRadius: 16, background: '#1d4ed8', color: '#fff', fontSize: 16, fontWeight: 900, textDecoration: 'none', boxShadow: '0 8px 24px rgba(29,78,216,0.35)', letterSpacing: '-0.01em' }}>
-          無料でアカウントを作成 →
+          {T('lp.final.cta')}
         </Link>
       </section>
 
@@ -450,7 +452,7 @@ export default function LandingPage() {
       <footer style={{ borderTop: '1px solid #e9ecf0', padding: '28px 48px', background: '#f4f6f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
         <Logo dark={false} size={24}/>
         <div style={{ display: 'flex', gap: 24 }}>
-          {[['料金','/pricing'],['ログイン','/login'],['新規登録','/signup']].map(([l,h]) => (
+          {[[T('lp.nav.pricing'),'/pricing'],[T('lp.nav.login'),'/login'],[T('lp.foot.signup'),'/signup']].map(([l,h]) => (
             <Link key={h} href={h} style={{ fontSize: 13, color: '#94a3b8', textDecoration: 'none' }}>{l}</Link>
           ))}
         </div>
