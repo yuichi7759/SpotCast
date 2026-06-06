@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useLocale } from '@/components/LocaleProvider'
 
 export default function SupportPage() {
   const [email,   setEmail]   = useState('')
@@ -11,6 +12,7 @@ export default function SupportPage() {
   const [done,    setDone]    = useState(false)
   const [error,   setError]   = useState('')
   const router = useRouter()
+  const { t } = useLocale()
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data }) => {
@@ -21,7 +23,7 @@ export default function SupportPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!subject.trim() || !message.trim()) {
-      setError('件名とメッセージを入力してください')
+      setError(t('support.validation'))
       return
     }
     setSending(true); setError('')
@@ -32,10 +34,10 @@ export default function SupportPage() {
         body: JSON.stringify({ subject, message }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? '送信に失敗しました')
+      if (!res.ok) throw new Error(data.error ?? t('support.failed'))
       setDone(true)
     } catch (e) {
-      setError(e instanceof Error ? e.message : '送信に失敗しました')
+      setError(e instanceof Error ? e.message : t('support.failed'))
     } finally {
       setSending(false)
     }
@@ -74,7 +76,7 @@ export default function SupportPage() {
             <polyline points="9,2 4,7 9,12"/>
           </svg>
         </button>
-        <span style={{ fontSize: 15, fontWeight: 700 }}>サポートへ問い合わせ</span>
+        <span style={{ fontSize: 15, fontWeight: 700 }}>{t('support.title')}</span>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
@@ -95,11 +97,11 @@ export default function SupportPage() {
               }}>✓</div>
               <div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 8 }}>
-                  送信しました
+                  {t("support.sentTitle")}
                 </div>
                 <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)', lineHeight: 1.7 }}>
-                  お問い合わせを受け付けました。<br/>
-                  内容を確認の上、ご登録のメールアドレスへご返信します。
+                  {t('support.sentBody1')}<br/>
+                  {t('support.sentBody2')}
                 </div>
               </div>
               <button
@@ -112,7 +114,7 @@ export default function SupportPage() {
                   cursor: 'pointer',
                 }}
               >
-                設定に戻る
+                {t("support.back")}
               </button>
             </div>
           ) : (
@@ -125,27 +127,27 @@ export default function SupportPage() {
                 border: '1px solid rgba(255,255,255,0.07)',
                 fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6,
               }}>
-                ご不明な点・ご要望・不具合の報告など、お気軽にお問い合わせください。
+                {t('support.intro')}
               </div>
 
               {/* メール（表示のみ） */}
               <div>
                 <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', marginBottom: 6, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-                  メールアドレス
+                  {t("support.email")}
                 </label>
                 <div style={{ ...inputStyle, color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.03)' }}>
-                  {email || '取得中...'}
+                  {email || t('support.loadingEmail')}
                 </div>
               </div>
 
               {/* 件名 */}
               <div>
                 <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', marginBottom: 6, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-                  件名 <span style={{ color: '#f87171' }}>*</span>
+                  {t("support.subject")} <span style={{ color: '#f87171' }}>*</span>
                 </label>
                 <input
                   style={inputStyle}
-                  placeholder="例：ポイントが保存されない"
+                  placeholder={t('support.subjectPh')}
                   value={subject}
                   onChange={e => setSubject(e.target.value)}
                 />
@@ -154,11 +156,11 @@ export default function SupportPage() {
               {/* メッセージ */}
               <div>
                 <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', marginBottom: 6, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-                  メッセージ <span style={{ color: '#f87171' }}>*</span>
+                  {t("support.message")} <span style={{ color: '#f87171' }}>*</span>
                 </label>
                 <textarea
                   style={{ ...inputStyle, resize: 'vertical', minHeight: 140, fontFamily: 'inherit', lineHeight: 1.7 } as React.CSSProperties}
-                  placeholder="詳しい状況や再現手順を教えていただくと、迅速に対応できます。"
+                  placeholder={t('support.messagePh')}
                   value={message}
                   onChange={e => setMessage(e.target.value)}
                 />
@@ -188,7 +190,7 @@ export default function SupportPage() {
                   transition: 'all 0.15s',
                 }}
               >
-                {sending ? '送信中...' : '送信する'}
+                {sending ? t('support.sending') : t('support.send')}
               </button>
             </form>
           )}

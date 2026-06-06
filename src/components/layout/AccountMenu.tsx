@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useLocale } from '@/components/LocaleProvider'
 
 interface UserInfo {
   email: string
@@ -16,6 +17,7 @@ export default function AccountMenu() {
   const [upgradeError, setUpgradeError] = useState('')
   const menuRef               = useRef<HTMLDivElement>(null)
   const router                = useRouter()
+  const { t } = useLocale()
 
   useEffect(() => {
     const supabase = createClient()
@@ -57,9 +59,9 @@ export default function AccountMenu() {
       const res = await fetch('/api/checkout', { method: 'POST' })
       const data = await res.json()
       if (data.url) { window.location.href = data.url; return }
-      setUpgradeError(data.error ?? 'エラーが発生しました')
+      setUpgradeError(data.error ?? t('common.error'))
     } catch {
-      setUpgradeError('通信エラーが発生しました')
+      setUpgradeError(t('common.commError'))
     } finally {
       setUpgrading(false)
     }
@@ -141,7 +143,7 @@ export default function AccountMenu() {
                   transition: 'all 0.15s',
                 }}
               >
-                {upgrading ? '処理中...' : '⚡ Standardにアップグレード'}
+                {upgrading ? t('common.processing') : t('settings.upgradeCta')}
               </button>
               {upgradeError && (
                 <div style={{ marginTop: 6, fontSize: 11, color: '#f87171', lineHeight: 1.4 }}>
@@ -161,7 +163,7 @@ export default function AccountMenu() {
                 <circle cx="12" cy="12" r="3"/>
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
               </svg>
-              設定
+              {t('settings.title')}
             </button>
             <button
               onClick={handleLogout}
@@ -172,7 +174,7 @@ export default function AccountMenu() {
                 <polyline points="11,11 14,8 11,5"/>
                 <line x1="14" y1="8" x2="6" y2="8"/>
               </svg>
-              ログアウト
+              {t('settings.logout')}
             </button>
           </div>
         </div>

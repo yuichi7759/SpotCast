@@ -61,9 +61,9 @@ export default function SettingsPage() {
       const res = await fetch('/api/checkout', { method: 'POST' })
       const data = await res.json()
       if (data.url) { window.location.href = data.url; return }
-      setUpgradeError(data.error ?? 'エラーが発生しました')
+      setUpgradeError(data.error ?? t('common.error'))
     } catch {
-      setUpgradeError('通信エラーが発生しました')
+      setUpgradeError(t('common.commError'))
     } finally {
       setUpgrading(false)
     }
@@ -108,7 +108,7 @@ export default function SettingsPage() {
             <polyline points="9,2 4,7 9,12"/>
           </svg>
         </button>
-        <span style={{ fontSize: 15, fontWeight: 700 }}>設定</span>
+        <span style={{ fontSize: 15, fontWeight: 700 }}>{t('settings.title')}</span>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
@@ -121,24 +121,24 @@ export default function SettingsPage() {
             background: 'rgba(251,191,36,0.12)', border: '1px solid rgba(251,191,36,0.4)',
             color: '#fbbf24', fontSize: 13, fontWeight: 700,
           }}>
-            ⚡ Standardプランへのアップグレードが完了しました！
+            ⚡ {t('settings.upgradeDone')}
           </div>
         )}
 
         {/* Account */}
         <section style={{ marginBottom: 24 }}>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: textMuted, marginBottom: 10 }}>
-            アカウント
+            {t('settings.account')}
           </div>
           <div style={{ background: surfaceBg, border: `1px solid ${borderColor}`, borderRadius: 14, overflow: 'hidden' }}>
             {/* Email */}
             <div style={{ padding: '14px 16px', borderBottom: `1px solid ${borderColor}` }}>
-              <div style={{ fontSize: 11, color: textMuted, marginBottom: 4 }}>メールアドレス</div>
+              <div style={{ fontSize: 11, color: textMuted, marginBottom: 4 }}>{t('settings.email')}</div>
               <div style={{ fontSize: 14, fontWeight: 600 }}>{email || '—'}</div>
             </div>
             {/* Plan */}
             <div style={{ padding: '14px 16px' }}>
-              <div style={{ fontSize: 11, color: textMuted, marginBottom: 8 }}>プラン</div>
+              <div style={{ fontSize: 11, color: textMuted, marginBottom: 8 }}>{t('settings.plan')}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{
                   fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 20,
@@ -162,7 +162,7 @@ export default function SettingsPage() {
                         transition: 'all 0.15s',
                       }}
                     >
-                      {upgrading ? '処理中...' : '⚡ Standardにアップグレード'}
+                      {upgrading ? t('common.processing') : t('settings.upgradeCta')}
                     </button>
                     {upgradeError && (
                       <div style={{ marginTop: 8, fontSize: 12, color: '#f87171' }}>⚠️ {upgradeError}</div>
@@ -234,8 +234,8 @@ export default function SettingsPage() {
             {/* 地図に天気アイコンを表示 */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: 12, borderBottom: `1px solid ${borderColor}` }}>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>地図に天気アイコンを表示</div>
-                <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>各マーカーの横に現在の天気を表示</div>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>{t('settings.wxIcons')}</div>
+                <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>{t('settings.wxIconsHint')}</div>
               </div>
               <button
                 onClick={() => { const v = !wxIcons; setWxIcons(v); saveWeatherIcons(v) }}
@@ -255,8 +255,8 @@ export default function SettingsPage() {
             {/* クリック時のズーム */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: 12, borderBottom: `1px solid ${borderColor}` }}>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>クリック時のズーム</div>
-                <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>マーカーを選択した時の拡大率</div>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>{t('settings.clickZoom')}</div>
+                <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>{t('settings.clickZoomHint')}</div>
               </div>
               <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
                 {MARKER_ZOOM_OPTIONS.map(opt => {
@@ -309,7 +309,7 @@ export default function SettingsPage() {
         {/* Session */}
         <section style={{ marginBottom: 24 }}>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: textMuted, marginBottom: 10 }}>
-            セッション
+            {t('settings.session')}
           </div>
           <div style={{ background: surfaceBg, border: `1px solid ${borderColor}`, borderRadius: 14, padding: '14px 16px' }}>
             <button
@@ -330,7 +330,7 @@ export default function SettingsPage() {
                 <polyline points="11,11 14,8 11,5"/>
                 <line x1="14" y1="8" x2="6" y2="8"/>
               </svg>
-              {loggingOut ? 'ログアウト中...' : 'ログアウト'}
+              {loggingOut ? t('settings.logoutLoading') : t('settings.logout')}
             </button>
           </div>
         </section>
@@ -338,7 +338,7 @@ export default function SettingsPage() {
         {/* Support */}
         <section>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: textMuted, marginBottom: 10 }}>
-            サポート
+            {t('settings.support')}
           </div>
           <div style={{ background: surfaceBg, border: `1px solid ${borderColor}`, borderRadius: 14, overflow: 'hidden' }}>
             <button
@@ -351,8 +351,8 @@ export default function SettingsPage() {
               }}
             >
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: textPrimary }}>お問い合わせ</div>
-                <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>不具合・ご要望・アカウント削除</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: textPrimary }}>{t('settings.contact')}</div>
+                <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>{t('settings.contactHint')}</div>
               </div>
               <svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke={textMuted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="5,2 10,7 5,12"/>
