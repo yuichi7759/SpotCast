@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import type { Field } from '@/types/field'
+import { useT } from '@/components/LocaleProvider'
 
 interface Props {
   field: Field
@@ -55,6 +56,7 @@ const FIELD_COLORS = [
 ]
 
 export default function EditFieldModal({ field, mapCenter, onSave, onClose, onDelete }: Props) {
+  const t = useT()
   const [name,      setName]      = useState(field.name)
   const [crop,      setCrop]      = useState(field.crop ?? '')
   const [variety,   setVariety]   = useState(field.variety ?? '')
@@ -83,7 +85,7 @@ export default function EditFieldModal({ field, mapCenter, onSave, onClose, onDe
   }
 
   async function handleSave() {
-    if (!name.trim()) { setError('ポイント名は必須です'); return }
+    if (!name.trim()) { setError(t('field.nameRequired')); return }
     setSaving(true); setError('')
     try {
       const res = await fetch(`/api/fields/${field.id}`, {
@@ -101,10 +103,10 @@ export default function EditFieldModal({ field, mapCenter, onSave, onClose, onDe
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'エラーが発生しました')
+      if (!res.ok) throw new Error(data.error ?? t('common.error'))
       onSave(data as Field)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'エラーが発生しました')
+      setError(e instanceof Error ? e.message : t('common.error'))
     } finally { setSaving(false) }
   }
 
@@ -113,7 +115,7 @@ export default function EditFieldModal({ field, mapCenter, onSave, onClose, onDe
     setDeleting(true)
     try {
       const res = await fetch(`/api/fields/${field.id}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('削除に失敗しました')
+      if (!res.ok) throw new Error(t('field.deleteFail'))
       onDelete(field.id)
     } catch (e) {
       setError(e instanceof Error ? e.message : '削除エラー')
@@ -124,7 +126,7 @@ export default function EditFieldModal({ field, mapCenter, onSave, onClose, onDe
 
   const coordPreview = coordLat && coordLng
     ? `${parseFloat(coordLat).toFixed(4)}, ${parseFloat(coordLng).toFixed(4)}`
-    : '座標未設定'
+    : t('field.coordsUnset')
 
   return (
     <div style={overlayStyle} onClick={e => { if (e.target === e.currentTarget) onClose() }}>
@@ -140,7 +142,7 @@ export default function EditFieldModal({ field, mapCenter, onSave, onClose, onDe
               display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16,
             }}>✏️</div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 16, color: 'var(--dash-text)', lineHeight: 1 }}>ポイントを編集</div>
+              <div style={{ fontWeight: 800, fontSize: 16, color: 'var(--dash-text)', lineHeight: 1 }}>{t('field.editTitle')}</div>
               <div style={{ fontSize: 11, color: 'var(--dash-text-4)', marginTop: 3 }}>{coordPreview}</div>
             </div>
           </div>
@@ -160,32 +162,32 @@ export default function EditFieldModal({ field, mapCenter, onSave, onClose, onDe
 
           {/* ポイント名 */}
           <div>
-            <label style={labelStyle}>ポイント名 <span style={{ color: '#f87171' }}>*</span></label>
+            <label style={labelStyle}>{t("field.name")} <span style={{ color: '#f87171' }}>*</span></label>
             <input style={inputStyle} value={name} onChange={e => setName(e.target.value)} autoFocus/>
           </div>
 
           {/* カテゴリ・種別 */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
-              <label style={labelStyle}>カテゴリ</label>
-              <input style={inputStyle} placeholder="農地 / 工場 / 観測点…" value={crop} onChange={e => setCrop(e.target.value)}/>
+              <label style={labelStyle}>{t("field.category")}</label>
+              <input style={inputStyle} placeholder={t("field.categoryPh")} value={crop} onChange={e => setCrop(e.target.value)}/>
             </div>
             <div>
-              <label style={labelStyle}>種別</label>
-              <input style={inputStyle} placeholder="露地 / 施設 / 屋外…" value={variety} onChange={e => setVariety(e.target.value)}/>
+              <label style={labelStyle}>{t("field.type")}</label>
+              <input style={inputStyle} placeholder={t("field.typePh")} value={variety} onChange={e => setVariety(e.target.value)}/>
             </div>
           </div>
 
           {/* 日付 */}
           <div>
-            <label style={labelStyle}>関連日付</label>
+            <label style={labelStyle}>{t("field.date")}</label>
             <input style={{ ...inputStyle, colorScheme: 'dark' }} type="date"
               value={plantedAt} onChange={e => setPlantedAt(e.target.value)}/>
           </div>
 
           {/* マーカーカラー */}
           <div>
-            <label style={labelStyle}>マーカーカラー</label>
+            <label style={labelStyle}>{t("field.color")}</label>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {FIELD_COLORS.map(c => (
                 <button
@@ -208,7 +210,7 @@ export default function EditFieldModal({ field, mapCenter, onSave, onClose, onDe
           {/* 座標 */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <label style={{ ...labelStyle, marginBottom: 0 }}>座標</label>
+              <label style={{ ...labelStyle, marginBottom: 0 }}>{t("field.coords")}</label>
               <div style={{ display: 'flex', gap: 6 }}>
                 {mapCenter && (
                   <button onClick={useMapCenter} style={{
@@ -216,7 +218,7 @@ export default function EditFieldModal({ field, mapCenter, onSave, onClose, onDe
                     background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.25)',
                     borderRadius: 7, padding: '4px 10px', cursor: 'pointer',
                   }}>
-                    🗺 地図の中心
+                    🗺 {t("field.mapCenter")}
                   </button>
                 )}
                 <button onClick={useCurrentLocation} style={{
@@ -224,17 +226,17 @@ export default function EditFieldModal({ field, mapCenter, onSave, onClose, onDe
                   background: 'rgba(29,78,216,0.1)', border: '1px solid rgba(29,78,216,0.2)',
                   borderRadius: 7, padding: '4px 10px', cursor: 'pointer',
                 }}>
-                  📍 現在地
+                  📍 {t("field.currentLoc")}
                 </button>
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               <div>
-                <div style={{ fontSize: 10, color: 'var(--dash-text-4)', marginBottom: 4 }}>緯度 (lat)</div>
+                <div style={{ fontSize: 10, color: 'var(--dash-text-4)', marginBottom: 4 }}>{t("field.lat")}</div>
                 <input style={inputStyle} placeholder="35.6762" value={coordLat} onChange={e => setCoordLat(e.target.value)}/>
               </div>
               <div>
-                <div style={{ fontSize: 10, color: 'var(--dash-text-4)', marginBottom: 4 }}>経度 (lng)</div>
+                <div style={{ fontSize: 10, color: 'var(--dash-text-4)', marginBottom: 4 }}>{t("field.lng")}</div>
                 <input style={inputStyle} placeholder="139.6503" value={coordLng} onChange={e => setCoordLng(e.target.value)}/>
               </div>
             </div>
@@ -247,10 +249,10 @@ export default function EditFieldModal({ field, mapCenter, onSave, onClose, onDe
 
           {/* メモ */}
           <div>
-            <label style={labelStyle}>メモ</label>
+            <label style={labelStyle}>{t("field.memo")}</label>
             <textarea
               style={{ ...inputStyle, resize: 'vertical', minHeight: 70, fontFamily: 'inherit', lineHeight: 1.6 } as React.CSSProperties}
-              placeholder="特記事項・メモなど"
+              placeholder={t("field.memoPh")}
               value={notes} onChange={e => setNotes(e.target.value)}
             />
           </div>
@@ -272,7 +274,7 @@ export default function EditFieldModal({ field, mapCenter, onSave, onClose, onDe
               border: '1px solid var(--dash-border)',
               background: 'var(--dash-surface)',
               fontSize: 14, fontWeight: 600, color: 'var(--dash-text-3)', cursor: 'pointer',
-            }}>キャンセル</button>
+            }}>{t("common.cancel")}</button>
             <button onClick={handleSave} disabled={saving} style={{
               flex: 2, padding: '12px 0', borderRadius: 10, border: 'none',
               background: saving ? 'var(--dash-border)' : 'linear-gradient(135deg, #3ecf8e, #059669)',
@@ -282,7 +284,7 @@ export default function EditFieldModal({ field, mapCenter, onSave, onClose, onDe
               boxShadow: saving ? 'none' : '0 4px 16px rgba(29,78,216,0.35)',
               transition: 'all 0.15s',
             }}>
-              {saving ? '保存中...' : '変更を保存'}
+              {saving ? t('field.saving') : t('field.saveChanges')}
             </button>
           </div>
 
@@ -296,23 +298,23 @@ export default function EditFieldModal({ field, mapCenter, onSave, onClose, onDe
                   background: 'rgba(239,68,68,0.05)',
                   fontSize: 13, fontWeight: 600, color: 'rgba(239,68,68,0.7)', cursor: 'pointer',
                 }}>
-                  🗑 このポイントを削除
+                  🗑 {t("field.deletePoint")}
                 </button>
               ) : (
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <div style={{ fontSize: 13, color: 'var(--dash-text-3)', flex: 1 }}>本当に削除しますか？</div>
+                  <div style={{ fontSize: 13, color: 'var(--dash-text-3)', flex: 1 }}>{t('field.confirmDelete')}</div>
                   <button onClick={() => setConfirmDel(false)} style={{
                     padding: '8px 14px', borderRadius: 8,
                     border: '1px solid var(--dash-border)',
                     background: 'var(--dash-surface)',
                     fontSize: 13, color: 'var(--dash-text-3)', cursor: 'pointer',
-                  }}>戻る</button>
+                  }}>{t("common.back")}</button>
                   <button onClick={handleDelete} disabled={deleting} style={{
                     padding: '8px 16px', borderRadius: 8, border: 'none',
                     background: deleting ? 'rgba(239,68,68,0.3)' : '#ef4444',
                     fontSize: 13, fontWeight: 700, color: '#fff', cursor: 'pointer',
                   }}>
-                    {deleting ? '削除中...' : '削除する'}
+                    {deleting ? t('field.deleting') : t('field.delete')}
                   </button>
                 </div>
               )}

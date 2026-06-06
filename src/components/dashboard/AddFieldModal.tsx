@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import type { Field } from '@/types/field'
+import { useT } from '@/components/LocaleProvider'
 
 interface Props {
   lat?: number
@@ -52,6 +53,7 @@ const FIELD_COLORS = [
 ]
 
 export default function AddFieldModal({ lat, lng, onSave, onClose }: Props) {
+  const t = useT()
   const [name, setName]           = useState('')
   const [crop, setCrop]           = useState('')
   const [variety, setVariety]     = useState('')
@@ -72,7 +74,7 @@ export default function AddFieldModal({ lat, lng, onSave, onClose }: Props) {
   }
 
   async function handleSave() {
-    if (!name.trim()) { setError('ポイント名は必須です'); return }
+    if (!name.trim()) { setError(t('field.nameRequired')); return }
     setSaving(true); setError('')
     try {
       const res = await fetch('/api/fields', {
@@ -90,10 +92,10 @@ export default function AddFieldModal({ lat, lng, onSave, onClose }: Props) {
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'エラーが発生しました')
+      if (!res.ok) throw new Error(data.error ?? t('common.error'))
       onSave(data as Field)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'エラーが発生しました')
+      setError(e instanceof Error ? e.message : t('common.error'))
     } finally { setSaving(false) }
   }
 
@@ -110,9 +112,9 @@ export default function AddFieldModal({ lat, lng, onSave, onClose }: Props) {
               fontSize: 16, boxShadow: '0 4px 12px rgba(29,78,216,0.35)',
             }}>📍</div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--dash-text)', lineHeight: 1 }}>ポイントを追加</div>
+              <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--dash-text)', lineHeight: 1 }}>{t('field.addTitle')}</div>
               <div style={{ fontSize: 10, color: 'var(--dash-text-3)', marginTop: 2 }}>
-                {coordLat && coordLng ? `${parseFloat(coordLat).toFixed(4)}, ${parseFloat(coordLng).toFixed(4)}` : '座標未設定'}
+                {coordLat && coordLng ? `${parseFloat(coordLat).toFixed(4)}, ${parseFloat(coordLng).toFixed(4)}` : t('field.coordsUnset')}
               </div>
             </div>
           </div>
@@ -134,26 +136,26 @@ export default function AddFieldModal({ lat, lng, onSave, onClose }: Props) {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
           <div>
-            <label style={labelStyle}>ポイント名 <span style={{ color: '#f87171' }}>*</span></label>
+            <label style={labelStyle}>{t("field.name")} <span style={{ color: '#f87171' }}>*</span></label>
             <input
-              style={inputStyle} placeholder="例: 本社屋上・第3観測点・北側農地"
+              style={inputStyle} placeholder={t('field.namePh')}
               value={name} onChange={e => setName(e.target.value)} autoFocus
             />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
-              <label style={labelStyle}>カテゴリ</label>
-              <input style={inputStyle} placeholder="農地 / 工場 / 観測点…" value={crop} onChange={e => setCrop(e.target.value)}/>
+              <label style={labelStyle}>{t("field.category")}</label>
+              <input style={inputStyle} placeholder={t('field.categoryPh')} value={crop} onChange={e => setCrop(e.target.value)}/>
             </div>
             <div>
-              <label style={labelStyle}>種別</label>
-              <input style={inputStyle} placeholder="露地 / 施設 / 屋外…" value={variety} onChange={e => setVariety(e.target.value)}/>
+              <label style={labelStyle}>{t("field.type")}</label>
+              <input style={inputStyle} placeholder={t('field.typePh')} value={variety} onChange={e => setVariety(e.target.value)}/>
             </div>
           </div>
 
           <div>
-            <label style={labelStyle}>関連日付</label>
+            <label style={labelStyle}>{t("field.date")}</label>
             <input
               style={{ ...inputStyle, colorScheme: 'dark' }}
               type="date" value={plantedAt} onChange={e => setPlantedAt(e.target.value)}
@@ -162,7 +164,7 @@ export default function AddFieldModal({ lat, lng, onSave, onClose }: Props) {
 
           {/* マーカーカラー */}
           <div>
-            <label style={labelStyle}>マーカーカラー</label>
+            <label style={labelStyle}>{t("field.color")}</label>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {FIELD_COLORS.map(c => (
                 <button
@@ -184,7 +186,7 @@ export default function AddFieldModal({ lat, lng, onSave, onClose }: Props) {
 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-              <label style={{ ...labelStyle, marginBottom: 0 }}>座標</label>
+              <label style={{ ...labelStyle, marginBottom: 0 }}>{t("field.coords")}</label>
               <button
                 onClick={useCurrentLocation}
                 style={{
@@ -193,20 +195,20 @@ export default function AddFieldModal({ lat, lng, onSave, onClose }: Props) {
                   borderRadius: 6, padding: '3px 9px', cursor: 'pointer', letterSpacing: '.02em',
                 }}
               >
-                📍 現在地
+                📍 {t("field.currentLoc")}
               </button>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <input style={inputStyle} placeholder="緯度 (lat)" value={coordLat} onChange={e => setCoordLat(e.target.value)}/>
-              <input style={inputStyle} placeholder="経度 (lng)" value={coordLng} onChange={e => setCoordLng(e.target.value)}/>
+              <input style={inputStyle} placeholder={t("field.lat")} value={coordLat} onChange={e => setCoordLat(e.target.value)}/>
+              <input style={inputStyle} placeholder={t("field.lng")} value={coordLng} onChange={e => setCoordLng(e.target.value)}/>
             </div>
           </div>
 
           <div>
-            <label style={labelStyle}>メモ</label>
+            <label style={labelStyle}>{t("field.memo")}</label>
             <textarea
               style={{ ...inputStyle, resize: 'vertical', minHeight: 66, fontFamily: 'inherit', lineHeight: 1.6 } as React.CSSProperties}
-              placeholder="特記事項・メモなど"
+              placeholder={t('field.memoPh')}
               value={notes} onChange={e => setNotes(e.target.value)}
             />
           </div>
@@ -231,7 +233,7 @@ export default function AddFieldModal({ lat, lng, onSave, onClose }: Props) {
                 fontSize: 13, fontWeight: 600, color: 'var(--dash-text-3)', cursor: 'pointer',
               }}
             >
-              キャンセル
+              {t("common.cancel")}
             </button>
             <button
               onClick={handleSave}
@@ -246,7 +248,7 @@ export default function AddFieldModal({ lat, lng, onSave, onClose }: Props) {
                 transition: 'all 0.15s',
               }}
             >
-              {saving ? '保存中...' : 'ポイントを登録'}
+              {saving ? t('field.saving') : t('field.save')}
             </button>
           </div>
         </div>

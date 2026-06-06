@@ -17,6 +17,7 @@ import { useToast } from '@/components/ToastProvider'
 import { createClient } from '@/lib/supabase/client'
 import { loadOrder, saveOrder } from '@/lib/spotOrder'
 import { loadMarkerZoom } from '@/lib/markerZoomPref'
+import { useT } from '@/components/LocaleProvider'
 import type { IntelligenceEvent } from '@/lib/mockIntelligence'
 
 const FREE_POINT_LIMIT = 3
@@ -27,6 +28,7 @@ const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 
 export default function DashboardPage() {
   const toast = useToast()
+  const t = useT()
 
   const [fields,            setFields]          = useState<Field[]>([])
   const [selectedField,     setSelected]        = useState<Field | null>(null)
@@ -100,7 +102,7 @@ export default function DashboardPage() {
     if (!ctxMenu) return
     if (plan === 'free' && fields.length >= FREE_POINT_LIMIT) {
       setCtxMenu(null)
-      toast.info(`Freeプランは${FREE_POINT_LIMIT}件まで`, 'Standardプランにアップグレードすると無制限に登録できます')
+      toast.info(t('dash.freeLimit', { n: FREE_POINT_LIMIT }), t('dash.freeLimitSub'))
       return
     }
     setPending({ lat: ctxMenu.lat, lng: ctxMenu.lng })
@@ -123,10 +125,10 @@ export default function DashboardPage() {
         setFields(prev => prev.map(f => f.id === updated.id ? updated : f))
         setSelected(updated)
         setCenter([lng, lat]); setZoom(15)
-        toast.success(`「${updated.name}」の場所を更新しました`)
+        toast.success(t('dash.locUpdated', { name: updated.name }))
       }
     } catch {
-      toast.info('場所の更新に失敗しました')
+      toast.info(t('dash.locUpdateFail'))
     }
   }
 
@@ -157,26 +159,26 @@ export default function DashboardPage() {
       setCenter([updated.lng, updated.lat])
       setZoom(15)
     }
-    toast.success(`「${updated.name}」を更新しました`)
+    toast.success(t('dash.updated', { name: updated.name }))
   }
 
   function handleFieldDeleted(id: string) {
     setFields(prev => prev.filter(f => f.id !== id))
     setEditingField(null)
     if (selectedField?.id === id) setSelected(null)
-    toast.info('ポイントを削除しました')
+    toast.info(t('dash.deleted'))
   }
 
   function handleFieldAdded(field: Field) {
     setFields(prev => [field, ...prev])
     setShowModal(false); setPending(null)
     handleFieldClick(field)
-    toast.success(`「${field.name}」を登録しました`, "マップにピンが追加されました")
+    toast.success(t('dash.added', { name: field.name }), t('dash.addedSub'))
   }
 
   function handleAddClick() {
     if (plan === 'free' && fields.length >= FREE_POINT_LIMIT) {
-      toast.info(`Freeプランは${FREE_POINT_LIMIT}件まで`, 'Standardプランにアップグレードすると無制限に登録できます')
+      toast.info(t('dash.freeLimit', { n: FREE_POINT_LIMIT }), t('dash.freeLimitSub'))
       return
     }
     setPending(null); setShowModal(true)
@@ -348,7 +350,7 @@ export default function DashboardPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, pointerEvents: 'auto' }}>
                 <button
                   onClick={() => { setCenter([136.7, 35.7]); setZoom(5) }}
-                  title="全国表示に戻る"
+                  title={t('dash.home')}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     width: 34, height: 34,
@@ -380,7 +382,7 @@ export default function DashboardPage() {
                   </svg>
                 </button>
                 <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 500 }}>
-                  {loadingFields ? '読込中…' : `登録ポイント ${fields.length}件`}
+                  {loadingFields ? t('dash.loading') : t('dash.pointCount', { n: fields.length })}
                 </div>
               </div>
 
@@ -397,12 +399,12 @@ export default function DashboardPage() {
                 <button
                   onClick={() => {
                     if (plan === 'free') {
-                      toast.info('雨雲レーダーはStandardプランの機能です', 'アップグレードしてご利用ください')
+                      toast.info(t('dash.radarLocked'), t('dash.radarLockedSub'))
                       return
                     }
                     setShowRainRadar(p => !p)
                   }}
-                  title={showRainRadar ? '雨雲レーダーを非表示' : '雨雲レーダーを表示'}
+                  title={showRainRadar ? t('dash.radarHide') : t('dash.radarShow')}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 5,
                     padding: '4px 10px', borderRadius: 20, height: 28,
@@ -415,7 +417,7 @@ export default function DashboardPage() {
                     boxShadow: showRainRadar ? '0 0 10px rgba(96,165,250,0.2)' : 'none',
                   }}
                 >
-                  🌧️ 雨雲
+                  🌧️ {t('dash.radar')}
                 </button>
                 {/* Weather refresh */}
                 <button
@@ -425,7 +427,7 @@ export default function DashboardPage() {
                     setTimeout(() => setRefreshing(false), 1500)
                   }}
                   disabled={refreshing}
-                  title="天気データを更新"
+                  title={t('dash.refresh')}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     width: 28, height: 28, borderRadius: '50%',
@@ -472,7 +474,7 @@ export default function DashboardPage() {
                 <button
                   onClick={() => {
                     if (plan === 'free' && fields.length >= FREE_POINT_LIMIT) {
-                      toast.info(`Freeプランは${FREE_POINT_LIMIT}件まで`, 'Standardプランにアップグレードすると無制限に登録できます')
+                      toast.info(t('dash.freeLimit', { n: FREE_POINT_LIMIT }), t('dash.freeLimitSub'))
                       return
                     }
                     setPending({ lat: searchPin.lat, lng: searchPin.lng }); setShowModal(true); setSearchPin(null)
@@ -487,7 +489,7 @@ export default function DashboardPage() {
                   onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(96,165,250,0.28)' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(96,165,250,0.15)' }}
                 >
-                  ＋ ここにポイントを追加
+                  ＋ {t('dash.addHere')}
                 </button>
                 <button
                   onClick={() => setSearchPin(null)}
@@ -539,7 +541,7 @@ export default function DashboardPage() {
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                   >
                     <span style={{ fontSize: 16 }}>＋</span>
-                    <span>ここに新しいポイントを追加</span>
+                    <span>{t('dash.ctxAddNew')}</span>
                   </button>
                   {selectedField && (
                     <button
@@ -555,7 +557,7 @@ export default function DashboardPage() {
                     >
                       <span style={{ fontSize: 15 }}>📍</span>
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        「{selectedField.name}」の場所をここに
+                        {t('dash.ctxSetLoc', { name: selectedField.name })}
                       </span>
                     </button>
                   )}
@@ -642,7 +644,7 @@ export default function DashboardPage() {
           </div>
           <Link
             href="/settings"
-            title="設定"
+            title={t('settings.title')}
             style={{
               flexShrink: 0,
               width: 38, height: 38, borderRadius: 10,
@@ -678,7 +680,7 @@ export default function DashboardPage() {
             cursor: 'pointer',
             boxShadow: '0 4px 20px rgba(0,0,0,0.4), 0 0 16px rgba(62,207,142,0.2)',
           }}
-          title="ポイントを追加"
+          title={t('dash.addPoint')}
         >
           ＋
         </button>
@@ -701,11 +703,11 @@ export default function DashboardPage() {
                 flexShrink: 0,
               }}/>
               <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {selectedField ? selectedField.name : `登録ポイント ${fields.length}件`}
+                {selectedField ? selectedField.name : t('dash.pointCount', { n: fields.length })}
               </span>
               {selectedField && (
                 <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', flexShrink: 0, marginLeft: 'auto' }}>
-                  ↑ 詳細
+                  {t('dash.detail')}
                 </span>
               )}
             </div>
