@@ -66,10 +66,10 @@ function calcScore(
 }
 
 function scoreColor(s: number): string {
-  if (s >= 80) return '#3ecf8e'
-  if (s >= 60) return '#60a5fa'
-  if (s >= 40) return '#fbbf24'
-  return '#f87171'
+  if (s >= 80) return 'var(--w-score-good)'
+  if (s >= 60) return 'var(--w-score-ok)'
+  if (s >= 40) return 'var(--w-score-mid)'
+  return 'var(--w-score-bad)'
 }
 function scoreBg(s: number): string {
   if (s >= 80) return 'rgba(62,207,142,0.14)'
@@ -327,7 +327,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                   {isMed && <span style={{ fontSize: 13, lineHeight: 1 }}>{MEDALS[mIdx]}</span>}
                   <span style={{
                     fontSize: 13, fontWeight: 800, lineHeight: 1,
-                    color: isMed ? mc!.text : (isSun ? '#f87171' : isSat ? '#93c5fd' : 'var(--dash-text-2)'),
+                    color: isMed ? mc!.text : (isSun ? 'var(--w-score-bad)' : isSat ? 'var(--w-accent)' : 'var(--dash-text-2)'),
                   }}>{label}</span>
                   <span style={{
                     fontSize: 11, lineHeight: 1,
@@ -461,11 +461,11 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                     }}>
                       <span style={{ fontSize: 15, lineHeight: 1 }}>{icon}</span>
                       <span style={{ fontSize: 10, color: 'var(--dash-text-2)', lineHeight: 1, fontWeight: 600 }}>
-                        <span style={{ color: '#fca5a5' }}>{day.temp_max}°</span>
+                        <span style={{ color: 'var(--w-tmax)' }}>{day.temp_max}°</span>
                         <span style={{ color: 'var(--dash-text-4)', margin: '0 1px' }}>/</span>
-                        <span style={{ color: '#93c5fd' }}>{day.temp_min}°</span>
+                        <span style={{ color: 'var(--w-tmin)' }}>{day.temp_min}°</span>
                       </span>
-                      <span style={{ fontSize: 10, lineHeight: 1, color: day.rain_prob >= 50 ? '#93c5fd' : 'var(--dash-text-4)', fontWeight: 600 }}>
+                      <span style={{ fontSize: 10, lineHeight: 1, color: day.rain_prob >= 50 ? 'var(--w-rain-hi)' : 'var(--dash-text-4)', fontWeight: 600 }}>
                         {day.rain_prob}%
                       </span>
                     </div>

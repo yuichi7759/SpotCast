@@ -32,6 +32,24 @@
   --dash-text-4: rgba(255,255,255,0.35);
   --dash-accent: #60a5fa;
   --dash-accent-bg: rgba(29,78,216,0.12);
+
+  /* ── 気象データ用カラーパレット（dark：明るめ） ── */
+  --w-temp1: #ef4444;  /* >=35 */
+  --w-temp2: #f97316;  /* >=30 */
+  --w-temp3: #fbbf24;  /* >=25 */
+  --w-temp4: #86efac;  /* >=20 */
+  --w-temp5: #34d399;  /* >=15 */
+  --w-temp6: #38bdf8;  /* >=10 */
+  --w-temp7: #818cf8;  /* <10  */
+  --w-tmax: #fb923c;   /* 最高気温 */
+  --w-tmin: #93c5fd;   /* 最低気温 */
+  --w-rain-hi: #93c5fd;
+  --w-rain-mid: #bfdbfe;
+  --w-accent: #60a5fa;
+  --w-score-good: #3ecf8e;
+  --w-score-ok: #60a5fa;
+  --w-score-mid: #fbbf24;
+  --w-score-bad: #f87171;
 }
 
 [data-theme="light"] {
@@ -66,6 +84,24 @@
   --dash-text-4: #5a6473;
   --dash-accent: #1d4ed8;
   --dash-accent-bg: rgba(29,78,216,0.12);
+
+  /* ── 気象データ用カラーパレット（light：白背景で読める濃色） ── */
+  --w-temp1: #dc2626;  /* >=35 */
+  --w-temp2: #ea580c;  /* >=30 */
+  --w-temp3: #b45309;  /* >=25 */
+  --w-temp4: #15803d;  /* >=20 */
+  --w-temp5: #047857;  /* >=15 */
+  --w-temp6: #0369a1;  /* >=10 */
+  --w-temp7: #4338ca;  /* <10  */
+  --w-tmax: #ea580c;   /* 最高気温 */
+  --w-tmin: #2563eb;   /* 最低気温 */
+  --w-rain-hi: #1d4ed8;
+  --w-rain-mid: #2563eb;
+  --w-accent: #1d4ed8;
+  --w-score-good: #15803d;
+  --w-score-ok: #1d4ed8;
+  --w-score-mid: #b45309;
+  --w-score-bad: #dc2626;
 }
 
 * { box-sizing: border-box; }

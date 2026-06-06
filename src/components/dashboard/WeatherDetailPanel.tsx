@@ -32,13 +32,13 @@ function wmoToMain(code: number): string {
 }
 
 function tempColor(t: number): string {
-  if (t >= 35) return '#ef4444'
-  if (t >= 30) return '#f97316'
-  if (t >= 25) return '#fbbf24'
-  if (t >= 20) return '#86efac'
-  if (t >= 15) return '#34d399'
-  if (t >= 10) return '#38bdf8'
-  return '#818cf8'
+  if (t >= 35) return 'var(--w-temp1)'
+  if (t >= 30) return 'var(--w-temp2)'
+  if (t >= 25) return 'var(--w-temp3)'
+  if (t >= 20) return 'var(--w-temp4)'
+  if (t >= 15) return 'var(--w-temp5)'
+  if (t >= 10) return 'var(--w-temp6)'
+  return 'var(--w-temp7)'
 }
 function rainBg(p: number): string {
   if (p >= 70) return 'rgba(59,130,246,0.28)'
@@ -47,8 +47,8 @@ function rainBg(p: number): string {
   return 'transparent'
 }
 function rainTextColor(p: number): string {
-  if (p >= 50) return '#93c5fd'
-  if (p >= 30) return '#bfdbfe'
+  if (p >= 50) return 'var(--w-rain-hi)'
+  if (p >= 30) return 'var(--w-rain-mid)'
   return 'var(--dash-text-4)'
 }
 
@@ -224,8 +224,8 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
                   ))}
                   {/* チャート凡例 */}
                   <div style={{ height: CHART_H, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-                    <span style={{ fontSize: 9, fontWeight: 800, color: '#ef4444' }}>気温</span>
-                    <span style={{ fontSize: 9, fontWeight: 800, color: '#38bdf8' }}>雨mm</span>
+                    <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--w-temp1)' }}>気温</span>
+                    <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--w-rain-hi)' }}>雨mm</span>
                   </div>
                 </div>
 
@@ -253,12 +253,12 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
                               })
                               return (
                                 <div style={{ position: 'absolute', left: 4, top: 0, height: DAY_H, display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap', zIndex: 1, pointerEvents: 'none' }}>
-                                  <span style={{ fontSize: 11, fontWeight: 800, color: gi === 0 ? '#60a5fa' : 'var(--dash-text-2)' }}>{g.dayLabel}</span>
+                                  <span style={{ fontSize: 11, fontWeight: 800, color: gi === 0 ? 'var(--w-accent)' : 'var(--dash-text-2)' }}>{g.dayLabel}</span>
                                   {daily && <>
                                     <span style={{ fontSize: 14 }}>{weatherIcon(wmoToMain(daily.weather_code))}</span>
-                                    <span style={{ fontSize: 11, fontWeight: 700, color: '#f97316' }}>{daily.temp_max}°</span>
-                                    <span style={{ fontSize: 11, fontWeight: 700, color: '#93c5fd' }}>{daily.temp_min}°</span>
-                                    {daily.rain_prob > 0 && <span style={{ fontSize: 11, fontWeight: 600, color: '#7dd3fc' }}>{daily.rain_prob}%</span>}
+                                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--w-tmax)' }}>{daily.temp_max}°</span>
+                                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--w-tmin)' }}>{daily.temp_min}°</span>
+                                    {daily.rain_prob > 0 && <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--w-rain-hi)' }}>{daily.rain_prob}%</span>}
                                   </>}
                                 </div>
                               )
@@ -267,7 +267,7 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
 
                           {/* 時刻 */}
                           <div style={{ height: RH.time, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: `1px solid ${SEP}` }}>
-                            <span style={{ fontSize: 12, fontWeight: isNow ? 800 : 600, color: isNow ? '#60a5fa' : 'var(--dash-text-2)' }}>{timeLabel}</span>
+                            <span style={{ fontSize: 12, fontWeight: isNow ? 800 : 600, color: isNow ? 'var(--w-accent)' : 'var(--dash-text-2)' }}>{timeLabel}</span>
                           </div>
                           {/* 天気 */}
                           <div style={{ height: RH.icon, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: `1px solid ${SEP}` }}>
@@ -307,15 +307,15 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
                           width={CELL_W * 0.44}
                           height={bh}
                           rx={1}
-                          fill="#38bdf8"
+                          fill="var(--w-rain-hi)"
                           opacity={0.7}
                         />
                       )
                     })}
                     {/* 気温の折れ線 */}
-                    <polyline points={linePts} fill="none" stroke="#ef4444" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+                    <polyline points={linePts} fill="none" stroke="var(--w-temp1)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
                     {allItems.map((a, i) => (
-                      <circle key={`c${i}`} cx={tx(i)} cy={ty(a.h.temp)} r={1.7} fill="#ef4444" />
+                      <circle key={`c${i}`} cx={tx(i)} cy={ty(a.h.temp)} r={1.7} fill="var(--w-temp1)" />
                     ))}
                   </svg>
                   </div>
