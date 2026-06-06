@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import { useT } from '@/components/LocaleProvider'
 
 function Logo() {
   return (
@@ -25,40 +26,41 @@ function Logo() {
   )
 }
 
-const plans = [
-  {
-    name: 'Free',
-    price: '¥0',
-    period: '/ 月',
-    desc: '個人のお試しに',
-    highlight: false,
-    features: ['ポイント登録 最大3件','現在の天気・時間別予報（24時間）','日別予報'],
-    notIncluded: ['Best Day（全ポイント比較）','雨雲レーダー','時間別予報 48時間','ポイント登録 無制限'],
-    cta: '無料で始める',
-    href: '/signup',
-  },
-  {
-    name: 'Standard',
-    price: '¥980',
-    period: '/ 月',
-    desc: 'ヘビーユーザー・業務利用に',
-    highlight: true,
-    features: ['ポイント登録 無制限','時間別予報 48時間','Best Day（全ポイント比較）','雨雲レーダー（アニメーション対応）'],
-    notIncluded: [],
-    cta: 'Standardを始める',
-    href: '/signup?plan=standard',
-  },
-]
-
-const faqs = [
-  { q: 'クレジットカードなしで始められますか？', a: 'はい。無料プランはクレジットカード不要です。Standardプランへのアップグレード時に決済情報をご入力いただきます。' },
-  { q: 'いつでもキャンセルできますか？', a: 'はい。Standardプランはいつでもキャンセルでき、次回更新日まで引き続きご利用いただけます。' },
-  { q: 'ポイントとは何ですか？', a: '地図上で登録した任意の場所のことです。農地・工場・観測地点・お気に入りスポットなど、どんな場所でも登録できます。' },
-  { q: 'Best Day機能とは何ですか？', a: '登録したポイントごとに、向こう7〜14日間の「晴れに最適な日」や「雨が期待できる日」をスコアで可視化する機能です。複数ポイントを横並びに比較できます。' },
-]
-
 export default function PricingPage() {
+  const t = useT()
   const [upgrading, setUpgrading] = useState(false)
+
+  const plans = [
+    {
+      name: 'Free',
+      price: '¥0',
+      period: t('lp.plan.period'),
+      desc: t('lp.plan.freeDesc'),
+      highlight: false,
+      features: [t('lp.plan.f.points3'), t('lp.plan.f.hourly24'), t('lp.plan.f.daily')],
+      notIncluded: [t('lp.plan.f.bestday'), t('lp.plan.f.radar'), t('lp.plan.f.hourly48'), t('lp.plan.f.unlimited')],
+      cta: t('lp.plan.ctaFree'),
+      href: '/signup',
+    },
+    {
+      name: 'Standard',
+      price: '¥980',
+      period: t('lp.plan.period'),
+      desc: t('lp.plan.stdDesc'),
+      highlight: true,
+      features: [t('lp.plan.f.unlimited'), t('lp.plan.f.hourly48'), t('lp.plan.f.bestday'), t('lp.plan.f.radar')],
+      notIncluded: [] as string[],
+      cta: t('lp.plan.ctaStd'),
+      href: '/signup?plan=standard',
+    },
+  ]
+
+  const faqs = [
+    { q: t('price.faq1q'), a: t('price.faq1a') },
+    { q: t('price.faq2q'), a: t('price.faq2a') },
+    { q: t('price.faq3q'), a: t('price.faq3a') },
+    { q: t('price.faq4q'), a: t('price.faq4a') },
+  ]
 
   async function handleStandardCta() {
     setUpgrading(true)
@@ -86,10 +88,10 @@ export default function PricingPage() {
       <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 48px', background: 'rgba(244,246,249,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(15,23,42,0.07)', position: 'sticky', top: 0, zIndex: 50 }}>
         <Link href="/" style={{ textDecoration: 'none' }}><Logo/></Link>
         <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-          <Link href="/dashboard" style={{ fontSize: 13, color: '#64748b', textDecoration: 'none', fontWeight: 500 }}>← アプリへ</Link>
-          <Link href="/login"    style={{ fontSize: 13, color: '#64748b', textDecoration: 'none', fontWeight: 500 }}>ログイン</Link>
+          <Link href="/dashboard" style={{ fontSize: 13, color: '#64748b', textDecoration: 'none', fontWeight: 500 }}>{t('price.navToApp')}</Link>
+          <Link href="/login"    style={{ fontSize: 13, color: '#64748b', textDecoration: 'none', fontWeight: 500 }}>{t('lp.nav.login')}</Link>
           <Link href="/signup"  style={{ fontSize: 13, fontWeight: 700, textDecoration: 'none', padding: '9px 20px', borderRadius: 10, background: '#1d4ed8', color: '#fff', boxShadow: '0 3px 10px rgba(29,78,216,0.28)' }}>
-            無料で始める
+            {t('lp.nav.start')}
           </Link>
         </div>
       </nav>
@@ -97,10 +99,10 @@ export default function PricingPage() {
       {/* Header */}
       <section style={{ textAlign: 'center', padding: '72px 24px 56px' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 999, marginBottom: 20, background: 'rgba(29,78,216,0.07)', border: '1px solid rgba(29,78,216,0.15)', color: '#1d4ed8', fontSize: 12, fontWeight: 700 }}>
-          シンプルな2プラン
+          {t('price.headerBadge')}
         </div>
-        <h1 style={{ fontSize: 36, fontWeight: 900, marginBottom: 12, color: '#0f172a', letterSpacing: '-0.02em' }}>まずは無料で試してみてください</h1>
-        <p style={{ fontSize: 15, color: '#64748b' }}>クレジットカード不要 · 30秒で登録完了</p>
+        <h1 style={{ fontSize: 36, fontWeight: 900, marginBottom: 12, color: '#0f172a', letterSpacing: '-0.02em' }}>{t('lp.price.title')}</h1>
+        <p style={{ fontSize: 15, color: '#64748b' }}>{t('lp.final.sub')}</p>
       </section>
 
       {/* Plans */}
@@ -110,7 +112,7 @@ export default function PricingPage() {
             <div key={p.name} style={{ position: 'relative', padding: '32px 28px', borderRadius: 20, border: p.highlight ? '2px solid #1d4ed8' : '1px solid #e2e8f0', background: '#fff', boxShadow: p.highlight ? '0 8px 32px rgba(29,78,216,0.1)' : '0 2px 10px rgba(15,23,42,0.05)' }}>
               {p.highlight && (
                 <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', padding: '4px 16px', borderRadius: 999, background: '#1d4ed8', color: '#fff', fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap', boxShadow: '0 2px 10px rgba(29,78,216,0.35)' }}>
-                  おすすめ
+                  {t('lp.plan.recommended')}
                 </div>
               )}
               <div style={{ marginBottom: 24 }}>
@@ -148,7 +150,7 @@ export default function PricingPage() {
                     disabled={upgrading}
                     style={{ display: 'block', width: '100%', textAlign: 'center', padding: '13px', borderRadius: 12, fontSize: 14, fontWeight: 700, border: 'none', cursor: upgrading ? 'default' : 'pointer', boxSizing: 'border-box', background: upgrading ? '#93a9d4' : '#1d4ed8', color: '#fff', boxShadow: upgrading ? 'none' : '0 4px 14px rgba(29,78,216,0.28)', transition: 'all 0.15s' }}
                   >
-                    {upgrading ? '処理中...' : p.cta}
+                    {upgrading ? t('common.processing') : p.cta}
                   </button>
                 ) : (
                   <Link href={p.href} style={{ display: 'block', width: '100%', textAlign: 'center', padding: '13px', borderRadius: 12, fontSize: 14, fontWeight: 700, textDecoration: 'none', boxSizing: 'border-box', background: '#f4f6f9', color: '#475569', border: '1px solid #e2e8f0' }}>
@@ -162,13 +164,13 @@ export default function PricingPage() {
 
         <div style={{ marginTop: 20, padding: '14px 18px', borderRadius: 12, background: '#fff', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 16, flexShrink: 0 }}>💡</span>
-          <p style={{ fontSize: 13, color: '#64748b', margin: 0 }}>Standardプランはいつでもキャンセル可能。アップグレードは設定画面から行えます。</p>
+          <p style={{ fontSize: 13, color: '#64748b', margin: 0 }}>{t('price.note')}</p>
         </div>
       </section>
 
       {/* FAQ */}
       <section style={{ maxWidth: 680, margin: '0 auto', padding: '0 24px 96px' }}>
-        <h2 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', textAlign: 'center', marginBottom: 32, letterSpacing: '-0.02em' }}>よくある質問</h2>
+        <h2 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', textAlign: 'center', marginBottom: 32, letterSpacing: '-0.02em' }}>{t('price.faqTitle')}</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {faqs.map(faq => (
             <div key={faq.q} style={{ padding: '20px 22px', borderRadius: 14, border: '1px solid #e2e8f0', background: '#fff', boxShadow: '0 1px 4px rgba(15,23,42,0.04)' }}>
@@ -183,7 +185,7 @@ export default function PricingPage() {
       <footer style={{ borderTop: '1px solid #e9ecf0', padding: '24px 48px', background: '#f4f6f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <Link href="/" style={{ textDecoration: 'none' }}><Logo/></Link>
         <div style={{ display: 'flex', gap: 24 }}>
-          {[['トップ','/'],['ログイン','/login'],['新規登録','/signup'],['特定商取引法','/tokusho'],['プライバシーポリシー','/privacy'],['利用規約','/terms']].map(([l,h]) => (
+          {[[t('lp.foot.top'),'/'],[t('lp.nav.login'),'/login'],[t('lp.foot.signup'),'/signup'],[t('lp.foot.tokusho'),'/tokusho'],[t('lp.foot.privacy'),'/privacy'],[t('lp.foot.terms'),'/terms']].map(([l,h]) => (
             <Link key={h} href={h} style={{ fontSize: 13, color: '#94a3b8', textDecoration: 'none' }}>{l}</Link>
           ))}
         </div>
