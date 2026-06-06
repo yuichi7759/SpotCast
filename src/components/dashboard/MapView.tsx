@@ -275,8 +275,9 @@ export default function MapView({
       // setStyle はカスタムソース/レイヤーを破棄するため再追加が必要。
       map.on('style.load', () => {
         try { map.setProjection({ name: 'mercator' }) } catch (e) { console.warn('setProjection failed', e) }
-        rebuildFieldMarkers()
-        rebuildIntelMarkers()
+        const doRebuild = () => { rebuildFieldMarkers(); rebuildIntelMarkers() }
+        doRebuild()                 // すぐ試す
+        map.once('idle', doRebuild) // style.load時点で未ロードでも、idleで確実に再構築
       })
     })
 
@@ -415,15 +416,17 @@ export default function MapView({
       return
     }
 
-    // スタイルロード済みなら即追加、未ロードなら load イベント後に追加
+    // スタイルロード済みなら即追加、未ロードなら load/idle 後に追加
     if (map.isStyleLoaded()) {
       addRadar()
     } else {
       map.once('style.load', addRadar)
     }
+    map.once('idle', addRadar)   // style.load時点で未ロードでも確実に追加
 
     return () => {
       map.off('style.load', addRadar)
+      map.off('idle', addRadar)
       removeRadar()
       setFrames([])
       setFrameIndex(0)
