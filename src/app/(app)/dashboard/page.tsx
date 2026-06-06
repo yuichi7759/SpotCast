@@ -16,6 +16,7 @@ import AccountMenu from '@/components/layout/AccountMenu'
 import { useToast } from '@/components/ToastProvider'
 import { createClient } from '@/lib/supabase/client'
 import { loadOrder, saveOrder } from '@/lib/spotOrder'
+import { loadMarkerZoom } from '@/lib/markerZoomPref'
 import type { IntelligenceEvent } from '@/lib/mockIntelligence'
 
 const FREE_POINT_LIMIT = 3
@@ -134,7 +135,7 @@ export default function DashboardPage() {
     setSelectedEvent(null)
     if (field.lat != null && field.lng != null) {
       setCenter([field.lng, field.lat])
-      setZoom(15)
+      setZoom(loadMarkerZoom())
     }
     // モバイル：タブは勝手に最大化しない。peek（地図が見えない）の時だけ中段(list)へ。
     setMobileSnap(prev => (prev === 'peek' ? 'list' : prev))

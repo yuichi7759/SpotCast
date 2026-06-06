@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useTheme } from '@/components/ThemeProvider'
 import { MARKER_SIZE_OPTIONS, loadMarkerSize, saveMarkerSize, type MarkerSize } from '@/lib/markerSize'
 import { loadWeatherIcons, saveWeatherIcons } from '@/lib/weatherIconsPref'
+import { MARKER_ZOOM_OPTIONS, loadMarkerZoom, saveMarkerZoom } from '@/lib/markerZoomPref'
 import { useLocale } from '@/components/LocaleProvider'
 import { LOCALES } from '@/lib/i18n/dictionaries'
 
@@ -16,6 +17,7 @@ export default function SettingsPage() {
   const [loggingOut, setLoggingOut] = useState(false)
   const [markerSize, setMarkerSize] = useState<MarkerSize>('md')
   const [wxIcons, setWxIcons]       = useState(true)
+  const [markerZoom, setMarkerZoom] = useState(12)
   const { theme, toggle } = useTheme()
   const { locale, setLocale, t } = useLocale()
   const router = useRouter()
@@ -25,7 +27,7 @@ export default function SettingsPage() {
   const isUpgradedReturn = typeof window !== 'undefined'
     && new URLSearchParams(window.location.search).get('upgraded') === '1'
 
-  useEffect(() => { setMarkerSize(loadMarkerSize()); setWxIcons(loadWeatherIcons()) }, [])
+  useEffect(() => { setMarkerSize(loadMarkerSize()); setWxIcons(loadWeatherIcons()); setMarkerZoom(loadMarkerZoom()) }, [])
 
   useEffect(() => {
     if (isUpgradedReturn) {
@@ -249,6 +251,33 @@ export default function SettingsPage() {
                   background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.3)', transition: 'left 0.2s',
                 }}/>
               </button>
+            </div>
+            {/* クリック時のズーム */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: 12, borderBottom: `1px solid ${borderColor}` }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>クリック時のズーム</div>
+                <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>マーカーを選択した時の拡大率</div>
+              </div>
+              <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                {MARKER_ZOOM_OPTIONS.map(opt => {
+                  const active = markerZoom === opt.zoom
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() => { setMarkerZoom(opt.zoom); saveMarkerZoom(opt.zoom) }}
+                      style={{
+                        minWidth: 44, padding: '6px 10px', borderRadius: 8,
+                        background: active ? (isLight ? '#3b82f6' : 'rgba(59,130,246,0.25)') : (isLight ? '#eef1f5' : 'rgba(255,255,255,0.06)'),
+                        border: `1px solid ${active ? '#3b82f6' : borderColor}`,
+                        color: active ? (isLight ? '#fff' : '#93c5fd') : textMuted,
+                        fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s',
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
             {/* 言語 */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: 12 }}>
