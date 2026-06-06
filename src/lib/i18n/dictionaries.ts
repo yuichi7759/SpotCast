@@ -265,6 +265,7 @@ export const dictionaries = {
     'price.faq3a':     '地図上で登録した任意の場所のことです。農地・工場・観測地点・お気に入りスポットなど、どんな場所でも登録できます。',
     'price.faq4q':     'Best Day機能とは何ですか？',
     'price.faq4a':     '登録したポイントごとに、向こう7〜14日間の「晴れに最適な日」や「雨が期待できる日」をスコアで可視化する機能です。複数ポイントを横並びに比較できます。',
+    'price.usdApprox': '',
   },
   en: {
     'common.save':    'Save',
@@ -515,6 +516,7 @@ export const dictionaries = {
     'price.faq3a':     'Any place you register on the map — farms, factories, observation sites, favorite spots, anywhere.',
     'price.faq4q':     'What is Best Day?',
     'price.faq4a':     'For each registered point, it scores the best sunny or rainy days over the next 7–14 days, so you can compare points side by side.',
+    'price.usdApprox': '≈ US$6.50 / mo',
   },
 } as const
 

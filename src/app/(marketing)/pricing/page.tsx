@@ -121,6 +121,9 @@ export default function PricingPage() {
                   <span style={{ fontSize: 40, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>{p.price}</span>
                   <span style={{ fontSize: 13, color: '#94a3b8', marginBottom: 4 }}>{p.period}</span>
                 </div>
+                {p.highlight && t('price.usdApprox') && (
+                  <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>{t('price.usdApprox')}</p>
+                )}
                 <p style={{ fontSize: 12, color: '#94a3b8' }}>{p.desc}</p>
               </div>
 
