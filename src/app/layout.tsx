@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import ThemeProvider from '@/components/ThemeProvider'
 import LocaleProvider from '@/components/LocaleProvider'
+import { Analytics } from '@vercel/analytics/next'
 import { getLocale, st } from '@/lib/i18n/server'
 
 const SITE_URL = 'https://spotcast.evident-ai.org'
@@ -77,6 +78,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <ThemeProvider><LocaleProvider>{children}</LocaleProvider></ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )
