@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import type { Field, WeatherData } from '@/types/field'
 import type { HourlyWeather, HourlyPoint } from '@/app/api/weather/hourly/route'
+import { useT } from '@/components/LocaleProvider'
 
 interface Props {
   point: Field | null
@@ -68,6 +69,7 @@ const CELL_W = 54
 const LABEL_W = 58
 
 export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 'standard' }: Props) {
+  const t = useT()
   const [weather, setWeather]   = useState<WeatherData | null>(null)
   const [hourly,  setHourly]    = useState<HourlyWeather | null>(null)
   const [loadingW, setLoadingW] = useState(false)
@@ -126,7 +128,7 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
       const d = new Date(today)
       d.setDate(d.getDate() + g.offset)
       const dateStr  = `${d.getMonth() + 1}/${d.getDate()}`
-      const dayLabel = g.offset === 0 ? '今日' : g.offset === 1 ? '明日' : `${d.getMonth() + 1}/${d.getDate()}`
+      const dayLabel = g.offset === 0 ? t('weather.today') : g.offset === 1 ? t('weather.tomorrow') : `${d.getMonth() + 1}/${d.getDate()}`
       const daily = hourly?.daily14?.find(day => {
         const dd = new Date(day.date)
         return dd.getDate() === d.getDate() && dd.getMonth() === d.getMonth()
@@ -182,7 +184,7 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
 
       {!hasCoords ? (
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dash-text-4)', fontSize: 14, textAlign: 'center', padding: 20 }}>
-          地図上でポイントを設定してください
+          {t('weather.setPoint')}
         </div>
       ) : (
         <div style={{ flex: 1, padding: '10px 12px', overflow: 'hidden' }}>
@@ -330,12 +332,12 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
               </div>
             )
           })() : (
-            <div style={{ color: 'var(--dash-text-4)', fontSize: 13, paddingTop: 12 }}>取得できません</div>
+            <div style={{ color: 'var(--dash-text-4)', fontSize: 13, paddingTop: 12 }}>{t('weather.unavailable')}</div>
           )}
 
           {plan === 'free' && hourly && (
             <div style={{ marginTop: 8, padding: '8px 12px', borderRadius: 8, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.22)', fontSize: 12, color: 'rgba(251,191,36,0.9)', textAlign: 'center' }}>
-              ⚡ Standardプランで48時間予報が利用できます
+              ⚡ {t('weather.freeBanner')}
             </div>
           )}
         </div>

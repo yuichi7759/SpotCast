@@ -3,10 +3,12 @@ import { useEffect, useState, useMemo } from 'react'
 import type { Field } from '@/types/field'
 import type { HourlyWeather } from '@/app/api/weather/hourly/route'
 import { applyOrder } from '@/lib/spotOrder'
+import { useLocale } from '@/components/LocaleProvider'
 
 export type ScoreMode = 'sunny' | 'rainy'
 
 const DOW_JP = ['日', '月', '火', '水', '木', '金', '土']
+const DOW_EN = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 
 const WEATHER_ICON: Record<string, string> = {
   Clear: '☀️', Clouds: '☁️', Rain: '🌧️', Drizzle: '🌦️',
@@ -99,6 +101,8 @@ interface Props {
 }
 
 export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey, plan = 'standard', orderIds = [] }: Props) {
+  const { t, locale } = useLocale()
+  const DOW = locale === 'en' ? DOW_EN : DOW_JP
   const [mode, setMode]           = useState<ScoreMode>('sunny')
   const [hourlyData, setHourly]   = useState<Record<string, HourlyWeather | null>>({})
   const [loadingIds, setLoading]  = useState<Set<string>>(new Set())
@@ -209,7 +213,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
         height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
         color: 'var(--dash-text-4)', fontSize: 14,
       }}>
-        座標登録済みのポイントがありません
+        {t('dash.noGeoPoints')}
       </div>
     )
   }
@@ -228,9 +232,9 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
           gap: 12,
         }}>
           <div style={{ fontSize: 32 }}>🔒</div>
-          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--dash-text)' }}>Best Day機能</div>
+          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--dash-text)' }}>{t('bestday.lockTitle')}</div>
           <div style={{ fontSize: 13, color: 'var(--dash-text-3)', textAlign: 'center', lineHeight: 1.7 }}>
-            Standardプランで<br/>全ポイントのベストデイを比較できます
+            {t('bestday.lockBody')}
           </div>
           <a href="/settings" style={{
             marginTop: 4, padding: '9px 20px', borderRadius: 10,
@@ -238,7 +242,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
             color: '#000', fontSize: 13, fontWeight: 800,
             textDecoration: 'none',
           }}>
-            ⚡ アップグレード
+            {t('bestday.upgrade')}
           </a>
         </div>
       )}
@@ -271,7 +275,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                   boxShadow: active ? `0 0 10px ${accent}22` : 'none',
                 }}
               >
-                {m === 'sunny' ? '☀️ 晴れ' : '🌧️ 雨'}
+                {m === 'sunny' ? t('bestday.sunny') : t('bestday.rainy')}
               </button>
             )
           })}
@@ -305,7 +309,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
             {dates.map((date, i) => {
               const d = new Date(date + 'T00:00:00')
               const label  = `${d.getMonth() + 1}/${d.getDate()}`
-              const dow    = DOW_JP[d.getDay()]
+              const dow    = DOW[d.getDay()]
               const isSat  = d.getDay() === 6
               const isSun  = d.getDay() === 0
               const mIdx   = top3Idx.indexOf(i)
@@ -392,7 +396,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                   {/* Toggle checkbox */}
                   <button
                     onClick={() => togglePoint(p.id)}
-                    title={isOn ? '除外する' : '含める'}
+                    title={isOn ? t('bestday.exclude') : t('bestday.include')}
                     style={{
                       flexShrink: 0,
                       width: 16, height: 16, borderRadius: 4,
@@ -493,7 +497,7 @@ export default function BestDayMatrix({ allPoints, highlightPointId, refreshKey,
                 display: 'flex', alignItems: 'center', gap: 8, padding: '0 10px',
               }}>
                 <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--dash-text-2)', letterSpacing: '0.04em' }}>
-                  デイスコア
+                  {t('bestday.dayScore')}
                 </span>
               </div>
 

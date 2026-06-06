@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useEffect, useState, useRef } from 'react'
 import type { Field, WeatherData } from '@/types/field'
 import { applyOrder } from '@/lib/spotOrder'
+import { useT } from '@/components/LocaleProvider'
 
 interface Props {
   points: Field[]
@@ -51,6 +52,7 @@ function PointCard({
 }) {
   const [weather, setWeather] = useState<WeatherData | null>(null)
   const cardRef = useRef<HTMLDivElement>(null)
+  const t = useT()
   const accentColor = point.color ?? '#60a5fa'
   const hasCoords = point.lat != null && point.lng != null
 
@@ -105,7 +107,7 @@ function PointCard({
           onGripDragStart(e)
         }}
         onClick={e => e.stopPropagation()}
-        title="ドラッグして並べ替え"
+        title={t('dash.dragReorder')}
         style={{
           flexShrink: 0, cursor: dragging ? 'grabbing' : 'grab',
           color: dragging ? 'var(--dash-accent)' : 'var(--dash-text-4)',
@@ -137,7 +139,7 @@ function PointCard({
         </div>
         {!hasCoords && (
           <div style={{ fontSize: 12, color: 'var(--dash-text-4)', marginTop: 2 }}>
-            📍 地点未設定
+            📍 {t("dash.noLocation")}
           </div>
         )}
       </div>
@@ -169,7 +171,7 @@ function PointCard({
         }}
         onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--dash-text-2)' }}
         onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--dash-text-4)' }}
-        title="編集"
+        title={t('dash.edit')}
       >
         <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
           <circle cx="3" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/>
@@ -180,6 +182,7 @@ function PointCard({
 }
 
 export default function PointList({ points, selectedPointId, onPointClick, onPointEdit, onAdd, orderIds, onReorder }: Props) {
+  const t = useT()
   const [dragId, setDragId] = useState<string | null>(null)
   const [overId, setOverId] = useState<string | null>(null)
 
@@ -225,7 +228,7 @@ export default function PointList({ points, selectedPointId, onPointClick, onPoi
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <Link
           href="/settings"
-          title="設定"
+          title={t('settings.title')}
           style={{
             width: 28, height: 28, borderRadius: 8,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -269,7 +272,7 @@ export default function PointList({ points, selectedPointId, onPointClick, onPoi
           onMouseLeave={e => {
             (e.currentTarget as HTMLButtonElement).style.background = 'var(--dash-accent-bg)'
           }}
-          title="ポイントを追加"
+          title={t('dash.addPoint')}
         >
           ＋
         </button>
@@ -292,8 +295,8 @@ export default function PointList({ points, selectedPointId, onPointClick, onPoi
             fontSize: 14,
             lineHeight: 1.6,
           }}>
-            まだポイントがありません。<br />
-            「＋」ボタンで追加しましょう。
+            {t("dash.emptyTitle")}<br />
+            {t("dash.emptyHint")}
           </div>
         ) : (
           ordered.map(p => (
