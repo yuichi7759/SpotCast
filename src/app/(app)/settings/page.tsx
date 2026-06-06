@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTheme } from '@/components/ThemeProvider'
 import { MARKER_SIZE_OPTIONS, loadMarkerSize, saveMarkerSize, type MarkerSize } from '@/lib/markerSize'
+import { loadWeatherIcons, saveWeatherIcons } from '@/lib/weatherIconsPref'
 import { useLocale } from '@/components/LocaleProvider'
 import { LOCALES } from '@/lib/i18n/dictionaries'
 
@@ -14,6 +15,7 @@ export default function SettingsPage() {
   const [upgradeError, setUpgradeError] = useState('')
   const [loggingOut, setLoggingOut] = useState(false)
   const [markerSize, setMarkerSize] = useState<MarkerSize>('md')
+  const [wxIcons, setWxIcons]       = useState(true)
   const { theme, toggle } = useTheme()
   const { locale, setLocale, t } = useLocale()
   const router = useRouter()
@@ -23,7 +25,7 @@ export default function SettingsPage() {
   const isUpgradedReturn = typeof window !== 'undefined'
     && new URLSearchParams(window.location.search).get('upgraded') === '1'
 
-  useEffect(() => { setMarkerSize(loadMarkerSize()) }, [])
+  useEffect(() => { setMarkerSize(loadMarkerSize()); setWxIcons(loadWeatherIcons()) }, [])
 
   useEffect(() => {
     if (isUpgradedReturn) {
@@ -226,6 +228,27 @@ export default function SettingsPage() {
                   )
                 })}
               </div>
+            </div>
+            {/* 地図に天気アイコンを表示 */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: 12, borderBottom: `1px solid ${borderColor}` }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>地図に天気アイコンを表示</div>
+                <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>各マーカーの横に現在の天気を表示</div>
+              </div>
+              <button
+                onClick={() => { const v = !wxIcons; setWxIcons(v); saveWeatherIcons(v) }}
+                style={{
+                  width: 48, height: 26, borderRadius: 999, flexShrink: 0,
+                  background: wxIcons ? '#3b82f6' : (isLight ? '#cbd5e1' : '#334155'),
+                  border: 'none', cursor: 'pointer', position: 'relative', transition: 'background 0.2s',
+                }}
+              >
+                <span style={{
+                  position: 'absolute', top: 4, left: wxIcons ? 26 : 4,
+                  width: 18, height: 18, borderRadius: '50%',
+                  background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.3)', transition: 'left 0.2s',
+                }}/>
+              </button>
             </div>
             {/* 言語 */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: 12 }}>

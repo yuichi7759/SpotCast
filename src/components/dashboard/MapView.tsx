@@ -3,8 +3,14 @@ import { useEffect, useRef, useState } from 'react'
 import type { Field } from '@/types/field'
 import { calcFieldStatus } from '@/lib/fieldStatus'
 import { markerScale } from '@/lib/markerSize'
+import { loadWeatherIcons } from '@/lib/weatherIconsPref'
 import type { IntelligenceEvent } from '@/lib/mockIntelligence'
 import { EVENT_CFG, SEVERITY_CFG } from '@/lib/mockIntelligence'
+
+const WX_EMOJI: Record<string, string> = {
+  Clear: '☀️', Clouds: '☁️', Rain: '🌧️', Drizzle: '🌦️',
+  Thunderstorm: '⛈️', Snow: '❄️', Fog: '🌫️',
+}
 
 // マーカー半径のズーム補間式（サイズ倍率 s を掛ける）
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -95,6 +101,10 @@ export default function MapView({
   const [isPlaying,  setIsPlaying]  = useState(false)
   const [mapStyleId, setMapStyleId] = useState<MapStyleId>('satellite')
   const appliedStyleRef = useRef<MapStyleId>('satellite')   // マップに実際に適用済みのスタイル
+  const [showWxIcons, setShowWxIcons] = useState(true)
+  const [wxByField, setWxByField]     = useState<Record<string, string>>({})  // fieldId -> weather_main
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const wxMkrsRef = useRef<any[]>([])   // 天気アイコンのHTMLマーカー
 
   const containerRef = useRef<HTMLDivElement>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -315,6 +325,59 @@ export default function MapView({
     window.addEventListener('spotcast:markerSizeChange', onChange)
     return () => window.removeEventListener('spotcast:markerSizeChange', onChange)
   }, [])
+
+  // ── 1d. 天気アイコン表示設定の読込＋変更監視 ──────────────
+  useEffect(() => {
+    setShowWxIcons(loadWeatherIcons())
+    const onChange = (e: Event) => setShowWxIcons((e as CustomEvent).detail as boolean)
+    window.addEventListener('spotcast:weatherIconsChange', onChange)
+    return () => window.removeEventListener('spotcast:weatherIconsChange', onChange)
+  }, [])
+
+  // ── 1e. 各ポイントの現在天気を取得（同時4件まで） ──────────
+  useEffect(() => {
+    if (!showWxIcons) return
+    const pts = fields.filter(f => f.lat != null && f.lng != null)
+    if (pts.length === 0) return
+    let cancelled = false
+    let idx = 0
+    async function worker() {
+      while (idx < pts.length && !cancelled) {
+        const f = pts[idx++]
+        try {
+          const r = await fetch(`/api/weather?lat=${f.lat}&lng=${f.lng}`, { cache: 'no-store' })
+          const d = r.ok ? await r.json() : null
+          if (!cancelled && d?.current?.weather_main) {
+            setWxByField(prev => ({ ...prev, [f.id]: d.current.weather_main }))
+          }
+        } catch {}
+      }
+    }
+    Promise.all(Array.from({ length: Math.min(4, pts.length) }, () => worker()))
+    return () => { cancelled = true }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fields.map(f => `${f.id}:${f.lat},${f.lng}`).join('|'), showWxIcons])
+
+  // ── 1f. 天気アイコンのHTMLマーカーを描画（マーカー横） ──────
+  useEffect(() => {
+    const map = mapRef.current
+    const mgl = mglRef.current
+    if (!map || !mgl) return
+    wxMkrsRef.current.forEach(m => m.remove())
+    wxMkrsRef.current = []
+    if (!showWxIcons) return
+    fields.forEach(f => {
+      if (f.lat == null || f.lng == null) return
+      const main = wxByField[f.id]
+      if (!main) return
+      const el = document.createElement('div')
+      el.textContent = WX_EMOJI[main] ?? '🌫️'
+      el.style.cssText = 'font-size:17px;line-height:1;pointer-events:none;user-select:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.55));'
+      const marker = new mgl.Marker({ element: el, anchor: 'bottom', offset: [16, -8] })
+        .setLngLat([f.lng, f.lat]).addTo(map)
+      wxMkrsRef.current.push(marker)
+    })
+  }, [fields, wxByField, showWxIcons])
 
   // ── 2. FlyTo when center changes ───────────────────────────
   useEffect(() => {
