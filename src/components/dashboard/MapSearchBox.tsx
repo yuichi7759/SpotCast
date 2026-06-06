@@ -1,6 +1,6 @@
 'use client'
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { useT } from '@/components/LocaleProvider'
+import { useLocale } from '@/components/LocaleProvider'
 
 interface GeoResult {
   id: string
@@ -16,7 +16,7 @@ interface Props {
 }
 
 export default function MapSearchBox({ mapboxToken, mapCenter, onSelect }: Props) {
-  const t = useT()
+  const { t, locale } = useLocale()
   const [query,    setQuery]    = useState('')
   const [results,  setResults]  = useState<GeoResult[]>([])
   const [loading,  setLoading]  = useState(false)
@@ -42,11 +42,12 @@ export default function MapSearchBox({ mapboxToken, mapCenter, onSelect }: Props
     if (!q.trim()) { setResults([]); setOpen(false); return }
     setLoading(true)
     try {
+      // 地図中心に近い結果を優先（国・言語の限定はしない＝世界対応）
       const proximity = mapCenter
         ? `&proximity=${mapCenter[0]},${mapCenter[1]}`
-        : '&proximity=136.7,35.7'   // 日本中心にフォールバック
+        : ''
       const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json` +
-        `?access_token=${mapboxToken}&country=jp&language=ja&types=address,place,locality,neighborhood,poi&limit=6` +
+        `?access_token=${mapboxToken}&language=${locale}&types=address,place,locality,neighborhood,poi&limit=6` +
         proximity
       const res = await fetch(url)
       const data = await res.json()
@@ -58,7 +59,7 @@ export default function MapSearchBox({ mapboxToken, mapCenter, onSelect }: Props
     } finally {
       setLoading(false)
     }
-  }, [mapboxToken, mapCenter])
+  }, [mapboxToken, mapCenter, locale])
 
   // 「35.6762, 139.6503」や「35.6762 139.6503」形式の座標を検出
   function parseCoords(v: string): { lat: number; lng: number } | null {
