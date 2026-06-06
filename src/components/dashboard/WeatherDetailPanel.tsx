@@ -65,7 +65,7 @@ function ShimmerBlock({ width, height, borderRadius = 6 }: { width: number | str
 // Row heights — must match between label column and data columns
 const RH = { time: 28, icon: 46, temp: 36, rain: 32 }
 const CELL_W = 54
-const LABEL_W = 52
+const LABEL_W = 58
 
 export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 'standard' }: Props) {
   const [weather, setWeather]   = useState<WeatherData | null>(null)
@@ -225,11 +225,11 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
                   {/* チャート縦軸（左=気温/赤, 右=降水mm/青） */}
                   <div style={{ height: CHART_H, position: 'relative' }}>
                     {/* 気温軸 */}
-                    <span style={{ position: 'absolute', left: 3, top: padT - 6, fontSize: 9, fontWeight: 700, color: 'var(--w-temp1)' }}>{Math.round(tMax)}°</span>
-                    <span style={{ position: 'absolute', left: 3, top: CHART_H - padB - 6, fontSize: 9, fontWeight: 700, color: 'var(--w-temp1)' }}>{Math.round(tMin)}°</span>
+                    <span style={{ position: 'absolute', left: 3, top: padT - 7, fontSize: 11, fontWeight: 700, color: 'var(--w-temp1)' }}>{Math.round(tMax)}°</span>
+                    <span style={{ position: 'absolute', left: 3, top: CHART_H - padB - 7, fontSize: 11, fontWeight: 700, color: 'var(--w-temp1)' }}>{Math.round(tMin)}°</span>
                     {/* 降水量軸 */}
-                    <span style={{ position: 'absolute', right: 3, top: padT - 6, fontSize: 9, fontWeight: 700, color: 'var(--w-rain-hi)' }}>{Math.round(pMax)}</span>
-                    <span style={{ position: 'absolute', right: 3, top: CHART_H - padB - 6, fontSize: 9, fontWeight: 700, color: 'var(--w-rain-hi)' }}>mm</span>
+                    <span style={{ position: 'absolute', right: 3, top: padT - 7, fontSize: 11, fontWeight: 700, color: 'var(--w-rain-hi)' }}>{Math.round(pMax)}</span>
+                    <span style={{ position: 'absolute', right: 3, top: CHART_H - padB - 7, fontSize: 11, fontWeight: 700, color: 'var(--w-rain-hi)' }}>mm</span>
                   </div>
                 </div>
 
