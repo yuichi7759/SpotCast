@@ -179,7 +179,14 @@ export const dictionaries = {
     'support.failed':      '送信に失敗しました',
 
     // ── メタ（SEO） ──
-    'meta.title': 'SpotCast — 気になる場所の天気をワンクリックで',
+        'map.style.satellite': '航空写真',
+    'map.style.streets': '地図',
+    'map.style.light': 'ライト',
+    'map.style.dark': 'ダーク',
+    'map.searchPh': '場所・住所・施設名で検索…',
+    'map.jumpCoords': '座標でジャンプ',
+    'map.poweredBy': 'Powered by Mapbox',
+'meta.title': 'SpotCast — 気になる場所の天気をワンクリックで',
     'meta.desc':  '地図をクリックするだけで、世界中の好きな場所の天気を登録・管理できる気象サービス。リアルタイム天気・最大14日予報・雨雲レーダー・複数地点のBest Day比較を、ひとつのダッシュボードで。',
     // ── ランディングページ ──
     'lp.nav.pricing': '料金',
@@ -431,7 +438,14 @@ export const dictionaries = {
     'support.validation':  'Please enter a subject and message',
     'support.failed':      'Failed to send',
 
-    'meta.title': 'SpotCast — Pinpoint weather, one click away',
+        'map.style.satellite': 'Satellite',
+    'map.style.streets': 'Map',
+    'map.style.light': 'Light',
+    'map.style.dark': 'Dark',
+    'map.searchPh': 'Search place, address or venue…',
+    'map.jumpCoords': 'Jump to coordinates',
+    'map.poweredBy': 'Powered by Mapbox',
+'meta.title': 'SpotCast — Pinpoint weather, one click away',
     'meta.desc':  'Click the map to register and manage weather for any place worldwide. Real-time weather, up to 14-day forecast, rain radar and multi-point Best Day comparison in one dashboard.',
     'lp.nav.pricing': 'Pricing',
     'lp.nav.login':   'Log in',

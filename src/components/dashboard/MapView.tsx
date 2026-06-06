@@ -4,6 +4,7 @@ import type { Field } from '@/types/field'
 import { calcFieldStatus } from '@/lib/fieldStatus'
 import { markerScale } from '@/lib/markerSize'
 import { loadWeatherIcons } from '@/lib/weatherIconsPref'
+import { useT } from '@/components/LocaleProvider'
 import type { IntelligenceEvent } from '@/lib/mockIntelligence'
 import { EVENT_CFG, SEVERITY_CFG } from '@/lib/mockIntelligence'
 
@@ -93,6 +94,7 @@ export default function MapView({
   drawingMode, drawingPoints, onPointAdd, onPolygonClose,
   showRainRadar = false,
 }: Props) {
+  const t = useT()
   const mapToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
   const [radarTime,  setRadarTime]  = useState<Date | null>(null)
@@ -948,7 +950,7 @@ export default function MapView({
             <button
               key={id}
               onClick={() => setMapStyleId(id)}
-              title={MAP_STYLES[id].label}
+              title={t(`map.style.`)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
                 padding: '4px 8px', borderRadius: 7, height: 26,
@@ -960,7 +962,7 @@ export default function MapView({
               }}
             >
               <StyleIcon id={id} />
-              {active && <span>{MAP_STYLES[id].label}</span>}
+              {active && <span>{t(`map.style.`)}</span>}
             </button>
           )
         })}

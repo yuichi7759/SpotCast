@@ -1,5 +1,6 @@
 'use client'
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { useT } from '@/components/LocaleProvider'
 
 interface GeoResult {
   id: string
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export default function MapSearchBox({ mapboxToken, mapCenter, onSelect }: Props) {
+  const t = useT()
   const [query,    setQuery]    = useState('')
   const [results,  setResults]  = useState<GeoResult[]>([])
   const [loading,  setLoading]  = useState(false)
@@ -162,7 +164,7 @@ export default function MapSearchBox({ mapboxToken, mapCenter, onSelect }: Props
           onCompositionStart={() => { composingRef.current = true }}
           onCompositionEnd={() => { composingRef.current = false }}
           onFocus={() => { if (results.length > 0) setOpen(true) }}
-          placeholder="場所・住所・施設名で検索…"
+          placeholder={t("map.searchPh")}
           style={{
             flex: 1, background: 'none', border: 'none', outline: 'none',
             color: '#fff', fontSize: 13, fontWeight: 500,
@@ -250,7 +252,7 @@ export default function MapSearchBox({ mapboxToken, mapCenter, onSelect }: Props
                   )}
                   {isCoord && (
                     <div style={{ fontSize: 10, color: 'rgba(96,165,250,0.5)', marginTop: 1 }}>
-                      座標でジャンプ
+                      {t("map.jumpCoords")}
                     </div>
                   )}
                 </div>
@@ -258,7 +260,7 @@ export default function MapSearchBox({ mapboxToken, mapCenter, onSelect }: Props
             )
           })}
           <div style={{ padding: '5px 12px', fontSize: 10, color: 'rgba(255,255,255,0.15)', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-            Powered by Mapbox · 無料枠 10万回/月
+            {t("map.poweredBy")}
           </div>
         </div>
       )}
