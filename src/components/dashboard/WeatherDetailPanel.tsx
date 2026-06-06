@@ -65,7 +65,7 @@ function ShimmerBlock({ width, height, borderRadius = 6 }: { width: number | str
 // Row heights — must match between label column and data columns
 const RH = { time: 28, icon: 46, temp: 36, rain: 32 }
 const CELL_W = 54
-const LABEL_W = 40
+const LABEL_W = 52
 
 export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 'standard' }: Props) {
   const [weather, setWeather]   = useState<WeatherData | null>(null)
@@ -222,10 +222,14 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
                       <span style={{ fontSize: 10, color: 'var(--dash-text-3)', fontWeight: 700 }}>{label}</span>
                     </div>
                   ))}
-                  {/* チャート凡例 */}
-                  <div style={{ height: CHART_H, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-                    <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--w-temp1)' }}>気温</span>
-                    <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--w-rain-hi)' }}>雨mm</span>
+                  {/* チャート縦軸（左=気温/赤, 右=降水mm/青） */}
+                  <div style={{ height: CHART_H, position: 'relative' }}>
+                    {/* 気温軸 */}
+                    <span style={{ position: 'absolute', left: 3, top: padT - 6, fontSize: 9, fontWeight: 700, color: 'var(--w-temp1)' }}>{Math.round(tMax)}°</span>
+                    <span style={{ position: 'absolute', left: 3, top: CHART_H - padB - 6, fontSize: 9, fontWeight: 700, color: 'var(--w-temp1)' }}>{Math.round(tMin)}°</span>
+                    {/* 降水量軸 */}
+                    <span style={{ position: 'absolute', right: 3, top: padT - 6, fontSize: 9, fontWeight: 700, color: 'var(--w-rain-hi)' }}>{Math.round(pMax)}</span>
+                    <span style={{ position: 'absolute', right: 3, top: CHART_H - padB - 6, fontSize: 9, fontWeight: 700, color: 'var(--w-rain-hi)' }}>mm</span>
                   </div>
                 </div>
 
@@ -294,6 +298,9 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
                     height={CHART_H}
                     style={{ display: 'block', borderTop: `1px solid ${SEP}` }}
                   >
+                    {/* グリッド線（上=最大ライン / 下=基準線） */}
+                    <line x1={0} y1={padT} x2={allItems.length * CELL_W} y2={padT} stroke="var(--dash-border)" strokeWidth={1} strokeDasharray="3 3" />
+                    <line x1={0} y1={CHART_H - padB} x2={allItems.length * CELL_W} y2={CHART_H - padB} stroke="var(--dash-border)" strokeWidth={1} />
                     {/* 降水量バー */}
                     {allItems.map((a, i) => {
                       const p = a.h.precip ?? 0
