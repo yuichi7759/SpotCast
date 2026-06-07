@@ -13,6 +13,40 @@ const WX_EMOJI: Record<string, string> = {
   Thunderstorm: '⛈️', Snow: '❄️', Fog: '🌫️',
 }
 
+// 天気アニメ用キーフレームを一度だけ注入
+function ensureWxAnimCss() {
+  if (typeof document === 'undefined' || document.getElementById('wx-anim-css')) return
+  const s = document.createElement('style')
+  s.id = 'wx-anim-css'
+  s.textContent = `
+    @keyframes wxTwinkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.82)}}
+    @keyframes wxDrop{0%{transform:translateY(-2px);opacity:0}25%{opacity:1}100%{transform:translateY(8px);opacity:0}}
+    @keyframes wxSnow{0%{transform:translateY(-2px) rotate(-12deg)}100%{transform:translateY(6px) rotate(12deg)}}
+  `
+  document.head.appendChild(s)
+}
+
+// 天気に応じてアニメするマーカー要素を組み立てる
+function buildWxElement(main: string): HTMLDivElement {
+  ensureWxAnimCss()
+  const el = document.createElement('div')
+  el.style.cssText = 'position:relative;width:20px;height:20px;line-height:1;pointer-events:none;user-select:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.55));'
+  if (main === 'Clear') {
+    el.innerHTML = '<span style="font-size:18px;display:inline-block;animation:wxTwinkle 2.2s ease-in-out infinite">☀️</span>'
+  } else if (main === 'Rain' || main === 'Drizzle' || main === 'Thunderstorm') {
+    const cloud = main === 'Thunderstorm' ? '⛈️' : '☁️'
+    el.innerHTML =
+      `<span style="font-size:16px">${cloud}</span>` +
+      '<i style="position:absolute;left:5px;bottom:-1px;width:2.5px;height:6px;border-radius:2px;background:#7dd3fc;animation:wxDrop 1.1s linear infinite"></i>' +
+      '<i style="position:absolute;left:11px;bottom:-1px;width:2.5px;height:6px;border-radius:2px;background:#7dd3fc;animation:wxDrop 1.1s linear .55s infinite"></i>'
+  } else if (main === 'Snow') {
+    el.innerHTML = '<span style="font-size:17px;display:inline-block;animation:wxSnow 2.4s ease-in-out infinite alternate">❄️</span>'
+  } else {
+    el.innerHTML = `<span style="font-size:17px">${WX_EMOJI[main] ?? '🌫️'}</span>`
+  }
+  return el
+}
+
 // マーカー半径のズーム補間式（サイズ倍率 s を掛ける）
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function radiusExpr(base5: number, base15: number, s: number): any {
@@ -372,9 +406,7 @@ export default function MapView({
       if (f.lat == null || f.lng == null) return
       const main = wxByField[f.id]
       if (!main) return
-      const el = document.createElement('div')
-      el.textContent = WX_EMOJI[main] ?? '🌫️'
-      el.style.cssText = 'font-size:17px;line-height:1;pointer-events:none;user-select:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.55));'
+      const el = buildWxElement(main)
       const marker = new mgl.Marker({ element: el, anchor: 'bottom', offset: [16, -8] })
         .setLngLat([f.lng, f.lat]).addTo(map)
       wxMkrsRef.current.push(marker)
