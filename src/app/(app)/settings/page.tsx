@@ -213,6 +213,7 @@ export default function SettingsPage() {
               <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
                 {MARKER_SIZE_OPTIONS.map(opt => {
                   const active = markerSize === opt.id
+                  const labelKey = 'settings.size' + opt.id.charAt(0).toUpperCase() + opt.id.slice(1)
                   return (
                     <button
                       key={opt.id}
@@ -225,7 +226,7 @@ export default function SettingsPage() {
                         fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s',
                       }}
                     >
-                      {opt.label}
+                      {t(labelKey)}
                     </button>
                   )
                 })}
@@ -261,6 +262,7 @@ export default function SettingsPage() {
               <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
                 {MARKER_ZOOM_OPTIONS.map(opt => {
                   const active = markerZoom === opt.zoom
+                  const labelKey = 'settings.zoom' + opt.id.charAt(0).toUpperCase() + opt.id.slice(1)
                   return (
                     <button
                       key={opt.id}
@@ -273,7 +275,7 @@ export default function SettingsPage() {
                         fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s',
                       }}
                     >
-                      {opt.label}
+                      {t(labelKey)}
                     </button>
                   )
                 })}

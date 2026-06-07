@@ -158,6 +158,13 @@ export const dictionaries = {
     'settings.wxIconsHint':   '各マーカーの横に現在の天気を表示',
     'settings.clickZoom':     'クリック時のズーム',
     'settings.clickZoomHint': 'マーカーを選択した時の拡大率',
+    'settings.sizeSm': '小',
+    'settings.sizeMd': '標準',
+    'settings.sizeLg': '大',
+    'settings.zoomWide': '広域',
+    'settings.zoomNormal': '標準',
+    'settings.zoomDetail': '詳細',
+    'settings.zoomMax': '拡大',
     'settings.contactHint':   '不具合・ご要望・アカウント削除',
 
     // サポート
@@ -419,6 +426,13 @@ export const dictionaries = {
     'settings.wxIconsHint':   'Show current weather next to each marker',
     'settings.clickZoom':     'Zoom on click',
     'settings.clickZoomHint': 'Zoom level when selecting a marker',
+    'settings.sizeSm': 'Small',
+    'settings.sizeMd': 'Medium',
+    'settings.sizeLg': 'Large',
+    'settings.zoomWide': 'Wide',
+    'settings.zoomNormal': 'Normal',
+    'settings.zoomDetail': 'Close',
+    'settings.zoomMax': 'Max',
     'settings.contactHint':   'Bug reports, requests, account deletion',
 
     'support.title':       'Contact support',
