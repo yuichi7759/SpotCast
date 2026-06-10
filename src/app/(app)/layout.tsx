@@ -10,7 +10,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <ToastProvider>
-      <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)' }}>
+      <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)', height: '100dvh' }}>
         <main className="flex-1 overflow-hidden flex flex-col pb-[56px] sm:pb-0">
           {children}
         </main>

@@ -13,6 +13,7 @@ interface Props {
   onAdd: () => void
   orderIds: string[]
   onReorder: (ids: string[]) => void
+  hideHeader?: boolean   // モバイル: 上のタブ/ピーク表示と重複するヘッダーを省く
 }
 
 const WEATHER_ICON: Record<string, string> = {
@@ -181,7 +182,7 @@ function PointCard({
   )
 }
 
-export default function PointList({ points, selectedPointId, onPointClick, onPointEdit, onAdd, orderIds, onReorder }: Props) {
+export default function PointList({ points, selectedPointId, onPointClick, onPointEdit, onAdd, orderIds, onReorder, hideHeader = false }: Props) {
   const t = useT()
   const [dragId, setDragId] = useState<string | null>(null)
   const [overId, setOverId] = useState<string | null>(null)
@@ -215,7 +216,8 @@ export default function PointList({ points, selectedPointId, onPointClick, onPoi
       flexDirection: 'column',
       background: 'var(--dash-panel)',
     }}>
-      {/* Header */}
+      {/* Header (モバイルでは上のタブと重複するため非表示) */}
+      {!hideHeader && (
       <div style={{
         padding: '16px 12px 12px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -278,6 +280,7 @@ export default function PointList({ points, selectedPointId, onPointClick, onPoi
         </button>
         </div>
       </div>
+      )}
 
       {/* Point list */}
       <div style={{

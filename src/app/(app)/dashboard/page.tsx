@@ -42,7 +42,7 @@ export default function DashboardPage() {
   const [mapCurrentCenter,  setMapCurrentCenter] = useState<[number, number] | undefined>()
   const [ctxMenu,           setCtxMenu]         = useState<{ lat: number; lng: number; x: number; y: number } | null>(null)
   const [searchPin,         setSearchPin]       = useState<{ lng: number; lat: number; label: string } | null>(null)
-  const [mobileSnap,        setMobileSnap]      = useState<SheetSnap>('peek')
+  const [mobileSnap,        setMobileSnap]      = useState<SheetSnap>('list')
   const [showRainRadar,     setShowRainRadar]   = useState(false)
   const [weatherRefreshKey, setWeatherRefreshKey] = useState(0)
   const [refreshing,        setRefreshing]       = useState(false)
@@ -139,8 +139,8 @@ export default function DashboardPage() {
       setCenter([field.lng, field.lat])
       setZoom(loadMarkerZoom())
     }
-    // モバイル：タブは勝手に最大化しない。peek（地図が見えない）の時だけ中段(list)へ。
-    setMobileSnap(prev => (prev === 'peek' ? 'list' : prev))
+    // モバイル：ポイント選択時は詳細スナップへ展開し、気温/降水グラフまで全部見えるように。
+    setMobileSnap('detail')
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -665,20 +665,25 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {/* FAB — add point */}
+        {/* FAB — add point. シートの上端に追従させ、詳細展開時は隠す。 */}
         <button
           onClick={handleAddClick}
           style={{
-            position: 'absolute', bottom: 160, right: 16, zIndex: 25,
+            position: 'absolute',
+            bottom: mobileSnap === 'peek' ? 'calc(84px + 14px + env(safe-area-inset-bottom))' : 'calc(56dvh + 14px + env(safe-area-inset-bottom))',
+            right: 16, zIndex: 25,
             width: 52, height: 52, borderRadius: 26,
-            background: 'rgba(62,207,142,0.18)',
+            background: 'rgba(62,207,142,0.22)',
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
-            border: '1.5px solid rgba(62,207,142,0.5)',
+            border: '1.5px solid rgba(62,207,142,0.55)',
             color: '#3ecf8e', fontSize: 28, fontWeight: 700,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer',
             boxShadow: '0 4px 20px rgba(0,0,0,0.4), 0 0 16px rgba(62,207,142,0.2)',
+            opacity: mobileSnap === 'detail' ? 0 : 1,
+            pointerEvents: mobileSnap === 'detail' ? 'none' : 'auto',
+            transition: 'bottom 0.30s cubic-bezier(0.32,0.72,0,1), opacity 0.2s',
           }}
           title={t('dash.addPoint')}
         >
@@ -717,7 +722,7 @@ export default function DashboardPage() {
             ? (
               <WeatherDetailPanel
                 point={selectedField}
-                onClose={() => { setSelected(null) }}
+                onClose={() => { setSelected(null); setMobileSnap('list') }}
                 refreshKey={weatherRefreshKey}
                 plan={plan}
               />
@@ -754,6 +759,7 @@ export default function DashboardPage() {
                       onAdd={handleAddClick}
                       orderIds={orderIds}
                       onReorder={handleReorder}
+                      hideHeader
                     />
                   ) : (
                     <BestDayMatrix allPoints={fields} highlightPointId={undefined} refreshKey={weatherRefreshKey} plan={plan} orderIds={orderIds} />

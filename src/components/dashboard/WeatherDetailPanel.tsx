@@ -184,7 +184,7 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
           {t('weather.setPoint')}
         </div>
       ) : (
-        <div style={{ flex: 1, padding: '10px 12px', overflow: 'hidden' }}>
+        <div style={{ flex: '1 0 auto', padding: '10px 12px', overflow: 'visible' }}>
           {loadingH ? (
             <ShimmerBlock width="100%" height={160} borderRadius={10} />
           ) : hourly && hourly.hourly && hourly.hourly.length > 0 ? (() => {

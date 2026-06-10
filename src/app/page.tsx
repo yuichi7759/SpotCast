@@ -176,19 +176,25 @@ export default async function LandingPage() {
     <main style={{ background: '#f4f6f9', color: '#0f172a', overflowX: 'hidden' }}>
 
       {/* ━━━━━ Nav ━━━━━ */}
-      <nav style={{
-        position: 'sticky', top: 0, zIndex: 50,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '14px 48px',
-        background: 'rgba(244,246,249,0.88)',
-        backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(15,23,42,0.08)',
-      }}>
-        <Logo dark={false}/>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-          <Link href="/pricing" style={{ fontSize: 14, color: '#64748b', fontWeight: 500, textDecoration: 'none' }}>{T('lp.nav.pricing')}</Link>
-          <Link href="/login"   style={{ fontSize: 14, color: '#64748b', fontWeight: 500, textDecoration: 'none' }}>{T('lp.nav.login')}</Link>
-          <Link href="/signup" style={{ fontSize: 14, fontWeight: 700, textDecoration: 'none', padding: '10px 22px', borderRadius: 12, background: '#1d4ed8', color: '#fff', boxShadow: '0 4px 14px rgba(29,78,216,0.32)' }}>
+      <nav
+        className="px-4 py-3 gap-2 sm:px-12 sm:py-[14px]"
+        style={{
+          position: 'sticky', top: 0, zIndex: 50,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          background: 'rgba(244,246,249,0.88)',
+          backdropFilter: 'blur(16px)',
+          borderBottom: '1px solid rgba(15,23,42,0.08)',
+        }}
+      >
+        <div style={{ flexShrink: 1, minWidth: 0, overflow: 'hidden' }}><Logo dark={false}/></div>
+        <div className="gap-3 sm:gap-7" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+          <Link href="/pricing" style={{ fontSize: 14, color: '#64748b', fontWeight: 500, textDecoration: 'none', whiteSpace: 'nowrap' }}>{T('lp.nav.pricing')}</Link>
+          <Link href="/login"   style={{ fontSize: 14, color: '#64748b', fontWeight: 500, textDecoration: 'none', whiteSpace: 'nowrap' }}>{T('lp.nav.login')}</Link>
+          <Link
+            href="/signup"
+            className="px-3 py-2 sm:px-[22px] sm:py-[10px]"
+            style={{ fontSize: 14, fontWeight: 700, textDecoration: 'none', borderRadius: 12, background: '#1d4ed8', color: '#fff', boxShadow: '0 4px 14px rgba(29,78,216,0.32)', whiteSpace: 'nowrap' }}
+          >
             {T('lp.cta.startFree')}
           </Link>
         </div>
