@@ -678,6 +678,25 @@ export default function DashboardPage() {
               onSelect={handleSearchSelect}
             />
           </div>
+          {/* 雨雲レーダー トグル（スマホ用） */}
+          <button
+            onClick={() => {
+              if (plan === 'free') { toast.info(t('dash.radarLocked'), t('dash.radarLockedSub')); return }
+              setShowRainRadar(p => !p)
+            }}
+            title={showRainRadar ? t('dash.radarHide') : t('dash.radarShow')}
+            style={{
+              flexShrink: 0,
+              width: 38, height: 38, borderRadius: 10,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: showRainRadar ? 'rgba(96,165,250,0.25)' : 'rgba(6,10,16,0.75)',
+              backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+              border: `1px solid ${showRainRadar ? 'rgba(96,165,250,0.55)' : 'rgba(255,255,255,0.12)'}`,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)', cursor: 'pointer', fontSize: 18, lineHeight: 1,
+            }}
+          >
+            🌧️
+          </button>
           <Link
             href="/settings"
             title={t('settings.title')}

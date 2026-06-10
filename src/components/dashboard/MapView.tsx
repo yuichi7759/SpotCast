@@ -136,8 +136,8 @@ export default function MapView({
   const [frames,     setFrames]     = useState<Array<{ time: number; path: string }>>([])
   const [frameIndex, setFrameIndex] = useState(0)
   const [isPlaying,  setIsPlaying]  = useState(false)
-  const [mapStyleId, setMapStyleId] = useState<MapStyleId>('satellite')
-  const appliedStyleRef = useRef<MapStyleId>('satellite')   // マップに実際に適用済みのスタイル
+  const [mapStyleId, setMapStyleId] = useState<MapStyleId>('streets')
+  const appliedStyleRef = useRef<MapStyleId>('streets')   // マップに実際に適用済みのスタイル
   const [showWxIcons, setShowWxIcons] = useState(true)
   const [wxByField, setWxByField]     = useState<Record<string, string>>({})  // fieldId -> weather_main
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -265,7 +265,7 @@ export default function MapView({
 
       const map = new mgl.Map({
         container: containerRef.current!,
-        style: MAP_STYLES.satellite.url,
+        style: MAP_STYLES.streets.url,
         center: center ?? [136.7, 35.7],
         zoom:   zoom   ?? 5,
         projection: { name: 'mercator' },  // Globe投影だとズームで南にズレる
@@ -411,7 +411,9 @@ export default function MapView({
       const main = wxByField[f.id]
       if (!main) return
       const el = buildWxElement(main)
-      const marker = new mgl.Marker({ element: el, anchor: 'bottom', offset: [16, -8] })
+      // anchor:'center' で「箱の中心」を点の右上に固定。anchor:'bottom'だと箱の高さ/
+      // 天気種別で絵文字の見かけ位置がズレ、点から大きく離れて見える不具合になる。
+      const marker = new mgl.Marker({ element: el, anchor: 'center', offset: [15, -14] })
         .setLngLat([f.lng, f.lat]).addTo(map)
       wxMkrsRef.current.push(marker)
     })
