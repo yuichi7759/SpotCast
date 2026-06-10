@@ -95,45 +95,42 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
 
   const accentColor = point.color ?? '#60a5fa'
 
-  // Group hourly data into days by detecting midnight crossings
+  // Group hourly data into days. Each hourly point carries its OWN location-local
+  // date (h.date, "YYYY-MM-DD"), so day boundaries, date labels, and the daily
+  // lookup are all keyed off the point's local time — never the viewer's browser
+  // timezone. (A Japan user viewing New York sees New York's local days.)
+  type DailyEntry = NonNullable<typeof hourly>['daily14'][number]
   function groupByDay(items: HourlyPoint[]) {
-    const today = new Date()
     const groups: Array<{
       offset: number
+      date: string                 // location-local "YYYY-MM-DD"
       dateStr: string
       dayLabel: string
+      daily: DailyEntry | null
       tempMax: number | null
       tempMin: number | null
       items: HourlyPoint[]
     }> = []
 
-    let offset = 0
-    let cur: typeof groups[0] = { offset: 0, dateStr: '', dayLabel: '', tempMax: null, tempMin: null, items: [] }
-
-    items.forEach((h, i) => {
-      if (i > 0) {
-        const prev = parseInt(items[i - 1].time.split(':')[0], 10)
-        const now  = parseInt(h.time.split(':')[0], 10)
-        if (now < prev) {
-          groups.push(cur)
-          offset++
-          cur = { offset, dateStr: '', dayLabel: '', tempMax: null, tempMin: null, items: [] }
-        }
+    // Split by distinct local date (handles missing hours / DST without relying on HH wrap).
+    items.forEach((h) => {
+      const last = groups[groups.length - 1]
+      if (!last || last.date !== h.date) {
+        groups.push({ offset: groups.length, date: h.date, dateStr: '', dayLabel: '', daily: null, tempMax: null, tempMin: null, items: [h] })
+      } else {
+        last.items.push(h)
       }
-      cur.items.push(h)
     })
-    if (cur.items.length > 0) groups.push(cur)
 
+    const baseDate = items[0]?.date ?? ''   // location-local "today"
     return groups.map(g => {
-      const d = new Date(today)
-      d.setDate(d.getDate() + g.offset)
-      const dateStr  = `${d.getMonth() + 1}/${d.getDate()}`
-      const dayLabel = g.offset === 0 ? t('weather.today') : g.offset === 1 ? t('weather.tomorrow') : `${d.getMonth() + 1}/${d.getDate()}`
-      const daily = hourly?.daily14?.find(day => {
-        const dd = new Date(day.date)
-        return dd.getDate() === d.getDate() && dd.getMonth() === d.getMonth()
-      }) ?? null
-      return { ...g, dateStr, dayLabel, tempMax: daily?.temp_max ?? null, tempMin: daily?.temp_min ?? null }
+      const [, mm, dd] = g.date.split('-')
+      const md = `${parseInt(mm, 10)}/${parseInt(dd, 10)}`
+      // Day offset relative to the point's local today (UTC-anchored diff, no browser TZ).
+      const diffDays = Math.round((Date.parse(g.date + 'T00:00:00Z') - Date.parse(baseDate + 'T00:00:00Z')) / 86400000)
+      const dayLabel = diffDays === 0 ? t('weather.today') : diffDays === 1 ? t('weather.tomorrow') : md
+      const daily = hourly?.daily14?.find(day => day.date === g.date) ?? null
+      return { ...g, dateStr: md, dayLabel, daily, tempMax: daily?.temp_max ?? null, tempMin: daily?.temp_min ?? null }
     })
   }
 
@@ -252,11 +249,7 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
                           {/* 日別サマリー行 — 日付が変わる列だけoverflowで横に伸ばす */}
                           <div style={{ height: DAY_H, borderBottom: `1px solid ${SEP}`, background: isDayStart ? 'var(--dash-surface)' : undefined, position: 'relative', overflow: 'visible' }}>
                             {isDayStart && (() => {
-                              const daily = hourly?.daily14?.find(d => {
-                                const today = new Date(); const dd = new Date(today); dd.setDate(dd.getDate() + g.offset)
-                                const ddate = new Date(d.date)
-                                return ddate.getDate() === dd.getDate() && ddate.getMonth() === dd.getMonth()
-                              })
+                              const daily = g.daily   // 既にグループ確定時に現地日付でマッチ済み
                               return (
                                 <div style={{ position: 'absolute', left: 4, top: 0, height: DAY_H, display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap', zIndex: 1, pointerEvents: 'none' }}>
                                   <span style={{ fontSize: 11, fontWeight: 800, color: gi === 0 ? 'var(--w-accent)' : 'var(--dash-text-2)' }}>{g.dayLabel}</span>

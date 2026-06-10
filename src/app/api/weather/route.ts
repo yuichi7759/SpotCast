@@ -42,26 +42,6 @@ function wmoToMain(code: number): string {
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
-// 逆ジオコーディング（OpenStreetMap Nominatim）で地名取得（タイムアウト付き）
-async function getCityName(lat: number, lng: number): Promise<string> {
-  const fallback = `${lat.toFixed(2)}, ${lng.toFixed(2)}`
-  try {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 4000)
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ja`,
-      { headers: { 'User-Agent': 'spotcast/1.0' }, cache: 'no-store', signal: controller.signal }
-    )
-    clearTimeout(timer)
-    if (!res.ok) throw new Error()
-    const data = await res.json()
-    const a = data.address ?? {}
-    return a.city ?? a.town ?? a.village ?? a.county ?? a.state ?? fallback
-  } catch {
-    return fallback
-  }
-}
-
 // Open-Meteo 取得（429/5xx は指数バックオフでリトライ、各試行10秒）
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function fetchOpenMeteo(url: string): Promise<any> {
@@ -99,9 +79,12 @@ async function buildWeather(lat: number, lng: number): Promise<WeatherData> {
     `?latitude=${lat}&longitude=${lng}` +
     `&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code` +
     `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max` +
-    `&timezone=Asia%2FTokyo&forecast_days=8`
+    `&timezone=auto&forecast_days=8`   // 各地点の現地時間（日付）で返す
 
-  const [d, city] = await Promise.all([fetchOpenMeteo(url), getCityName(lat, lng)])
+  // 逆ジオコーディング(Nominatim)は遅く・レート制限が厳しいため critical path から除外。
+  // city は UI 未使用なので空文字でOK（フリーズ防止）。
+  const d = await fetchOpenMeteo(url)
+  const city = ''
 
   const cur = d.current
   const daily = d.daily

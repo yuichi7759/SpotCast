@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 export const runtime = 'nodejs'
 
 export interface HourlyPoint {
-  time: string       // "06:00" 形式
+  time: string       // "06:00" 形式（地点の現地時刻）
+  date: string       // "2026-06-09"（地点の現地日付）
   temp: number
   rain_prob: number  // 降水確率(%)
   precip: number     // 降水量(mm)
@@ -64,26 +65,6 @@ function calcScore(weatherCode: number, rainProb: number, tempMax: number, tempM
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
-// 逆ジオコーディング（OpenStreetMap Nominatim）で地名取得（タイムアウト付き・失敗時は座標）
-async function getCityName(lat: number, lng: number): Promise<string> {
-  const fallback = `${lat.toFixed(2)}, ${lng.toFixed(2)}`
-  try {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 4000)
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ja`,
-      { headers: { 'User-Agent': 'spotcast/1.0' }, cache: 'no-store', signal: controller.signal }
-    )
-    clearTimeout(timer)
-    if (!res.ok) throw new Error()
-    const data = await res.json()
-    const a = data.address ?? {}
-    return a.city ?? a.town ?? a.village ?? a.county ?? a.state ?? fallback
-  } catch {
-    return fallback
-  }
-}
-
 // Open-Meteo 取得（429/5xx は指数バックオフでリトライ、各試行10秒でタイムアウト）
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function fetchOpenMeteo(url: string): Promise<any> {
@@ -121,13 +102,13 @@ async function buildForecast(lat: number, lng: number): Promise<HourlyWeather> {
     `?latitude=${lat}&longitude=${lng}` +
     `&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,wind_direction_10m,weather_code,relative_humidity_2m` +
     `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_probability_mean,wind_speed_10m_max` +
-    `&timezone=Asia%2FTokyo&forecast_days=14`
+    `&timezone=auto&forecast_days=14`   // 各地点の現地時間で時刻を返す（utc_offset_seconds で整合）
     // 注: models=jma_seamless（気象庁）は降水確率を一切提供しない(null)ため指定しない。
 
-    const [d, city] = await Promise.all([
-      fetchOpenMeteo(url),
-      getCityName(lat, lng),
-    ])
+    // 逆ジオコーディング(Nominatim)は遅く・レート制限が厳しいため critical path から除外。
+    // city は UI 未使用なので空文字でOK（フリーズ防止）。
+    const d = await fetchOpenMeteo(url)
+    const city = ''
 
     // hourly: その地点の現在時刻（含む現在の1時間）から48時間分をフィルタ。
     // Open-Meteo の time 文字列は地点ローカルの壁時計（オフセット無し）なので、
@@ -151,6 +132,7 @@ async function buildForecast(lat: number, lng: number): Promise<HourlyWeather> {
       const hhmm = hourlyTimes[i].slice(11, 16) // "HH:MM"
       hourly.push({
         time: hhmm,
+        date: hourlyTimes[i].slice(0, 10), // "YYYY-MM-DD"（地点の現地日付）
         temp: Math.round(temps[i] ?? 0),
         rain_prob: rainProbs[i] ?? 0,
         precip: Math.round((precips[i] ?? 0) * 10) / 10,
