@@ -30,19 +30,19 @@ function ensureWxAnimCss() {
 function buildWxElement(main: string): HTMLDivElement {
   ensureWxAnimCss()
   const el = document.createElement('div')
-  el.style.cssText = 'position:relative;width:20px;height:20px;line-height:1;pointer-events:none;user-select:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.55));'
+  el.style.cssText = 'position:relative;width:28px;height:28px;line-height:1;pointer-events:none;user-select:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.55));'
   if (main === 'Clear') {
-    el.innerHTML = '<span style="font-size:18px;display:inline-block;animation:wxTwinkle 2.2s ease-in-out infinite">☀️</span>'
+    el.innerHTML = '<span style="font-size:25px;display:inline-block;animation:wxTwinkle 2.2s ease-in-out infinite">☀️</span>'
   } else if (main === 'Rain' || main === 'Drizzle' || main === 'Thunderstorm') {
     const cloud = main === 'Thunderstorm' ? '⛈️' : '☁️'
     el.innerHTML =
-      `<span style="font-size:16px">${cloud}</span>` +
-      '<i style="position:absolute;left:5px;bottom:-1px;width:2.5px;height:6px;border-radius:2px;background:#7dd3fc;animation:wxDrop 1.1s linear infinite"></i>' +
-      '<i style="position:absolute;left:11px;bottom:-1px;width:2.5px;height:6px;border-radius:2px;background:#7dd3fc;animation:wxDrop 1.1s linear .55s infinite"></i>'
+      `<span style="font-size:23px">${cloud}</span>` +
+      '<i style="position:absolute;left:7px;bottom:-2px;width:3.5px;height:8px;border-radius:2px;background:#7dd3fc;animation:wxDrop 1.1s linear infinite"></i>' +
+      '<i style="position:absolute;left:16px;bottom:-2px;width:3.5px;height:8px;border-radius:2px;background:#7dd3fc;animation:wxDrop 1.1s linear .55s infinite"></i>'
   } else if (main === 'Snow') {
-    el.innerHTML = '<span style="font-size:17px;display:inline-block;animation:wxSnow 2.4s ease-in-out infinite alternate">❄️</span>'
+    el.innerHTML = '<span style="font-size:24px;display:inline-block;animation:wxSnow 2.4s ease-in-out infinite alternate">❄️</span>'
   } else {
-    el.innerHTML = `<span style="font-size:17px">${WX_EMOJI[main] ?? '🌫️'}</span>`
+    el.innerHTML = `<span style="font-size:24px">${WX_EMOJI[main] ?? '🌫️'}</span>`
   }
   return el
 }
