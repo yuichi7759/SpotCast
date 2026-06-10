@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import type { Field, WeatherData } from '@/types/field'
 import type { HourlyWeather, HourlyPoint } from '@/app/api/weather/hourly/route'
-import { useT } from '@/components/LocaleProvider'
+import { useLocale } from '@/components/LocaleProvider'
 
 interface Props {
   point: Field | null
@@ -69,7 +69,7 @@ const CELL_W = 54
 const LABEL_W = 58
 
 export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 'standard' }: Props) {
-  const t = useT()
+  const { t, locale } = useLocale()
   const [weather, setWeather]   = useState<WeatherData | null>(null)
   const [hourly,  setHourly]    = useState<HourlyWeather | null>(null)
   const [loadingW, setLoadingW] = useState(false)
@@ -216,7 +216,7 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
                 {/* 固定ラベル列 */}
                 <div style={{ width: LABEL_W, flexShrink: 0, borderRight: `1px solid ${SEP}`, background: LABEL_BG, zIndex: 2 }}>
                   <div style={{ height: DAY_H, borderBottom: `1px solid ${SEP}` }} />
-                  {[{ h: RH.time, label: '時刻' }, { h: RH.icon, label: '天気' }, { h: RH.temp, label: '気温' }, { h: RH.rain, label: '降水' }].map(({ h, label }, ri) => (
+                  {[{ h: RH.time, label: t('weather.rowTime') }, { h: RH.icon, label: t('weather.rowSky') }, { h: RH.temp, label: t('weather.rowTemp') }, { h: RH.rain, label: t('weather.rowRain') }].map(({ h, label }, ri) => (
                     <div key={ri} style={{ height: h, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: `1px solid ${SEP}` }}>
                       <span style={{ fontSize: 10, color: 'var(--dash-text-3)', fontWeight: 700 }}>{label}</span>
                     </div>
@@ -239,7 +239,8 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
                     {allItems.map(({ h, gi, hi, g }, idx) => {
                       const isDayStart = hi === 0
                       const isNow      = idx === 0
-                      const timeLabel  = h.time.replace(':00', '').replace(/^0/, '') + '時'
+                      // ja: 「14時」/ en: 「14:00」（現地時刻のまま）
+                      const timeLabel  = locale === 'ja' ? h.time.replace(':00', '').replace(/^0/, '') + '時' : h.time
                       const icon       = weatherIcon(wmoToMain(h.weather_code))
                       const borderL    = isDayStart && idx > 0 ? `2px solid ${DAY_SEP}` : idx > 0 ? `1px solid ${SEP}` : undefined
 
