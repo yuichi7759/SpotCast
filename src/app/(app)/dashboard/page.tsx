@@ -52,6 +52,7 @@ export default function DashboardPage() {
   const [plan,              setPlan]             = useState<'free' | 'standard'>('free')
   const [orderIds,          setOrderIds]         = useState<string[]>([])
   const [mobileTab,         setMobileTab]        = useState<'spots' | 'bestday'>('spots')
+  const [isMobile,          setIsMobile]         = useState(false)
   const isResizingRight  = useRef(false)
   const resizeStartXR    = useRef(0)
   const resizeStartWR    = useRef(0)
@@ -62,6 +63,21 @@ export default function DashboardPage() {
   const resizeStartY     = useRef(0)
   const resizeStartH     = useRef(0)
 
+
+  // モバイル判定（flyToオフセット用）
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+
+  // ポイント選択時、シートで隠れる分だけ地図を上にずらして「見えている領域の中心」に置く。
+  // list(0.56) スナップ基準で、シート高の半分だけ上方向(負)へオフセット。
+  const flyOffsetY = isMobile
+    ? -Math.round((typeof window !== 'undefined' ? window.innerHeight : 800) * 0.56 / 2)
+    : 0
 
   const loadFields = useCallback(async () => {
     try {
@@ -139,8 +155,9 @@ export default function DashboardPage() {
       setCenter([field.lng, field.lat])
       setZoom(loadMarkerZoom())
     }
-    // モバイル：ポイント選択時は詳細スナップへ展開し、気温/降水グラフまで全部見えるように。
-    setMobileSnap('detail')
+    // モバイル：ポイント選択時は中段(list)に展開。マップ上半分は見えたまま、
+    // 詳細はシート内スクロールで気温/降水グラフまで確認できる（detailにすると地図が隠れる）。
+    setMobileSnap(prev => (prev === 'detail' ? 'detail' : 'list'))
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -285,6 +302,7 @@ export default function DashboardPage() {
       center={mapCenter}
       zoom={mapZoom}
       showRainRadar={showRainRadar}
+      flyOffsetY={flyOffsetY}
     />
   )
 

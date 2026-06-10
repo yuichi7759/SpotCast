@@ -119,6 +119,7 @@ interface Props {
   onPointAdd?: (coord: [number, number]) => void
   onPolygonClose?: () => void          // user clicked near first vertex (auto-close)
   showRainRadar?: boolean
+  flyOffsetY?: number                  // flyTo時の縦オフセットpx（モバイル: シートで隠れる分だけ上にずらす）
 }
 
 export default function MapView({
@@ -126,7 +127,7 @@ export default function MapView({
   searchPin,
   onMapClick, onMapRightClick, onFieldClick, onIntelClick, onMoveEnd, center, zoom,
   drawingMode, drawingPoints, onPointAdd, onPolygonClose,
-  showRainRadar = false,
+  showRainRadar = false, flyOffsetY = 0,
 }: Props) {
   const t = useT()
   const mapToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
@@ -420,11 +421,13 @@ export default function MapView({
     const map = mapRef.current
     if (!map) { pendingFly.current = target; return }
     try {
-      map.flyTo({ ...target, speed: 1.5, curve: 1.2 })
+      // offset: 負のyで対象地点を画面上方へ。モバイルではシートで隠れる下半分を避け、
+      // 見えている領域の中心にポイントが来るようにする。
+      map.flyTo({ ...target, offset: [0, flyOffsetY], speed: 1.5, curve: 1.2 })
     } catch {
       pendingFly.current = target
     }
-  }, [center, zoom])
+  }, [center, zoom, flyOffsetY])
 
   // ── 3. Rebuild field markers when fields change ────────────
   useEffect(() => {
@@ -982,7 +985,7 @@ export default function MapView({
             <button
               key={id}
               onClick={() => setMapStyleId(id)}
-              title={t(`map.style.`)}
+              title={t(`map.style.${id}`)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
                 padding: '4px 8px', borderRadius: 7, height: 26,
@@ -994,7 +997,7 @@ export default function MapView({
               }}
             >
               <StyleIcon id={id} />
-              {active && <span>{t(`map.style.`)}</span>}
+              {active && <span>{t(`map.style.${id}`)}</span>}
             </button>
           )
         })}
