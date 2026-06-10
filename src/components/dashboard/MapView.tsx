@@ -301,6 +301,9 @@ export default function MapView({
 
         rebuildFieldMarkers()
         rebuildIntelMarkers()
+        // 初期中心を親へ通知（位置決めモードでパン前に確定しても座標が取れるように）
+        const c0 = map.getCenter()
+        onMoveEnd?.([c0.lng, c0.lat])
         if (pendingFly.current) {
           map.flyTo({ ...pendingFly.current, speed: 1.5, curve: 1.2 })
           pendingFly.current = null

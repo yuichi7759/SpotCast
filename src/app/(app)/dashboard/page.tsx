@@ -53,6 +53,7 @@ export default function DashboardPage() {
   const [orderIds,          setOrderIds]         = useState<string[]>([])
   const [mobileTab,         setMobileTab]        = useState<'spots' | 'bestday'>('spots')
   const [isMobile,          setIsMobile]         = useState(false)
+  const [placingPoint,      setPlacingPoint]     = useState(false)
   const isResizingRight  = useRef(false)
   const resizeStartXR    = useRef(0)
   const resizeStartWR    = useRef(0)
@@ -199,6 +200,23 @@ export default function DashboardPage() {
       return
     }
     setPending(null); setShowModal(true)
+  }
+
+  // ── モバイル: ＋ で「地図中央のピンで位置決め」モードに入る ──
+  function startPlacingPoint() {
+    if (plan === 'free' && fields.length >= FREE_POINT_LIMIT) {
+      toast.info(t('dash.freeLimit', { n: FREE_POINT_LIMIT }), t('dash.freeLimitSub'))
+      return
+    }
+    setSelected(null)
+    setMobileSnap('peek')   // 地図をほぼ全画面にして位置を合わせやすく
+    setPlacingPoint(true)
+  }
+  function confirmPlacePoint() {
+    const c = mapCurrentCenter ?? mapCenter ?? [139.6917, 35.6895]
+    setPlacingPoint(false)
+    setPending({ lat: c[1], lng: c[0] })
+    setShowModal(true)
   }
 
   // ─────────────────────────────────────────────────────────
@@ -683,9 +701,9 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {/* FAB — add point. シートの上端に追従させ、詳細展開時は隠す。 */}
+        {/* FAB — add point. シートの上端に追従させ、詳細展開・位置決め中は隠す。 */}
         <button
-          onClick={handleAddClick}
+          onClick={startPlacingPoint}
           style={{
             position: 'absolute',
             bottom: mobileSnap === 'peek' ? 'calc(84px + 14px + env(safe-area-inset-bottom))' : 'calc(56dvh + 14px + env(safe-area-inset-bottom))',
@@ -699,8 +717,8 @@ export default function DashboardPage() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer',
             boxShadow: '0 4px 20px rgba(0,0,0,0.4), 0 0 16px rgba(62,207,142,0.2)',
-            opacity: mobileSnap === 'detail' ? 0 : 1,
-            pointerEvents: mobileSnap === 'detail' ? 'none' : 'auto',
+            opacity: (mobileSnap === 'detail' || placingPoint) ? 0 : 1,
+            pointerEvents: (mobileSnap === 'detail' || placingPoint) ? 'none' : 'auto',
             transition: 'bottom 0.30s cubic-bezier(0.32,0.72,0,1), opacity 0.2s',
           }}
           title={t('dash.addPoint')}
@@ -708,7 +726,80 @@ export default function DashboardPage() {
           ＋
         </button>
 
-        {/* Bottom sheet */}
+        {/* ── 位置決めモード: 中央の半透明ピン + ヒント + 確定バー ── */}
+        {placingPoint && (
+          <>
+            {/* 中央ピン（タップ透過。先端=地図コンテナ中心(top50%)=map.getCenter()と一致） */}
+            <div style={{
+              position: 'absolute', left: '50%', top: '50%',
+              transform: 'translate(-50%, -100%)', zIndex: 26,
+              pointerEvents: 'none', textAlign: 'center',
+              animation: 'placePinBob 1.8s ease-in-out infinite',
+            }}>
+              <style>{`
+                @keyframes placePinBob { 0%,100%{transform:translate(-50%,-100%)} 50%{transform:translate(-50%,calc(-100% - 6px))} }
+                @keyframes placeRing { 0%{transform:translate(-50%,-50%) scale(.6);opacity:.7} 100%{transform:translate(-50%,-50%) scale(1.8);opacity:0} }
+              `}</style>
+              <svg width="40" height="52" viewBox="0 0 40 52" fill="none" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.5))' }}>
+                <path d="M20 2C10.6 2 3 9.6 3 19c0 12 17 29 17 29s17-17 17-29C37 9.6 29.4 2 20 2z"
+                  fill="rgba(62,207,142,0.55)" stroke="#3ecf8e" strokeWidth="2"/>
+                <circle cx="20" cy="19" r="6.5" fill="#0a0e16"/>
+                <line x1="20" y1="14.5" x2="20" y2="23.5" stroke="#3ecf8e" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="15.5" y1="19" x2="24.5" y2="19" stroke="#3ecf8e" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
+            {/* 先端の地面リング（地図中心を明示＝実際に保存される地点） */}
+            <div style={{ position: 'absolute', left: '50%', top: '50%', zIndex: 25, pointerEvents: 'none' }}>
+              <div style={{ position: 'absolute', width: 26, height: 26, borderRadius: '50%', border: '2px solid rgba(62,207,142,0.7)', animation: 'placeRing 1.6s ease-out infinite' }}/>
+              <div style={{ position: 'absolute', width: 6, height: 6, borderRadius: '50%', background: '#3ecf8e', transform: 'translate(-50%,-50%)', boxShadow: '0 0 6px #3ecf8e' }}/>
+            </div>
+
+            {/* ヒントピル（上部） */}
+            <div style={{
+              position: 'absolute', top: 64, left: '50%', transform: 'translateX(-50%)', zIndex: 27,
+              background: 'rgba(8,12,22,0.92)', backdropFilter: 'blur(14px)',
+              border: '1px solid rgba(62,207,142,0.35)', borderRadius: 999,
+              padding: '7px 14px', fontSize: 12.5, fontWeight: 600, color: '#d1fae5',
+              whiteSpace: 'nowrap', boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+            }}>
+              📍 {t('dash.placeHint')}
+            </div>
+
+            {/* 確定バー（下部） */}
+            <div style={{
+              position: 'absolute', left: 12, right: 12,
+              bottom: 'calc(16px + env(safe-area-inset-bottom))', zIndex: 27,
+              display: 'flex', gap: 10,
+            }}>
+              <button
+                onClick={() => setPlacingPoint(false)}
+                style={{
+                  flex: '0 0 auto', padding: '14px 18px', borderRadius: 14,
+                  background: 'rgba(20,24,34,0.92)', backdropFilter: 'blur(14px)',
+                  border: '1px solid rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.75)',
+                  fontSize: 15, fontWeight: 700, cursor: 'pointer',
+                }}
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={confirmPlacePoint}
+                style={{
+                  flex: 1, padding: '14px 18px', borderRadius: 14,
+                  background: '#3ecf8e', border: '1px solid #3ecf8e', color: '#06281a',
+                  fontSize: 15, fontWeight: 800, cursor: 'pointer',
+                  boxShadow: '0 6px 20px rgba(62,207,142,0.4)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                }}
+              >
+                📍 {t('dash.addHere')}
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Bottom sheet（位置決め中は隠す） */}
+        {!placingPoint && (
         <MobileBottomSheet
           snap={mobileSnap}
           onSnapChange={s => {
@@ -787,6 +878,7 @@ export default function DashboardPage() {
             )
           }
         </MobileBottomSheet>
+        )}
       </div>
 
       {/* ══════════════════════════════════════════════════
