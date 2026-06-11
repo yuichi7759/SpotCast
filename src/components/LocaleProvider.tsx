@@ -21,23 +21,20 @@ const LocaleContext = createContext<Ctx>({
 export function useLocale() { return useContext(LocaleContext) }
 export function useT(): TFunc { return useContext(LocaleContext).t }
 
-export default function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('ja')
+export default function LocaleProvider({ children, initialLocale = 'ja' }: { children: React.ReactNode; initialLocale?: Locale }) {
+  // 初期値はサーバー判定（cookie/Accept-Language）に合わせる。
+  // これでSSRの本文が <html lang> と一致し、英語ブラウザで日本語が一瞬出る不具合を防ぐ。
+  const [locale, setLocaleState] = useState<Locale>(initialLocale)
 
   useEffect(() => {
-    // 1) 手動で選んだ言語があれば最優先
+    // 手動で選んだ言語(保存値)があればそれを最優先で上書き。
+    // 未設定時はサーバーが既にAccept-Languageで判定済みなので再判定しない（二重判定の不整合防止）。
     const saved = localStorage.getItem(LOCALE_KEY) as Locale | null
-    if (saved && saved in dictionaries) {
+    if (saved && saved in dictionaries && saved !== locale) {
       setLocaleState(saved)
       document.documentElement.lang = saved
-      return
     }
-    // 2) 未設定ならブラウザの言語から自動判定（保存はしない＝手動切替で上書き可）
-    const langs = navigator.languages ?? [navigator.language]
-    const isJa = langs.some(l => l?.toLowerCase().startsWith('ja'))
-    const detected: Locale = isJa ? 'ja' : 'en'
-    setLocaleState(detected)
-    document.documentElement.lang = detected
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const setLocale = useCallback((l: Locale) => {

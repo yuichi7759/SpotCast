@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
     siteName: 'SpotCast',
     title: TITLE,
     description: DESCRIPTION,
-    locale: 'ja_JP',
+    locale: locale === 'ja' ? 'ja_JP' : 'en_US',
     // OG画像は opengraph-image.tsx（動的生成）が自動付与される
   },
   twitter: {
@@ -77,7 +77,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <ThemeProvider><LocaleProvider>{children}</LocaleProvider></ThemeProvider>
+        <ThemeProvider><LocaleProvider initialLocale={locale}>{children}</LocaleProvider></ThemeProvider>
         <Analytics />
       </body>
     </html>
