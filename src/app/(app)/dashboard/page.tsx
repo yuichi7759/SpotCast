@@ -13,6 +13,7 @@ import MapSearchBox from '@/components/dashboard/MapSearchBox'
 import BestDayMatrix from '@/components/dashboard/BestDayMatrix'
 import MobileBottomSheet, { type SheetSnap } from '@/components/dashboard/MobileBottomSheet'
 import MapMediaStrip, { type Media, type Expanded } from '@/components/dashboard/MapMediaStrip'
+import OnboardingCard from '@/components/dashboard/OnboardingCard'
 import { loadCameras, loadHighlights, CAMERAS_EVENT, HIGHLIGHTS_EVENT } from '@/lib/mediaStripPref'
 import AccountMenu from '@/components/layout/AccountMenu'
 import { useToast } from '@/components/ToastProvider'
@@ -1024,6 +1025,9 @@ export default function DashboardPage() {
           onDelete={handleFieldDeleted}
         />
       )}
+
+      {/* 初回ログイン時の使い方カード */}
+      <OnboardingCard />
     </div>
   )
 }
