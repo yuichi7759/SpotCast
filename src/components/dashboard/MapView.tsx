@@ -411,9 +411,9 @@ export default function MapView({
       const main = wxByField[f.id]
       if (!main) return
       const el = buildWxElement(main)
-      // anchor:'center' で「箱の中心」を点の右上に固定。anchor:'bottom'だと箱の高さ/
-      // 天気種別で絵文字の見かけ位置がズレ、点から大きく離れて見える不具合になる。
-      const marker = new mgl.Marker({ element: el, anchor: 'center', offset: [15, -14] })
+      // anchor:'center'＝箱の中心を固定（アイコンサイズ・天気種別に依らずブレない）。
+      // offset[0,-17]でドットの真上に密着。左右オフセット0なので横ズレも無し。
+      const marker = new mgl.Marker({ element: el, anchor: 'center', offset: [0, -17] })
         .setLngLat([f.lng, f.lat]).addTo(map)
       wxMkrsRef.current.push(marker)
     })
