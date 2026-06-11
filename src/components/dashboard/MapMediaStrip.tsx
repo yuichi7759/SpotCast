@@ -7,6 +7,16 @@ function fmtDist(m: number): string {
   return m < 1000 ? `${m}m` : `${(m / 1000).toFixed(1)}km`
 }
 
+// 画像の取得日時（閲覧者のローカル時刻で M/D HH:MM）
+function fmtDateTime(iso: string): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return ''
+  const M = d.getMonth() + 1, D = d.getDate()
+  const h = String(d.getHours()).padStart(2, '0'), m = String(d.getMinutes()).padStart(2, '0')
+  return `${M}/${D} ${h}:${m}`
+}
+
 export type Expanded =
   | { kind: 'cam'; n: number; item: Webcam }
   | { kind: 'place'; n: number; item: NearbyPlace }
@@ -73,10 +83,19 @@ export default function MapMediaStrip({
               {expanded.kind === 'place' && expanded.item.extract && (
                 <div style={{ color: 'rgba(255,255,255,0.62)', fontSize: 12.5, lineHeight: 1.55, marginTop: 8 }}>{expanded.item.extract}</div>
               )}
-              <a href={expanded.kind === 'cam' ? expanded.item.detail : expanded.item.url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 12, padding: '8px 13px', borderRadius: 9, background: 'rgba(96,165,250,0.16)', border: '1px solid rgba(96,165,250,0.4)', color: '#93c5fd', fontSize: 12.5, fontWeight: 700, textDecoration: 'none' }}>
-                {expanded.kind === 'cam' ? t('media.windy') : t('media.wiki')}
-                <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2h6v6M10 2L3 9"/></svg>
-              </a>
+              {expanded.kind === 'cam' ? (
+                expanded.item.updated && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 12, color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>
+                    <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6.3"/><path d="M8 4.6V8l2.4 1.4"/></svg>
+                    {t('media.captured')} {fmtDateTime(expanded.item.updated)}
+                  </div>
+                )
+              ) : (
+                <a href={expanded.item.url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 12, padding: '8px 13px', borderRadius: 9, background: 'rgba(96,165,250,0.16)', border: '1px solid rgba(96,165,250,0.4)', color: '#93c5fd', fontSize: 12.5, fontWeight: 700, textDecoration: 'none' }}>
+                  {t('media.wiki')}
+                  <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2h6v6M10 2L3 9"/></svg>
+                </a>
+              )}
             </div>
           </div>
         </div>
