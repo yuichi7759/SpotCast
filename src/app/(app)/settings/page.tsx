@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useTheme } from '@/components/ThemeProvider'
 import { MARKER_SIZE_OPTIONS, loadMarkerSize, saveMarkerSize, type MarkerSize } from '@/lib/markerSize'
 import { loadWeatherIcons, saveWeatherIcons } from '@/lib/weatherIconsPref'
-import { loadMediaStrip, saveMediaStrip } from '@/lib/mediaStripPref'
+import { loadCameras, saveCameras, loadHighlights, saveHighlights } from '@/lib/mediaStripPref'
 import { MARKER_ZOOM_OPTIONS, loadMarkerZoom, saveMarkerZoom } from '@/lib/markerZoomPref'
 import { useLocale } from '@/components/LocaleProvider'
 import { LOCALES } from '@/lib/i18n/dictionaries'
@@ -18,7 +18,8 @@ export default function SettingsPage() {
   const [loggingOut, setLoggingOut] = useState(false)
   const [markerSize, setMarkerSize] = useState<MarkerSize>('md')
   const [wxIcons, setWxIcons]       = useState(true)
-  const [mediaStrip, setMediaStrip] = useState(false)
+  const [cameras, setCameras]       = useState(false)
+  const [highlights, setHighlights] = useState(false)
   const [markerZoom, setMarkerZoom] = useState(12)
   const { theme, toggle } = useTheme()
   const { locale, setLocale, t } = useLocale()
@@ -29,7 +30,7 @@ export default function SettingsPage() {
   const isUpgradedReturn = typeof window !== 'undefined'
     && new URLSearchParams(window.location.search).get('upgraded') === '1'
 
-  useEffect(() => { setMarkerSize(loadMarkerSize()); setWxIcons(loadWeatherIcons()); setMarkerZoom(loadMarkerZoom()); setMediaStrip(loadMediaStrip()) }, [])
+  useEffect(() => { setMarkerSize(loadMarkerSize()); setWxIcons(loadWeatherIcons()); setMarkerZoom(loadMarkerZoom()); setCameras(loadCameras()); setHighlights(loadHighlights()) }, [])
 
   useEffect(() => {
     if (isUpgradedReturn) {
@@ -255,22 +256,43 @@ export default function SettingsPage() {
                 }}/>
               </button>
             </div>
-            {/* ライブカメラ＋見どころを地図に表示 */}
+            {/* ライブカメラを地図に表示 */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: 12, borderBottom: `1px solid ${borderColor}` }}>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>{t('settings.media')}</div>
-                <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>{t('settings.mediaHint')}</div>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>{t('settings.cameras')}</div>
+                <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>{t('settings.camerasHint')}</div>
               </div>
               <button
-                onClick={() => { const v = !mediaStrip; setMediaStrip(v); saveMediaStrip(v) }}
+                onClick={() => { const v = !cameras; setCameras(v); saveCameras(v) }}
                 style={{
                   width: 48, height: 26, borderRadius: 999, flexShrink: 0,
-                  background: mediaStrip ? '#3b82f6' : (isLight ? '#cbd5e1' : '#334155'),
+                  background: cameras ? '#3b82f6' : (isLight ? '#cbd5e1' : '#334155'),
                   border: 'none', cursor: 'pointer', position: 'relative', transition: 'background 0.2s',
                 }}
               >
                 <span style={{
-                  position: 'absolute', top: 4, left: mediaStrip ? 26 : 4,
+                  position: 'absolute', top: 4, left: cameras ? 26 : 4,
+                  width: 18, height: 18, borderRadius: '50%',
+                  background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.3)', transition: 'left 0.2s',
+                }}/>
+              </button>
+            </div>
+            {/* 周辺の見どころを地図に表示 */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: 12, borderBottom: `1px solid ${borderColor}` }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>{t('settings.highlights')}</div>
+                <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>{t('settings.highlightsHint')}</div>
+              </div>
+              <button
+                onClick={() => { const v = !highlights; setHighlights(v); saveHighlights(v) }}
+                style={{
+                  width: 48, height: 26, borderRadius: 999, flexShrink: 0,
+                  background: highlights ? '#3b82f6' : (isLight ? '#cbd5e1' : '#334155'),
+                  border: 'none', cursor: 'pointer', position: 'relative', transition: 'background 0.2s',
+                }}
+              >
+                <span style={{
+                  position: 'absolute', top: 4, left: highlights ? 26 : 4,
                   width: 18, height: 18, borderRadius: '50%',
                   background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.3)', transition: 'left 0.2s',
                 }}/>

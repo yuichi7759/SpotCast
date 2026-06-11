@@ -1,16 +1,26 @@
-// ライブカメラ＋見どころの地図表示ON/OFF（localStorage共有・デフォルトOFF）
+// ライブカメラ／周辺の見どころ の地図表示ON/OFF（localStorage共有・各デフォルトOFF）
+// カメラと見どころは別々に切り替え可能。
 
-export const MEDIA_STRIP_KEY = 'spotcast:mediaStrip'
+const CAMERAS_KEY = 'spotcast:cameras'
+const HIGHLIGHTS_KEY = 'spotcast:highlights'
 
-export function loadMediaStrip(): boolean {
+function load(key: string): boolean {
   if (typeof window === 'undefined') return false
-  return localStorage.getItem(MEDIA_STRIP_KEY) === '1'   // 未設定＝デフォOFF
+  return localStorage.getItem(key) === '1'   // 未設定＝デフォOFF
 }
 
-export function saveMediaStrip(on: boolean): void {
+function save(key: string, evt: string, on: boolean): void {
   if (typeof window === 'undefined') return
   try {
-    localStorage.setItem(MEDIA_STRIP_KEY, on ? '1' : '0')
-    window.dispatchEvent(new CustomEvent('spotcast:mediaStripChange', { detail: on }))
+    localStorage.setItem(key, on ? '1' : '0')
+    window.dispatchEvent(new CustomEvent(evt, { detail: on }))
   } catch {}
 }
+
+export const CAMERAS_EVENT = 'spotcast:camerasChange'
+export const HIGHLIGHTS_EVENT = 'spotcast:highlightsChange'
+
+export function loadCameras(): boolean { return load(CAMERAS_KEY) }
+export function saveCameras(on: boolean): void { save(CAMERAS_KEY, CAMERAS_EVENT, on) }
+export function loadHighlights(): boolean { return load(HIGHLIGHTS_KEY) }
+export function saveHighlights(on: boolean): void { save(HIGHLIGHTS_KEY, HIGHLIGHTS_EVENT, on) }
