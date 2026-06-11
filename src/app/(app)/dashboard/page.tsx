@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import type { Field } from '@/types/field'
@@ -12,13 +12,14 @@ import WeatherStrip from '@/components/dashboard/WeatherStrip'
 import MapSearchBox from '@/components/dashboard/MapSearchBox'
 import BestDayMatrix from '@/components/dashboard/BestDayMatrix'
 import MobileBottomSheet, { type SheetSnap } from '@/components/dashboard/MobileBottomSheet'
-import MapMediaStrip from '@/components/dashboard/MapMediaStrip'
+import MapMediaStrip, { type Media, type Expanded } from '@/components/dashboard/MapMediaStrip'
+import { loadMediaStrip } from '@/lib/mediaStripPref'
 import AccountMenu from '@/components/layout/AccountMenu'
 import { useToast } from '@/components/ToastProvider'
 import { createClient } from '@/lib/supabase/client'
 import { loadOrder, saveOrder } from '@/lib/spotOrder'
 import { loadMarkerZoom } from '@/lib/markerZoomPref'
-import { useT } from '@/components/LocaleProvider'
+import { useLocale } from '@/components/LocaleProvider'
 import type { IntelligenceEvent } from '@/lib/mockIntelligence'
 
 const FREE_POINT_LIMIT = 3
@@ -29,7 +30,7 @@ const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 
 export default function DashboardPage() {
   const toast = useToast()
-  const t = useT()
+  const { t, locale } = useLocale()
 
   const [fields,            setFields]          = useState<Field[]>([])
   const [selectedField,     setSelected]        = useState<Field | null>(null)
@@ -56,7 +57,9 @@ export default function DashboardPage() {
   const [isMobile,          setIsMobile]         = useState(false)
   const [placingPoint,      setPlacingPoint]     = useState(false)
   const [fitAllNonce,       setFitAllNonce]      = useState(0)
-  const [webcamPins,        setWebcamPins]       = useState<{ id: number; lat: number; lng: number }[]>([])
+  const [mediaEnabled,      setMediaEnabled]     = useState(false)
+  const [media,             setMedia]            = useState<Media | null>(null)
+  const [expandedMedia,     setExpandedMedia]    = useState<Expanded>(null)
   const isResizingRight  = useRef(false)
   const resizeStartXR    = useRef(0)
   const resizeStartWR    = useRef(0)
@@ -107,8 +110,48 @@ export default function DashboardPage() {
   }, [])
   useEffect(() => { loadFields() }, [loadFields])
 
-  // 選択ポイントが無ければカメラピンを消す
-  useEffect(() => { if (!selectedField) setWebcamPins([]) }, [selectedField])
+  // メディア表示の設定（デフォルトOFF。設定変更を購読）
+  useEffect(() => {
+    setMediaEnabled(loadMediaStrip())
+    const h = (e: Event) => setMediaEnabled((e as CustomEvent).detail as boolean)
+    window.addEventListener('spotcast:mediaStripChange', h)
+    return () => window.removeEventListener('spotcast:mediaStripChange', h)
+  }, [])
+
+  // 選択ポイント近くのカメラ＋見どころを取得（設定ONかつ座標あり時のみ）
+  useEffect(() => {
+    setExpandedMedia(null)
+    const lat = selectedField?.lat, lng = selectedField?.lng
+    if (!mediaEnabled || lat == null || lng == null) { setMedia(null); return }
+    let cancelled = false
+    Promise.all([
+      fetch(`/api/webcams?lat=${lat}&lng=${lng}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(`/api/nearby?lat=${lat}&lng=${lng}&lang=${locale}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
+    ]).then(([w, p]) => { if (!cancelled) setMedia({ cams: w?.webcams ?? [], places: p?.places ?? [] }) })
+    return () => { cancelled = true }
+  }, [selectedField, mediaEnabled, locale])
+
+  // 地図ピン（カメラ＝青/見どころ＝アンバー、番号でワイプと対応）
+  const mediaPins = useMemo(() => {
+    if (!media) return []
+    return [
+      ...media.cams.map((c, i) => ({ key: `cam:${c.id}`, kind: 'cam' as const, lat: c.lat, lng: c.lng, n: i + 1 })),
+      ...media.places.map((p, i) => ({ key: `place:${i}`, kind: 'place' as const, lat: p.lat, lng: p.lon, n: i + 1 })),
+    ]
+  }, [media])
+
+  function handleMediaPinClick(key: string) {
+    if (!media) return
+    if (key.startsWith('cam:')) {
+      const id = Number(key.slice(4))
+      const i = media.cams.findIndex(c => c.id === id)
+      if (i >= 0) setExpandedMedia({ kind: 'cam', n: i + 1, item: media.cams[i] })
+    } else {
+      const i = Number(key.slice(6))
+      const p = media.places[i]
+      if (p) setExpandedMedia({ kind: 'place', n: i + 1, item: p })
+    }
+  }
 
   // スポット並び順をロード
   useEffect(() => { setOrderIds(loadOrder()) }, [])
@@ -345,7 +388,8 @@ export default function DashboardPage() {
       radarPlayerBottom={isMobile ? 'calc(84px + 10px + env(safe-area-inset-bottom))' : '0'}
       fitAllNonce={fitAllNonce}
       fitBottomInset={fitBottomInset}
-      webcamPins={webcamPins}
+      mediaPins={mediaPins}
+      onMediaPinClick={handleMediaPinClick}
     />
   )
 
@@ -396,8 +440,8 @@ export default function DashboardPage() {
             <div style={{ position: 'absolute', inset: 0 }}>{mapViewEl}</div>
 
             {/* 選択ポイント近くのライブカメラ＋見どころ（地図下部の帯） */}
-            {selectedField?.lat != null && selectedField?.lng != null && (
-              <MapMediaStrip lat={selectedField.lat} lng={selectedField.lng} onWebcams={cams => setWebcamPins(cams.map(c => ({ id: c.id, lat: c.lat, lng: c.lng })))} />
+            {mediaEnabled && (
+              <MapMediaStrip media={media} expanded={expandedMedia} onExpand={setExpandedMedia} />
             )}
 
             {/* Top gradient */}
@@ -689,14 +733,14 @@ export default function DashboardPage() {
         <div style={{ position: 'absolute', inset: 0 }}>{mapViewEl}</div>
 
         {/* 選択ポイント近くのライブカメラ＋見どころ（シートの上に帯／詳細展開・位置決め中は隠す） */}
-        {selectedField?.lat != null && selectedField?.lng != null && !placingPoint && mobileSnap !== 'detail' && (
+        {mediaEnabled && !placingPoint && mobileSnap !== 'detail' && (
           <MapMediaStrip
-            lat={selectedField.lat}
-            lng={selectedField.lng}
+            media={media}
+            expanded={expandedMedia}
+            onExpand={setExpandedMedia}
             bottomOffset={mobileSnap === 'peek'
               ? 'calc(84px + 8px + env(safe-area-inset-bottom))'
               : 'calc(56dvh + 8px + env(safe-area-inset-bottom))'}
-            onWebcams={cams => setWebcamPins(cams.map(c => ({ id: c.id, lat: c.lat, lng: c.lng })))}
           />
         )}
 
