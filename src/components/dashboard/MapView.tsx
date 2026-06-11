@@ -29,21 +29,28 @@ function ensureWxAnimCss() {
 // 天気に応じてアニメするマーカー要素を組み立てる
 function buildWxElement(main: string): HTMLDivElement {
   ensureWxAnimCss()
+  // 重要: マーカー要素(el)に position を付けない。Mapboxの .mapboxgl-marker が
+  // position:absolute を当てて座標配置するため、ここで position:relative を入れると
+  // それを上書きしてしまい、マーカーが通常フローで縦に積み重なって大きくズレる。
+  // 内側の inner(position:relative) に描画内容を入れ、雨の雫はそこを基準にする。
   const el = document.createElement('div')
-  el.style.cssText = 'position:relative;width:28px;height:28px;line-height:1;pointer-events:none;user-select:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.55));'
+  el.style.cssText = 'width:28px;height:28px;pointer-events:none;user-select:none;'
+  const inner = document.createElement('div')
+  inner.style.cssText = 'position:relative;width:28px;height:28px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.55));'
   if (main === 'Clear') {
-    el.innerHTML = '<span style="font-size:25px;display:inline-block;animation:wxTwinkle 2.2s ease-in-out infinite">☀️</span>'
+    inner.innerHTML = '<span style="font-size:25px;display:inline-block;animation:wxTwinkle 2.2s ease-in-out infinite">☀️</span>'
   } else if (main === 'Rain' || main === 'Drizzle' || main === 'Thunderstorm') {
     const cloud = main === 'Thunderstorm' ? '⛈️' : '☁️'
-    el.innerHTML =
+    inner.innerHTML =
       `<span style="font-size:23px">${cloud}</span>` +
       '<i style="position:absolute;left:7px;bottom:-2px;width:3.5px;height:8px;border-radius:2px;background:#7dd3fc;animation:wxDrop 1.1s linear infinite"></i>' +
       '<i style="position:absolute;left:16px;bottom:-2px;width:3.5px;height:8px;border-radius:2px;background:#7dd3fc;animation:wxDrop 1.1s linear .55s infinite"></i>'
   } else if (main === 'Snow') {
-    el.innerHTML = '<span style="font-size:24px;display:inline-block;animation:wxSnow 2.4s ease-in-out infinite alternate">❄️</span>'
+    inner.innerHTML = '<span style="font-size:24px;display:inline-block;animation:wxSnow 2.4s ease-in-out infinite alternate">❄️</span>'
   } else {
-    el.innerHTML = `<span style="font-size:24px">${WX_EMOJI[main] ?? '🌫️'}</span>`
+    inner.innerHTML = `<span style="font-size:24px">${WX_EMOJI[main] ?? '🌫️'}</span>`
   }
+  el.appendChild(inner)
   return el
 }
 
@@ -120,6 +127,7 @@ interface Props {
   onPolygonClose?: () => void          // user clicked near first vertex (auto-close)
   showRainRadar?: boolean
   flyOffsetY?: number                  // flyTo時の縦オフセットpx（モバイル: シートで隠れる分だけ上にずらす）
+  radarPlayerBottom?: string           // 雨雲レーダープレーヤーの bottom 位置（モバイルではシートの上へ）
 }
 
 export default function MapView({
@@ -127,7 +135,7 @@ export default function MapView({
   searchPin,
   onMapClick, onMapRightClick, onFieldClick, onIntelClick, onMoveEnd, center, zoom,
   drawingMode, drawingPoints, onPointAdd, onPolygonClose,
-  showRainRadar = false, flyOffsetY = 0,
+  showRainRadar = false, flyOffsetY = 0, radarPlayerBottom = '0',
 }: Props) {
   const t = useT()
   const mapToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
@@ -1011,7 +1019,7 @@ export default function MapView({
       {/* ── 雨雲レーダー タイムプレーヤー ── */}
       {showRainRadar && frames.length > 0 && (
         <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10,
+          position: 'absolute', bottom: radarPlayerBottom, left: 0, right: 0, zIndex: 31,
           background: 'rgba(6,10,16,0.90)', backdropFilter: 'blur(14px)',
           WebkitBackdropFilter: 'blur(14px)',
           borderTop: '1px solid rgba(96,165,250,0.18)',

@@ -321,6 +321,7 @@ export default function DashboardPage() {
       zoom={mapZoom}
       showRainRadar={showRainRadar}
       flyOffsetY={flyOffsetY}
+      radarPlayerBottom={isMobile ? 'calc(84px + 10px + env(safe-area-inset-bottom))' : '0'}
     />
   )
 
@@ -682,7 +683,11 @@ export default function DashboardPage() {
           <button
             onClick={() => {
               if (plan === 'free') { toast.info(t('dash.radarLocked'), t('dash.radarLockedSub')); return }
-              setShowRainRadar(p => !p)
+              setShowRainRadar(p => {
+                const next = !p
+                if (next) setMobileSnap('peek')   // レーダー再生バーが見えるようシートを畳む
+                return next
+              })
             }}
             title={showRainRadar ? t('dash.radarHide') : t('dash.radarShow')}
             style={{
