@@ -286,7 +286,7 @@ export default async function LandingPage() {
               { icon: '🌤', title: T('lp.feat.fc'),    c: '#15803d', bg: '#fff', border: '#e2e8f0', desc: T('lp.feat.fcDesc') },
               { icon: '⭐', title: 'Best Day',   c: '#b45309', bg: '#fff', border: '#e2e8f0', desc: T('lp.feat.bdDesc'), badge: T('lp.feat.badge') },
               { icon: '🌧️', title: T('lp.feat.radar'), c: '#6d28d9', bg: '#fff', border: '#e2e8f0', desc: T('lp.feat.radarDesc') },
-              { icon: '📹', title: T('lp.feat.media'), c: '#0e7490', bg: '#fff', border: '#e2e8f0', desc: T('lp.feat.mediaDesc') },
+              { icon: '📹', title: T('lp.feat.media'), c: '#0e7490', bg: '#fff', border: '#e2e8f0', desc: T('lp.feat.mediaDesc'), badge: T('lp.feat.standardBadge') },
             ].map(f => (
               <div key={f.title} style={{ position: 'relative', padding: '26px 22px', borderRadius: 16, background: f.bg, border: `1px solid ${f.border}`, boxShadow: '0 2px 10px rgba(15,23,42,0.05)' }}>
                 {f.badge && (
