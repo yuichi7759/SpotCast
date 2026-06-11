@@ -12,6 +12,7 @@ import WeatherStrip from '@/components/dashboard/WeatherStrip'
 import MapSearchBox from '@/components/dashboard/MapSearchBox'
 import BestDayMatrix from '@/components/dashboard/BestDayMatrix'
 import MobileBottomSheet, { type SheetSnap } from '@/components/dashboard/MobileBottomSheet'
+import MapMediaStrip from '@/components/dashboard/MapMediaStrip'
 import AccountMenu from '@/components/layout/AccountMenu'
 import { useToast } from '@/components/ToastProvider'
 import { createClient } from '@/lib/supabase/client'
@@ -55,6 +56,7 @@ export default function DashboardPage() {
   const [isMobile,          setIsMobile]         = useState(false)
   const [placingPoint,      setPlacingPoint]     = useState(false)
   const [fitAllNonce,       setFitAllNonce]      = useState(0)
+  const [webcamPins,        setWebcamPins]       = useState<{ id: number; lat: number; lng: number }[]>([])
   const isResizingRight  = useRef(false)
   const resizeStartXR    = useRef(0)
   const resizeStartWR    = useRef(0)
@@ -104,6 +106,9 @@ export default function DashboardPage() {
     setLoadingFields(false)
   }, [])
   useEffect(() => { loadFields() }, [loadFields])
+
+  // 選択ポイントが無ければカメラピンを消す
+  useEffect(() => { if (!selectedField) setWebcamPins([]) }, [selectedField])
 
   // スポット並び順をロード
   useEffect(() => { setOrderIds(loadOrder()) }, [])
@@ -340,6 +345,7 @@ export default function DashboardPage() {
       radarPlayerBottom={isMobile ? 'calc(84px + 10px + env(safe-area-inset-bottom))' : '0'}
       fitAllNonce={fitAllNonce}
       fitBottomInset={fitBottomInset}
+      webcamPins={webcamPins}
     />
   )
 
@@ -388,6 +394,11 @@ export default function DashboardPage() {
 
             {/* Map */}
             <div style={{ position: 'absolute', inset: 0 }}>{mapViewEl}</div>
+
+            {/* 選択ポイント近くのライブカメラ＋見どころ（地図下部の帯） */}
+            {selectedField?.lat != null && selectedField?.lng != null && (
+              <MapMediaStrip lat={selectedField.lat} lng={selectedField.lng} onWebcams={cams => setWebcamPins(cams.map(c => ({ id: c.id, lat: c.lat, lng: c.lng })))} />
+            )}
 
             {/* Top gradient */}
             <div style={{
@@ -676,6 +687,18 @@ export default function DashboardPage() {
 
         {/* Full-screen map */}
         <div style={{ position: 'absolute', inset: 0 }}>{mapViewEl}</div>
+
+        {/* 選択ポイント近くのライブカメラ＋見どころ（シートの上に帯／詳細展開・位置決め中は隠す） */}
+        {selectedField?.lat != null && selectedField?.lng != null && !placingPoint && mobileSnap !== 'detail' && (
+          <MapMediaStrip
+            lat={selectedField.lat}
+            lng={selectedField.lng}
+            bottomOffset={mobileSnap === 'peek'
+              ? 'calc(84px + 8px + env(safe-area-inset-bottom))'
+              : 'calc(56dvh + 8px + env(safe-area-inset-bottom))'}
+            onWebcams={cams => setWebcamPins(cams.map(c => ({ id: c.id, lat: c.lat, lng: c.lng })))}
+          />
+        )}
 
         {/* Top gradient */}
         <div style={{

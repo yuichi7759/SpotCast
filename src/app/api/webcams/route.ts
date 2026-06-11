@@ -13,6 +13,8 @@ export interface Webcam {
   dist: number      // メートル
   city: string
   updated: string   // ISO
+  lat: number       // カメラ位置（地図ピン用）
+  lng: number
 }
 
 const KEY = process.env.WINDY_WEBCAMS_API_KEY
@@ -58,6 +60,8 @@ export async function GET(req: NextRequest) {
         dist: Math.round(haversine(lat, lng, w.location.latitude, w.location.longitude)),
         city: w.location.city ?? '',
         updated: w.lastUpdatedOn ?? '',
+        lat: w.location.latitude,
+        lng: w.location.longitude,
       }))
       .sort((a: Webcam, b: Webcam) => a.dist - b.dist)
       .slice(0, 6)

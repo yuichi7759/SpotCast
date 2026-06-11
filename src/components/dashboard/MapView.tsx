@@ -130,6 +130,7 @@ interface Props {
   radarPlayerBottom?: string           // 雨雲レーダープレーヤーの bottom 位置（モバイルではシートの上へ）
   fitAllNonce?: number                 // この値が変わると全ポイントが収まるよう自動ズーム
   fitBottomInset?: number              // fitBounds時の下パディングpx（モバイル: シートで隠れる分）
+  webcamPins?: { id: number; lat: number; lng: number }[]   // ライブカメラ位置のピン
 }
 
 export default function MapView({
@@ -138,7 +139,7 @@ export default function MapView({
   onMapClick, onMapRightClick, onFieldClick, onIntelClick, onMoveEnd, center, zoom,
   drawingMode, drawingPoints, onPointAdd, onPolygonClose,
   showRainRadar = false, flyOffsetY = 0, radarPlayerBottom = '0',
-  fitAllNonce = 0, fitBottomInset = 0,
+  fitAllNonce = 0, fitBottomInset = 0, webcamPins = [],
 }: Props) {
   const t = useT()
   const mapToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
@@ -153,6 +154,8 @@ export default function MapView({
   const [wxByField, setWxByField]     = useState<Record<string, string>>({})  // fieldId -> weather_main
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const wxMkrsRef = useRef<any[]>([])   // 天気アイコンのHTMLマーカー
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const camMkrsRef = useRef<any[]>([])  // ライブカメラ位置のピン
 
   const containerRef = useRef<HTMLDivElement>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -429,6 +432,26 @@ export default function MapView({
       wxMkrsRef.current.push(marker)
     })
   }, [fields, wxByField, showWxIcons])
+
+  // ── 1g. ライブカメラ位置のピン（webcamPins） ──────────────
+  useEffect(() => {
+    const map = mapRef.current
+    const mgl = mglRef.current
+    if (!map || !mgl) return
+    camMkrsRef.current.forEach(m => m.remove())
+    camMkrsRef.current = []
+    webcamPins.forEach(c => {
+      const el = document.createElement('div')
+      // 注: position は付けない（Mapboxの絶対配置に委ねる）
+      el.style.cssText = 'width:22px;height:22px;pointer-events:none;'
+      el.innerHTML =
+        '<div style="width:22px;height:22px;border-radius:50%;background:#0c447c;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.5)">' +
+        '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l4.55-2.27A1 1 0 0 1 21 8.6v6.8a1 1 0 0 1-1.45.87L15 14M3 6h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/></svg>' +
+        '</div>'
+      const marker = new mgl.Marker({ element: el, anchor: 'center' }).setLngLat([c.lng, c.lat]).addTo(map)
+      camMkrsRef.current.push(marker)
+    })
+  }, [webcamPins])
 
   // ── 2. FlyTo when center changes ───────────────────────────
   useEffect(() => {
