@@ -864,7 +864,7 @@ export default function MapView({
             name:     f.name,
             crop:     f.crop  ?? '',
             variety:  f.variety ?? '',
-            stage:    fs.stage,
+            stage:    f.crop || t('map.savedPoint'),   // crop未設定時はロケール対応のフォールバック
             action:   fs.nextAction,
             status:   fs.status,
             selected: f.id === selectedFieldIdRef.current ? 1 : 0,
