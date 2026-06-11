@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { metnoWeather, isOpenMeteoDown, markOpenMeteoDown, markOpenMeteoUp } from '@/lib/weather/metno'
 
 export const runtime = 'nodejs'
 
@@ -46,9 +47,9 @@ const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function fetchOpenMeteo(url: string): Promise<any> {
   let lastErr: unknown = new Error('unknown')
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 2; attempt++) {   // 障害時に早めに諦めてフォールバックへ
     const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 10000)
+    const timer = setTimeout(() => controller.abort(), 6000)
     try {
       const res = await fetch(url, { cache: 'no-store', signal: controller.signal })
       clearTimeout(timer)
@@ -83,7 +84,17 @@ async function buildWeather(lat: number, lng: number): Promise<WeatherData> {
 
   // 逆ジオコーディング(Nominatim)は遅く・レート制限が厳しいため critical path から除外。
   // city は UI 未使用なので空文字でOK（フリーズ防止）。
-  const d = await fetchOpenMeteo(url)
+  // ブレーカーが開いている間は Open-Meteo を試さず即フォールバック（待ち時間ゼロ）
+  if (isOpenMeteoDown()) return await metnoWeather(lat, lng)
+  let d
+  try {
+    d = await fetchOpenMeteo(url)
+    markOpenMeteoUp()
+  } catch (e) {
+    console.warn('[weather] Open-Meteo unavailable → MET Norway フォールバック', e)
+    markOpenMeteoDown()
+    return await metnoWeather(lat, lng)   // Open-Meteo障害時の予備プロバイダ
+  }
   const city = ''
 
   const cur = d.current
