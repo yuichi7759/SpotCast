@@ -54,6 +54,7 @@ export default function DashboardPage() {
   const [mobileTab,         setMobileTab]        = useState<'spots' | 'bestday'>('spots')
   const [isMobile,          setIsMobile]         = useState(false)
   const [placingPoint,      setPlacingPoint]     = useState(false)
+  const [fitAllNonce,       setFitAllNonce]      = useState(0)
   const isResizingRight  = useRef(false)
   const resizeStartXR    = useRef(0)
   const resizeStartWR    = useRef(0)
@@ -79,6 +80,21 @@ export default function DashboardPage() {
   const flyOffsetY = isMobile
     ? -Math.round((typeof window !== 'undefined' ? window.innerHeight : 800) * 0.56 / 2)
     : 0
+  // fitBounds の下パディング（モバイルはシートで隠れる分）
+  const fitBottomInset = isMobile
+    ? Math.round((typeof window !== 'undefined' ? window.innerHeight : 800) * 0.56)
+    : 0
+
+  // 全ポイントが地図に収まるよう自動ズーム
+  function fitAllSpots() {
+    const withCoords = fields.filter(f => f.lat != null && f.lng != null)
+    if (withCoords.length === 0) {
+      toast.info(t('dash.fitAllEmpty'))
+      return
+    }
+    if (isMobile) setMobileSnap('list')   // 地図を見える状態に
+    setFitAllNonce(n => n + 1)
+  }
 
   const loadFields = useCallback(async () => {
     try {
@@ -322,6 +338,8 @@ export default function DashboardPage() {
       showRainRadar={showRainRadar}
       flyOffsetY={flyOffsetY}
       radarPlayerBottom={isMobile ? 'calc(84px + 10px + env(safe-area-inset-bottom))' : '0'}
+      fitAllNonce={fitAllNonce}
+      fitBottomInset={fitBottomInset}
     />
   )
 
@@ -349,6 +367,7 @@ export default function DashboardPage() {
               onAdd={handleAddClick}
               orderIds={orderIds}
               onReorder={handleReorder}
+              onFitAll={fitAllSpots}
             />
             {/* Resize handle */}
             <div
@@ -386,8 +405,8 @@ export default function DashboardPage() {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, pointerEvents: 'auto' }}>
                 <button
-                  onClick={() => { setCenter([136.7, 35.7]); setZoom(5) }}
-                  title={t('dash.home')}
+                  onClick={fitAllSpots}
+                  title={t('dash.fitAll')}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     width: 34, height: 34,
@@ -868,9 +887,11 @@ export default function DashboardPage() {
                     return (
                       <button
                         key={id}
-                        onClick={() => setMobileTab(id)}
+                        // My Spots タップで全ポイントを地図に収める（タブ切替も兼ねる）
+                        onClick={() => { setMobileTab(id); if (id === 'spots') fitAllSpots() }}
                         style={{
                           flex: 1, padding: '8px 0', borderRadius: 9,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
                           background: active ? 'var(--dash-accent-bg)' : 'var(--dash-surface)',
                           border: `1px solid ${active ? 'var(--dash-accent)' : 'var(--dash-border)'}`,
                           color: active ? 'var(--dash-accent)' : 'var(--dash-text-3)',
@@ -878,6 +899,11 @@ export default function DashboardPage() {
                         }}
                       >
                         {label}
+                        {id === 'spots' && (
+                          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/>
+                          </svg>
+                        )}
                       </button>
                     )
                   })}

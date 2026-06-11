@@ -128,6 +128,8 @@ interface Props {
   showRainRadar?: boolean
   flyOffsetY?: number                  // flyTo時の縦オフセットpx（モバイル: シートで隠れる分だけ上にずらす）
   radarPlayerBottom?: string           // 雨雲レーダープレーヤーの bottom 位置（モバイルではシートの上へ）
+  fitAllNonce?: number                 // この値が変わると全ポイントが収まるよう自動ズーム
+  fitBottomInset?: number              // fitBounds時の下パディングpx（モバイル: シートで隠れる分）
 }
 
 export default function MapView({
@@ -136,6 +138,7 @@ export default function MapView({
   onMapClick, onMapRightClick, onFieldClick, onIntelClick, onMoveEnd, center, zoom,
   drawingMode, drawingPoints, onPointAdd, onPolygonClose,
   showRainRadar = false, flyOffsetY = 0, radarPlayerBottom = '0',
+  fitAllNonce = 0, fitBottomInset = 0,
 }: Props) {
   const t = useT()
   const mapToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
@@ -441,6 +444,29 @@ export default function MapView({
       pendingFly.current = target
     }
   }, [center, zoom, flyOffsetY])
+
+  // ── 2b. 全ポイントが収まるよう自動ズーム（fitAllNonce 変化時） ──
+  useEffect(() => {
+    if (!fitAllNonce) return
+    const map = mapRef.current
+    const mgl = mglRef.current
+    if (!map || !mgl) return
+    const pts = fieldsRef.current.filter(f => f.lat != null && f.lng != null)
+    if (pts.length === 0) return
+    if (pts.length === 1) {
+      map.flyTo({ center: [pts[0].lng!, pts[0].lat!], zoom: 12, offset: [0, flyOffsetY], speed: 1.4, curve: 1.2 })
+      return
+    }
+    const b = new mgl.LngLatBounds()
+    pts.forEach(p => b.extend([p.lng!, p.lat!]))
+    try {
+      map.fitBounds(b, {
+        padding: { top: 64, bottom: 64 + fitBottomInset, left: 48, right: 48 },
+        maxZoom: 13, duration: 900,
+      })
+    } catch { /* bounds不正時は無視 */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fitAllNonce])
 
   // ── 3. Rebuild field markers when fields change ────────────
   useEffect(() => {

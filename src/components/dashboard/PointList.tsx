@@ -14,6 +14,7 @@ interface Props {
   orderIds: string[]
   onReorder: (ids: string[]) => void
   hideHeader?: boolean   // モバイル: 上のタブ/ピーク表示と重複するヘッダーを省く
+  onFitAll?: () => void  // 「My Spots」見出しクリックで全ポイントを地図に収める
 }
 
 const WEATHER_ICON: Record<string, string> = {
@@ -182,7 +183,7 @@ function PointCard({
   )
 }
 
-export default function PointList({ points, selectedPointId, onPointClick, onPointEdit, onAdd, orderIds, onReorder, hideHeader = false }: Props) {
+export default function PointList({ points, selectedPointId, onPointClick, onPointEdit, onAdd, orderIds, onReorder, hideHeader = false, onFitAll }: Props) {
   const t = useT()
   const [dragId, setDragId] = useState<string | null>(null)
   const [overId, setOverId] = useState<string | null>(null)
@@ -224,9 +225,22 @@ export default function PointList({ points, selectedPointId, onPointClick, onPoi
         borderBottom: '1px solid var(--dash-surface2)',
         flexShrink: 0,
       }}>
-        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--dash-text)', letterSpacing: '-0.01em' }}>
+        <button
+          onClick={onFitAll}
+          title={t('dash.fitAll')}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: 'none', border: 'none', padding: 0, cursor: onFitAll ? 'pointer' : 'default',
+            fontSize: 15, fontWeight: 800, color: 'var(--dash-text)', letterSpacing: '-0.01em',
+          }}
+        >
           My Spots
-        </div>
+          {onFitAll && (
+            <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="var(--dash-text-3)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/>
+            </svg>
+          )}
+        </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <Link
           href="/settings"
