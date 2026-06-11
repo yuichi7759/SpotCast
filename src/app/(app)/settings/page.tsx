@@ -256,26 +256,46 @@ export default function SettingsPage() {
                 }}/>
               </button>
             </div>
-            {/* ライブカメラを地図に表示 */}
+            {/* ライブカメラを地図に表示（Standard限定） */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: 12, borderBottom: `1px solid ${borderColor}` }}>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>{t('settings.cameras')}</div>
+                <div style={{ fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {t('settings.cameras')}
+                  {!isPro && (
+                    <span style={{ fontSize: 9, fontWeight: 800, padding: '1px 6px', borderRadius: 999, background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.5)', color: '#d97706' }}>STANDARD</span>
+                  )}
+                </div>
                 <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>{t('settings.camerasHint')}</div>
               </div>
-              <button
-                onClick={() => { const v = !cameras; setCameras(v); saveCameras(v) }}
-                style={{
-                  width: 48, height: 26, borderRadius: 999, flexShrink: 0,
-                  background: cameras ? '#3b82f6' : (isLight ? '#cbd5e1' : '#334155'),
-                  border: 'none', cursor: 'pointer', position: 'relative', transition: 'background 0.2s',
-                }}
-              >
-                <span style={{
-                  position: 'absolute', top: 4, left: cameras ? 26 : 4,
-                  width: 18, height: 18, borderRadius: '50%',
-                  background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.3)', transition: 'left 0.2s',
-                }}/>
-              </button>
+              {isPro ? (
+                <button
+                  onClick={() => { const v = !cameras; setCameras(v); saveCameras(v) }}
+                  style={{
+                    width: 48, height: 26, borderRadius: 999, flexShrink: 0,
+                    background: cameras ? '#3b82f6' : (isLight ? '#cbd5e1' : '#334155'),
+                    border: 'none', cursor: 'pointer', position: 'relative', transition: 'background 0.2s',
+                  }}
+                >
+                  <span style={{
+                    position: 'absolute', top: 4, left: cameras ? 26 : 4,
+                    width: 18, height: 18, borderRadius: '50%',
+                    background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.3)', transition: 'left 0.2s',
+                  }}/>
+                </button>
+              ) : (
+                <button
+                  onClick={handleUpgrade}
+                  disabled={upgrading}
+                  style={{
+                    flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5,
+                    padding: '6px 12px', borderRadius: 999, cursor: 'pointer',
+                    background: 'rgba(251,191,36,0.12)', border: '1px solid rgba(251,191,36,0.45)',
+                    color: '#d97706', fontSize: 12, fontWeight: 700,
+                  }}
+                >
+                  🔒 {upgrading ? t('common.processing') : t('settings.unlock')}
+                </button>
+              )}
             </div>
             {/* 周辺の見どころを地図に表示 */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: 12, borderBottom: `1px solid ${borderColor}` }}>

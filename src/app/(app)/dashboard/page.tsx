@@ -121,18 +121,21 @@ export default function DashboardPage() {
     return () => { window.removeEventListener(CAMERAS_EVENT, hc); window.removeEventListener(HIGHLIGHTS_EVENT, hh) }
   }, [])
 
-  // 選択ポイント近くのカメラ／見どころを取得（各設定ONかつ座標あり時のみ）
+  // ライブカメラは Standard 限定（無料プランは Windy API を叩かない＝コスト保護）
+  const camerasActive = camerasEnabled && plan === 'standard'
+
+  // 選択ポイント近くのカメラ／見どころを取得（各条件ONかつ座標あり時のみ）
   useEffect(() => {
     setExpandedMedia(null)
     const lat = selectedField?.lat, lng = selectedField?.lng
-    if ((!camerasEnabled && !highlightsEnabled) || lat == null || lng == null) { setMedia(null); return }
+    if ((!camerasActive && !highlightsEnabled) || lat == null || lng == null) { setMedia(null); return }
     let cancelled = false
     Promise.all([
-      camerasEnabled    ? fetch(`/api/webcams?lat=${lat}&lng=${lng}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null),
+      camerasActive     ? fetch(`/api/webcams?lat=${lat}&lng=${lng}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null),
       highlightsEnabled ? fetch(`/api/nearby?lat=${lat}&lng=${lng}&lang=${locale}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null),
     ]).then(([w, p]) => { if (!cancelled) setMedia({ cams: w?.webcams ?? [], places: p?.places ?? [] }) })
     return () => { cancelled = true }
-  }, [selectedField, camerasEnabled, highlightsEnabled, locale])
+  }, [selectedField, camerasActive, highlightsEnabled, locale])
 
   // 地図ピン（カメラ＝青/見どころ＝アンバー、番号でワイプと対応）
   const mediaPins = useMemo(() => {
@@ -443,7 +446,7 @@ export default function DashboardPage() {
             <div style={{ position: 'absolute', inset: 0 }}>{mapViewEl}</div>
 
             {/* 選択ポイント近くのライブカメラ＋見どころ（地図下部の帯） */}
-            {(camerasEnabled || highlightsEnabled) && (
+            {(camerasActive || highlightsEnabled) && (
               <MapMediaStrip media={media} expanded={expandedMedia} onExpand={setExpandedMedia} />
             )}
 
@@ -736,7 +739,7 @@ export default function DashboardPage() {
         <div style={{ position: 'absolute', inset: 0 }}>{mapViewEl}</div>
 
         {/* 選択ポイント近くのライブカメラ＋見どころ（シートの上に帯／詳細展開・位置決め中は隠す） */}
-        {(camerasEnabled || highlightsEnabled) && !placingPoint && mobileSnap !== 'detail' && (
+        {(camerasActive || highlightsEnabled) && !placingPoint && mobileSnap !== 'detail' && (
           <MapMediaStrip
             media={media}
             expanded={expandedMedia}
