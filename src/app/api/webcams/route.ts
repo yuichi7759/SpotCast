@@ -19,7 +19,8 @@ export interface Webcam {
 
 const KEY = process.env.WINDY_WEBCAMS_API_KEY
 const RADIUS_KM = 25
-const CACHE_TTL = 20 * 60 * 1000   // 20分（ライブだがクォータ節約のためキャッシュ）
+// 無料枠の画像URLは10分で失効するため、キャッシュは必ずそれ未満に（画像切れ防止）。
+const CACHE_TTL = 8 * 60 * 1000   // 8分
 const cache = new Map<string, { data: Webcam[]; ts: number }>()
 
 function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
