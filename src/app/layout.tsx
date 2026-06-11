@@ -71,7 +71,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     ],
   }
   return (
-    <html lang={locale} className="h-full">
+    <html lang={locale} className="h-full" data-theme="light">
       <body className="min-h-full flex flex-col">
         <script
           type="application/ld+json"
