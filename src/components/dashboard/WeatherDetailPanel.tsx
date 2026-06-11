@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import type { Field, WeatherData } from '@/types/field'
 import type { HourlyWeather, HourlyPoint } from '@/app/api/weather/hourly/route'
 import { useLocale } from '@/components/LocaleProvider'
+import NearbyPlaces from '@/components/dashboard/NearbyPlaces'
 
 interface Props {
   point: Field | null
@@ -333,6 +334,11 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
             <div style={{ marginTop: 8, padding: '8px 12px', borderRadius: 8, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.22)', fontSize: 12, color: 'rgba(251,191,36,0.9)', textAlign: 'center' }}>
               ⚡ {t('weather.freeBanner')}
             </div>
+          )}
+
+          {/* 周辺の見どころ（Wikipedia・見どころが無ければ自動で非表示） */}
+          {point.lat != null && point.lng != null && (
+            <NearbyPlaces lat={point.lat} lng={point.lng} />
           )}
         </div>
       )}
