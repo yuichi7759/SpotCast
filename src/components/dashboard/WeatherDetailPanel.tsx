@@ -4,6 +4,7 @@ import type { Field, WeatherData } from '@/types/field'
 import type { HourlyWeather, HourlyPoint } from '@/app/api/weather/hourly/route'
 import { useLocale } from '@/components/LocaleProvider'
 import NearbyPlaces from '@/components/dashboard/NearbyPlaces'
+import NearbyWebcams from '@/components/dashboard/NearbyWebcams'
 
 interface Props {
   point: Field | null
@@ -339,6 +340,10 @@ export default function WeatherDetailPanel({ point, onClose, refreshKey, plan = 
           {/* 周辺の見どころ（Wikipedia・見どころが無ければ自動で非表示） */}
           {point.lat != null && point.lng != null && (
             <NearbyPlaces lat={point.lat} lng={point.lng} />
+          )}
+          {/* 近くのライブカメラ（Windy・近くに無ければ自動で非表示） */}
+          {point.lat != null && point.lng != null && (
+            <NearbyWebcams lat={point.lat} lng={point.lng} />
           )}
         </div>
       )}
