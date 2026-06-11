@@ -409,7 +409,7 @@ export default async function LandingPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20 }}>
             {[
               { name: 'Free', price: '¥0', period: T('lp.plan.period'), desc: T('lp.plan.freeDesc'), highlight: false, features: [T('lp.plan.f.points3'),T('lp.plan.f.hourly24'),T('lp.plan.f.daily')], cta: T('lp.plan.ctaFree'), href: '/signup' },
-              { name: 'Standard', price: '¥980', period: T('lp.plan.period'), desc: T('lp.plan.stdDesc'), highlight: true, features: [T('lp.plan.f.unlimited'),T('lp.plan.f.hourly48'),T('lp.plan.f.bestday'),T('lp.plan.f.radar')], cta: T('lp.plan.ctaStd'), href: '/signup?plan=standard' },
+              { name: 'Standard', price: '¥980', period: T('lp.plan.period'), desc: T('lp.plan.stdDesc'), highlight: true, features: [T('lp.plan.f.unlimited'),T('lp.plan.f.hourly48'),T('lp.plan.f.bestday'),T('lp.plan.f.radar'),T('lp.plan.f.cameras')], cta: T('lp.plan.ctaStd'), href: '/signup?plan=standard' },
             ].map(p => (
               <div key={p.name} style={{ position: 'relative', padding: '30px 26px', borderRadius: 20, border: p.highlight ? '2px solid #1d4ed8' : '1px solid #e2e8f0', background: '#fff', boxShadow: p.highlight ? '0 8px 32px rgba(29,78,216,0.1)' : '0 2px 8px rgba(15,23,42,0.04)' }}>
                 {p.highlight && (
