@@ -177,6 +177,7 @@ export const dictionaries = {
     // 設定（追加分）
     'settings.upgradeDone':   'Standardプランへのアップグレードが完了しました！',
     'settings.upgradeCta':    '⚡ Standardにアップグレード',
+    'settings.managePlan':    'プランを管理',
     'settings.logoutLoading': 'ログアウト中...',
     'settings.wxIcons':       '地図に天気アイコンを表示',
     'settings.wxIconsHint':   '各マーカーの横に現在の天気を表示',
@@ -483,6 +484,7 @@ export const dictionaries = {
 
     'settings.upgradeDone':   'Upgraded to Standard!',
     'settings.upgradeCta':    '⚡ Upgrade to Standard',
+    'settings.managePlan':    'Manage plan',
     'settings.logoutLoading': 'Logging out...',
     'settings.wxIcons':       'Show weather icons on map',
     'settings.wxIconsHint':   'Show current weather next to each marker',

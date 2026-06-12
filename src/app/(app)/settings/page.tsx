@@ -14,6 +14,7 @@ export default function SettingsPage() {
   const [email, setEmail]         = useState('')
   const [plan, setPlan]           = useState<'free' | 'pro'>('free')
   const [upgrading, setUpgrading] = useState(false)
+  const [portalLoading, setPortalLoading] = useState(false)
   const [upgradeError, setUpgradeError] = useState('')
   const [loggingOut, setLoggingOut] = useState(false)
   const [markerSize, setMarkerSize] = useState<MarkerSize>('md')
@@ -69,6 +70,22 @@ export default function SettingsPage() {
       setUpgradeError(t('common.commError'))
     } finally {
       setUpgrading(false)
+    }
+  }
+
+  // Stripe Customer Portal へ（解約・支払い方法変更・領収書）
+  async function handlePortal() {
+    setPortalLoading(true)
+    setUpgradeError('')
+    try {
+      const res = await fetch('/api/portal', { method: 'POST' })
+      const data = await res.json()
+      if (res.ok && data.url) { window.location.href = data.url; return }
+      setUpgradeError(data.error ?? t('common.error'))
+    } catch {
+      setUpgradeError(t('common.commError'))
+    } finally {
+      setPortalLoading(false)
     }
   }
 
@@ -152,6 +169,20 @@ export default function SettingsPage() {
                 }}>
                   {isPro ? '⚡ STANDARD' : 'FREE'}
                 </span>
+                {isPro && (
+                  <button
+                    onClick={handlePortal}
+                    disabled={portalLoading}
+                    style={{
+                      fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                      background: 'transparent', border: `1px solid ${borderColor}`,
+                      borderRadius: 8, padding: '5px 14px', color: textMuted,
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    {portalLoading ? t('common.processing') : t('settings.managePlan')}
+                  </button>
+                )}
                 {!isPro && (
                   <div>
                     <button
@@ -173,6 +204,9 @@ export default function SettingsPage() {
                   </div>
                 )}
               </div>
+              {isPro && upgradeError && (
+                <div style={{ marginTop: 8, fontSize: 12, color: '#f87171' }}>⚠️ {upgradeError}</div>
+              )}
             </div>
           </div>
         </section>
