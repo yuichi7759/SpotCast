@@ -1,4 +1,5 @@
 'use client'
+import { useEffect } from 'react'
 import { useLocale } from '@/components/LocaleProvider'
 import type { Webcam } from '@/app/api/webcams/route'
 import type { NearbyPlace } from '@/app/api/nearby/route'
@@ -50,8 +51,34 @@ export default function MapMediaStrip({
   bottomOffset?: string
 }) {
   const { t } = useLocale()
-  if (!media || (media.cams.length === 0 && media.places.length === 0)) return null
-  const { cams, places } = media
+  const cams = media?.cams ?? []
+  const places = media?.places ?? []
+
+  // カメラ→見どころの順に並べたフラットリスト（拡大表示の前後送り用）
+  const flat: NonNullable<Expanded>[] = [
+    ...cams.map((c, i) => ({ kind: 'cam' as const, n: i + 1, item: c })),
+    ...places.map((p, i) => ({ kind: 'place' as const, n: i + 1, item: p })),
+  ]
+  const curIdx = expanded ? flat.findIndex(f => f.kind === expanded.kind && f.n === expanded.n) : -1
+  function go(delta: number) {
+    if (curIdx < 0 || flat.length < 2) return
+    onExpand(flat[(curIdx + delta + flat.length) % flat.length])
+  }
+
+  // 拡大中は ← → で前後送り、Esc で閉じる
+  useEffect(() => {
+    if (!expanded) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(1) }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1) }
+      else if (e.key === 'Escape') onExpand(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expanded, curIdx, flat.length])
+
+  if (cams.length === 0 && places.length === 0) return null
 
   return (
     <>
@@ -73,6 +100,21 @@ export default function MapMediaStrip({
               <button onClick={() => onExpand(null)} aria-label="close" style={{ position: 'absolute', top: 7, right: 7, width: 28, height: 28, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>
               </button>
+
+              {/* 前後送り（← → キー / ‹ › ボタン） */}
+              {flat.length > 1 && (
+                <>
+                  <button onClick={e => { e.stopPropagation(); go(-1) }} aria-label="prev" style={{ position: 'absolute', left: 7, top: '50%', transform: 'translateY(-50%)', width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="10,3 5,8 10,13"/></svg>
+                  </button>
+                  <button onClick={e => { e.stopPropagation(); go(1) }} aria-label="next" style={{ position: 'absolute', right: 7, top: '50%', transform: 'translateY(-50%)', width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6,3 11,8 6,13"/></svg>
+                  </button>
+                  <div style={{ position: 'absolute', bottom: 7, right: 9, background: 'rgba(0,0,0,0.55)', borderRadius: 6, padding: '2px 7px', color: '#fff', fontSize: 10, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+                    {curIdx + 1} / {flat.length}
+                  </div>
+                </>
+              )}
             </div>
             <div style={{ padding: '11px 14px 13px' }}>
               <div style={{ color: '#fff', fontSize: 14, fontWeight: 700, lineHeight: 1.35 }}>{expanded.item.title}</div>
