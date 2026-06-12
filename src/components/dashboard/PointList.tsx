@@ -15,6 +15,7 @@ interface Props {
   onReorder: (ids: string[]) => void
   hideHeader?: boolean   // モバイル: 上のタブ/ピーク表示と重複するヘッダーを省く
   onFitAll?: () => void  // 「My Spots」見出しクリックで全ポイントを地図に収める
+  lockedIds?: Set<string>  // Free上限超のロック済みポイント（グレー＋🔒）
 }
 
 const WEATHER_ICON: Record<string, string> = {
@@ -32,6 +33,7 @@ function weatherIcon(main: string): string {
 function PointCard({
   point,
   selected,
+  locked,
   onPointClick,
   onPointEdit,
   dragging,
@@ -43,6 +45,7 @@ function PointCard({
 }: {
   point: Field
   selected: boolean
+  locked: boolean
   onPointClick: () => void
   onPointEdit: () => void
   dragging: boolean
@@ -59,12 +62,12 @@ function PointCard({
   const hasCoords = point.lat != null && point.lng != null
 
   useEffect(() => {
-    if (!hasCoords) return
+    if (!hasCoords || locked) return   // ロック中は天気を取りに行かない
     fetch(`/api/weather?lat=${point.lat}&lng=${point.lng}`, { cache: 'no-store' })
       .then(r => r.json())
       .then(d => { if (d && d.current) setWeather(d) })   // エラー応答({error})は無視
       .catch(() => {})
-  }, [point.lat, point.lng, hasCoords])
+  }, [point.lat, point.lng, hasCoords, locked])
 
   return (
     <div
@@ -83,7 +86,7 @@ function PointCard({
         borderLeft: selected ? `3px solid ${accentColor}` : '3px solid transparent',
         cursor: dragging ? 'grabbing' : 'pointer',
         transition: dragging ? 'none' : 'background 0.15s, transform 0.12s',
-        opacity: dragging ? 0.35 : 1,
+        opacity: dragging ? 0.35 : locked ? 0.5 : 1,
         transform: dragOver ? 'scale(1.015)' : 'none',
         boxShadow: dragOver ? '0 4px 16px rgba(0,0,0,0.25)' : 'none',
         display: 'flex',
@@ -146,8 +149,14 @@ function PointCard({
         )}
       </div>
 
-      {/* Weather mini */}
-      {hasCoords && weather && (
+      {/* ロック表示（Free上限超）。天気miniより優先 */}
+      {locked ? (
+        <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', color: 'var(--dash-text-4)' }} title="Standardで解除">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <rect x="3" y="7" width="10" height="6.5" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/>
+          </svg>
+        </div>
+      ) : hasCoords && weather && (
         <div style={{
           display: 'flex', flexDirection: 'column', alignItems: 'flex-end',
           flexShrink: 0, gap: 1,
@@ -183,7 +192,7 @@ function PointCard({
   )
 }
 
-export default function PointList({ points, selectedPointId, onPointClick, onPointEdit, onAdd, orderIds, onReorder, hideHeader = false, onFitAll }: Props) {
+export default function PointList({ points, selectedPointId, onPointClick, onPointEdit, onAdd, orderIds, onReorder, hideHeader = false, onFitAll, lockedIds }: Props) {
   const t = useT()
   const [dragId, setDragId] = useState<string | null>(null)
   const [overId, setOverId] = useState<string | null>(null)
@@ -321,6 +330,7 @@ export default function PointList({ points, selectedPointId, onPointClick, onPoi
               key={p.id}
               point={p}
               selected={p.id === selectedPointId}
+              locked={lockedIds?.has(p.id) ?? false}
               onPointClick={() => onPointClick(p)}
               onPointEdit={() => onPointEdit(p)}
               dragging={dragId === p.id}

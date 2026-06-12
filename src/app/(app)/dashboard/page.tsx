@@ -18,7 +18,7 @@ import { loadCameras, loadHighlights, CAMERAS_EVENT, HIGHLIGHTS_EVENT } from '@/
 import AccountMenu from '@/components/layout/AccountMenu'
 import { useToast } from '@/components/ToastProvider'
 import { createClient } from '@/lib/supabase/client'
-import { loadOrder, saveOrder } from '@/lib/spotOrder'
+import { loadOrder, saveOrder, applyOrder } from '@/lib/spotOrder'
 import { loadMarkerZoom } from '@/lib/markerZoomPref'
 import { useLocale } from '@/components/LocaleProvider'
 import type { IntelligenceEvent } from '@/lib/mockIntelligence'
@@ -229,7 +229,19 @@ export default function DashboardPage() {
     }
   }
 
+  // Free上限を超えるポイントは「ロック」（非破壊）。表示順の先頭3件をアクティブにし、
+  // 残りはグレー＋🔒で操作不可。Standard復帰で全部解除（データは消さない）。
+  const lockedIds = useMemo(() => {
+    if (plan === 'standard') return new Set<string>()
+    const ordered = applyOrder(fields, orderIds)
+    return new Set(ordered.slice(FREE_POINT_LIMIT).map(f => f.id))
+  }, [plan, fields, orderIds])
+
   function handleFieldClick(field: Field) {
+    if (lockedIds.has(field.id)) {
+      toast.info(t('dash.lockedPoint'), t('dash.lockedPointSub', { n: FREE_POINT_LIMIT }))
+      return
+    }
     setSelected(field)
     setSelectedEvent(null)
     if (field.lat != null && field.lng != null) {
@@ -400,6 +412,7 @@ export default function DashboardPage() {
       fitBottomInset={fitBottomInset}
       mediaPins={mediaPins}
       onMediaPinClick={handleMediaPinClick}
+      lockedIds={lockedIds}
     />
   )
 
@@ -428,6 +441,7 @@ export default function DashboardPage() {
               orderIds={orderIds}
               onReorder={handleReorder}
               onFitAll={fitAllSpots}
+              lockedIds={lockedIds}
             />
             {/* Resize handle */}
             <div
@@ -993,6 +1007,7 @@ export default function DashboardPage() {
                       orderIds={orderIds}
                       onReorder={handleReorder}
                       hideHeader
+                      lockedIds={lockedIds}
                     />
                   ) : (
                     <BestDayMatrix allPoints={fields} highlightPointId={undefined} refreshKey={weatherRefreshKey} plan={plan} orderIds={orderIds} />

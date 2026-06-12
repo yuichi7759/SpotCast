@@ -69,6 +69,8 @@ export const dictionaries = {
     'dash.freeLimitSub': 'Standardプランにアップグレードすると{m}件まで登録できます',
     'dash.stdLimit':     'Standardプランは{n}件まで',
     'dash.stdLimitSub':  'さらに登録したい場合は Max プラン（近日公開）をご利用ください',
+    'dash.lockedPoint':  'このポイントはロック中です',
+    'dash.lockedPointSub':'Freeは{n}件まで。Standardに戻すと全ポイントが使えます',
     'dash.radarLocked':  '雨雲レーダーはStandardプランの機能です',
     'dash.radarLockedSub':'アップグレードしてご利用ください',
     // BestDay
@@ -382,6 +384,8 @@ export const dictionaries = {
     'dash.freeLimitSub': 'Upgrade to Standard for up to {m} points',
     'dash.stdLimit':     'Standard plan is limited to {n} points',
     'dash.stdLimitSub':  'For more, the Max plan (coming soon) will offer unlimited points',
+    'dash.lockedPoint':  'This point is locked',
+    'dash.lockedPointSub':'Free is limited to {n}. Upgrade to Standard to use all points',
     'dash.radarLocked':  'Rain radar is a Standard feature',
     'dash.radarLockedSub':'Please upgrade to use it',
     'bestday.lockTitle': 'Best Day',

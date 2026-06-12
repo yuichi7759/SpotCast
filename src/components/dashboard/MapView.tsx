@@ -132,6 +132,7 @@ interface Props {
   fitBottomInset?: number              // fitBounds時の下パディングpx（モバイル: シートで隠れる分）
   mediaPins?: { key: string; kind: 'cam' | 'place'; lat: number; lng: number; n: number }[]   // ライブカメラ/見どころの位置ピン
   onMediaPinClick?: (key: string) => void
+  lockedIds?: Set<string>   // Free上限超のロック済みポイント（グレー表示・天気アイコン無し）
 }
 
 export default function MapView({
@@ -140,7 +141,7 @@ export default function MapView({
   onMapClick, onMapRightClick, onFieldClick, onIntelClick, onMoveEnd, center, zoom,
   drawingMode, drawingPoints, onPointAdd, onPolygonClose,
   showRainRadar = false, flyOffsetY = 0, radarPlayerBottom = '0',
-  fitAllNonce = 0, fitBottomInset = 0, mediaPins = [], onMediaPinClick,
+  fitAllNonce = 0, fitBottomInset = 0, mediaPins = [], onMediaPinClick, lockedIds,
 }: Props) {
   const t = useT()
   const mapToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
@@ -178,6 +179,7 @@ export default function MapView({
   const onFieldClickRef   = useRef(onFieldClick)
   const onIntelClickRef   = useRef(onIntelClick)
   const selectedFieldIdRef = useRef(selectedFieldId)
+  const lockedIdsRef      = useRef<Set<string> | undefined>(lockedIds)
   const drawingModeRef    = useRef(false)
   const drawingPointsRef  = useRef<[number, number][]>([])
   const previewPtRef      = useRef<[number, number] | null>(null)
@@ -190,6 +192,7 @@ export default function MapView({
   onFieldClickRef.current   = onFieldClick
   onIntelClickRef.current   = onIntelClick
   selectedFieldIdRef.current = selectedFieldId
+  lockedIdsRef.current      = lockedIds
   drawingModeRef.current    = !!drawingMode
   drawingPointsRef.current  = drawingPoints ?? []
   onPointAddRef.current     = onPointAdd
@@ -424,6 +427,7 @@ export default function MapView({
     if (!showWxIcons) return
     fields.forEach(f => {
       if (f.lat == null || f.lng == null) return
+      if (lockedIds?.has(f.id)) return     // ロック中のポイントは天気アイコン非表示
       const main = wxByField[f.id]
       if (!main) return
       const el = buildWxElement(main)
@@ -433,7 +437,7 @@ export default function MapView({
         .setLngLat([f.lng, f.lat]).addTo(map)
       wxMkrsRef.current.push(marker)
     })
-  }, [fields, wxByField, showWxIcons])
+  }, [fields, wxByField, showWxIcons, lockedIds])
 
   // ── 1g. ライブカメラ/見どころの位置ピン（番号付き・クリックで拡大） ──
   onMediaPinClickRef.current = onMediaPinClick
@@ -714,6 +718,12 @@ export default function MapView({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFieldId])
 
+  // ── 6b. ロック状態が変わったらドットの色/透明度を再反映 ──────
+  useEffect(() => {
+    rebuildFieldMarkers()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lockedIds])
+
   // ── Drawing mode ────────────────────────────────────────────
   useEffect(() => {
     const map = mapRef.current
@@ -868,6 +878,7 @@ export default function MapView({
             action:   fs.nextAction,
             status:   fs.status,
             selected: f.id === selectedFieldIdRef.current ? 1 : 0,
+            locked:   lockedIdsRef.current?.has(f.id) ? 1 : 0,
           },
           geometry: { type: 'Point' as const, coordinates: [f.lng!, f.lat!] },
         }
@@ -891,14 +902,15 @@ export default function MapView({
     map.addLayer({ id: 'field-glow', type: 'circle', source: 'field-pts', paint: {
       'circle-radius':  radiusExpr(10, 22, ms),
       'circle-color':   ['get', 'color'],
-      'circle-opacity': 0.18,
+      'circle-opacity': ['case', ['==', ['get', 'locked'], 1], 0, 0.18],   // ロックはグロー無し
       'circle-blur':    1,
     }})
 
-    // メインドット
+    // メインドット（ロックは半透明グレー寄りに）
     map.addLayer({ id: 'field-dot', type: 'circle', source: 'field-pts', paint: {
       'circle-radius': radiusExpr(5, 11, ms),
-      'circle-color':  ['get', 'color'],
+      'circle-color':  ['case', ['==', ['get', 'locked'], 1], '#94a3b8', ['get', 'color']],
+      'circle-opacity': ['case', ['==', ['get', 'locked'], 1], 0.4, 1],
       'circle-stroke-width': 2,
       'circle-stroke-color': 'rgba(255,255,255,0.92)',
     }})
