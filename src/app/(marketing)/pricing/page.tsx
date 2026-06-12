@@ -38,9 +38,10 @@ export default function PricingPage() {
       desc: t('lp.plan.freeDesc'),
       highlight: false,
       features: [t('lp.plan.f.points3'), t('lp.plan.f.hourly24'), t('lp.plan.f.daily')],
-      notIncluded: [t('lp.plan.f.bestday'), t('lp.plan.f.radar'), t('lp.plan.f.cameras'), t('lp.plan.f.hourly48'), t('lp.plan.f.unlimited')],
+      notIncluded: [t('lp.plan.f.points10'), t('lp.plan.f.bestday'), t('lp.plan.f.radar'), t('lp.plan.f.cameras'), t('lp.plan.f.hourly48')],
       cta: t('lp.plan.ctaFree'),
       href: '/signup',
+      comingSoon: false,
     },
     {
       name: 'Standard',
@@ -48,10 +49,23 @@ export default function PricingPage() {
       period: t('lp.plan.period'),
       desc: t('lp.plan.stdDesc'),
       highlight: true,
-      features: [t('lp.plan.f.unlimited'), t('lp.plan.f.hourly48'), t('lp.plan.f.bestday'), t('lp.plan.f.radar'), t('lp.plan.f.cameras')],
+      features: [t('lp.plan.f.points10'), t('lp.plan.f.hourly48'), t('lp.plan.f.bestday'), t('lp.plan.f.radar'), t('lp.plan.f.cameras')],
       notIncluded: [] as string[],
       cta: t('lp.plan.ctaStd'),
       href: '/signup?plan=standard',
+      comingSoon: false,
+    },
+    {
+      name: 'Max',
+      price: '—',
+      period: t('lp.plan.period'),
+      desc: t('lp.plan.maxDesc'),
+      highlight: false,
+      features: [t('lp.plan.f.unlimited'), t('lp.plan.f.hourly48'), t('lp.plan.f.bestday'), t('lp.plan.f.radar'), t('lp.plan.f.cameras')],
+      notIncluded: [] as string[],
+      cta: t('lp.plan.ctaMax'),
+      href: '#',
+      comingSoon: true,
     },
   ]
 
@@ -109,10 +123,15 @@ export default function PricingPage() {
       <section style={{ maxWidth: 760, margin: '0 auto', padding: '0 24px 80px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20 }}>
           {plans.map(p => (
-            <div key={p.name} style={{ position: 'relative', padding: '32px 28px', borderRadius: 20, border: p.highlight ? '2px solid #1d4ed8' : '1px solid #e2e8f0', background: '#fff', boxShadow: p.highlight ? '0 8px 32px rgba(29,78,216,0.1)' : '0 2px 10px rgba(15,23,42,0.05)' }}>
+            <div key={p.name} style={{ position: 'relative', padding: '32px 28px', borderRadius: 20, border: p.highlight ? '2px solid #1d4ed8' : '1px solid #e2e8f0', background: '#fff', boxShadow: p.highlight ? '0 8px 32px rgba(29,78,216,0.1)' : '0 2px 10px rgba(15,23,42,0.05)', opacity: p.comingSoon ? 0.6 : 1 }}>
               {p.highlight && (
                 <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', padding: '4px 16px', borderRadius: 999, background: '#1d4ed8', color: '#fff', fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap', boxShadow: '0 2px 10px rgba(29,78,216,0.35)' }}>
                   {t('lp.plan.recommended')}
+                </div>
+              )}
+              {p.comingSoon && (
+                <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', padding: '4px 16px', borderRadius: 999, background: '#64748b', color: '#fff', fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>
+                  {t('lp.plan.comingSoon')}
                 </div>
               )}
               <div style={{ marginBottom: 24 }}>
@@ -147,7 +166,11 @@ export default function PricingPage() {
               </ul>
 
               <div style={{ marginTop: 24 }}>
-                {p.highlight ? (
+                {p.comingSoon ? (
+                  <div style={{ display: 'block', width: '100%', textAlign: 'center', padding: '13px', borderRadius: 12, fontSize: 14, fontWeight: 700, boxSizing: 'border-box', background: '#eef1f5', color: '#94a3b8', border: '1px solid #e2e8f0', cursor: 'default' }}>
+                    {p.cta}
+                  </div>
+                ) : p.highlight ? (
                   <button
                     onClick={handleStandardCta}
                     disabled={upgrading}

@@ -408,12 +408,16 @@ export default async function LandingPage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20 }}>
             {[
-              { name: 'Free', price: '¥0', period: T('lp.plan.period'), desc: T('lp.plan.freeDesc'), highlight: false, features: [T('lp.plan.f.points3'),T('lp.plan.f.hourly24'),T('lp.plan.f.daily')], cta: T('lp.plan.ctaFree'), href: '/signup' },
-              { name: 'Standard', price: '¥980', period: T('lp.plan.period'), desc: T('lp.plan.stdDesc'), highlight: true, features: [T('lp.plan.f.unlimited'),T('lp.plan.f.hourly48'),T('lp.plan.f.bestday'),T('lp.plan.f.radar'),T('lp.plan.f.cameras')], cta: T('lp.plan.ctaStd'), href: '/signup?plan=standard' },
+              { name: 'Free', price: '¥0', period: T('lp.plan.period'), desc: T('lp.plan.freeDesc'), highlight: false, features: [T('lp.plan.f.points3'),T('lp.plan.f.hourly24'),T('lp.plan.f.daily')], cta: T('lp.plan.ctaFree'), href: '/signup', comingSoon: false },
+              { name: 'Standard', price: '¥980', period: T('lp.plan.period'), desc: T('lp.plan.stdDesc'), highlight: true, features: [T('lp.plan.f.points10'),T('lp.plan.f.hourly48'),T('lp.plan.f.bestday'),T('lp.plan.f.radar'),T('lp.plan.f.cameras')], cta: T('lp.plan.ctaStd'), href: '/signup?plan=standard', comingSoon: false },
+              { name: 'Max', price: '—', period: T('lp.plan.period'), desc: T('lp.plan.maxDesc'), highlight: false, features: [T('lp.plan.f.unlimited'),T('lp.plan.f.hourly48'),T('lp.plan.f.bestday'),T('lp.plan.f.radar'),T('lp.plan.f.cameras')], cta: T('lp.plan.ctaMax'), href: '#', comingSoon: true },
             ].map(p => (
-              <div key={p.name} style={{ position: 'relative', padding: '30px 26px', borderRadius: 20, border: p.highlight ? '2px solid #1d4ed8' : '1px solid #e2e8f0', background: '#fff', boxShadow: p.highlight ? '0 8px 32px rgba(29,78,216,0.1)' : '0 2px 8px rgba(15,23,42,0.04)' }}>
+              <div key={p.name} style={{ position: 'relative', padding: '30px 26px', borderRadius: 20, border: p.highlight ? '2px solid #1d4ed8' : '1px solid #e2e8f0', background: '#fff', boxShadow: p.highlight ? '0 8px 32px rgba(29,78,216,0.1)' : '0 2px 8px rgba(15,23,42,0.04)', opacity: p.comingSoon ? 0.6 : 1 }}>
                 {p.highlight && (
                   <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', padding: '4px 16px', borderRadius: 999, background: '#1d4ed8', color: '#fff', fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap', boxShadow: '0 2px 10px rgba(29,78,216,0.35)' }}>{T('lp.plan.recommended')}</div>
+                )}
+                {p.comingSoon && (
+                  <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', padding: '4px 16px', borderRadius: 999, background: '#64748b', color: '#fff', fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>{T('lp.plan.comingSoon')}</div>
                 )}
                 <p style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{p.name}</p>
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, marginBottom: 4 }}>
@@ -434,9 +438,15 @@ export default async function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link href={p.href} style={{ display: 'block', textAlign: 'center', padding: '13px', borderRadius: 12, fontSize: 14, fontWeight: 700, textDecoration: 'none', background: p.highlight ? '#1d4ed8' : '#f4f6f9', color: p.highlight ? '#fff' : '#475569', border: p.highlight ? 'none' : '1px solid #e2e8f0', boxShadow: p.highlight ? '0 4px 14px rgba(29,78,216,0.28)' : 'none' }}>
-                  {p.cta}
-                </Link>
+                {p.comingSoon ? (
+                  <div style={{ display: 'block', textAlign: 'center', padding: '13px', borderRadius: 12, fontSize: 14, fontWeight: 700, background: '#eef1f5', color: '#94a3b8', border: '1px solid #e2e8f0', cursor: 'default' }}>
+                    {p.cta}
+                  </div>
+                ) : (
+                  <Link href={p.href} style={{ display: 'block', textAlign: 'center', padding: '13px', borderRadius: 12, fontSize: 14, fontWeight: 700, textDecoration: 'none', background: p.highlight ? '#1d4ed8' : '#f4f6f9', color: p.highlight ? '#fff' : '#475569', border: p.highlight ? 'none' : '1px solid #e2e8f0', boxShadow: p.highlight ? '0 4px 14px rgba(29,78,216,0.28)' : 'none' }}>
+                    {p.cta}
+                  </Link>
+                )}
               </div>
             ))}
           </div>

@@ -24,6 +24,7 @@ import { useLocale } from '@/components/LocaleProvider'
 import type { IntelligenceEvent } from '@/lib/mockIntelligence'
 
 const FREE_POINT_LIMIT = 3
+const STANDARD_POINT_LIMIT = 10   // Standardは10件まで（超過はMaxプラン・近日公開）
 
 const MapView = dynamic(() => import('@/components/dashboard/MapView'), { ssr: false })
 
@@ -186,11 +187,19 @@ export default function DashboardPage() {
     setCtxMenu({ lat, lng, x, y })
   }
 
+  // 現プランの登録上限に達していればトーストを出して true を返す
+  function reachedPointLimit(): boolean {
+    const limit = plan === 'standard' ? STANDARD_POINT_LIMIT : FREE_POINT_LIMIT
+    if (fields.length < limit) return false
+    if (plan === 'standard') toast.info(t('dash.stdLimit', { n: STANDARD_POINT_LIMIT }), t('dash.stdLimitSub'))
+    else toast.info(t('dash.freeLimit', { n: FREE_POINT_LIMIT }), t('dash.freeLimitSub', { m: STANDARD_POINT_LIMIT }))
+    return true
+  }
+
   async function handleCtxAddField() {
     if (!ctxMenu) return
-    if (plan === 'free' && fields.length >= FREE_POINT_LIMIT) {
+    if (reachedPointLimit()) {
       setCtxMenu(null)
-      toast.info(t('dash.freeLimit', { n: FREE_POINT_LIMIT }), t('dash.freeLimitSub'))
       return
     }
     setPending({ lat: ctxMenu.lat, lng: ctxMenu.lng })
@@ -266,19 +275,13 @@ export default function DashboardPage() {
   }
 
   function handleAddClick() {
-    if (plan === 'free' && fields.length >= FREE_POINT_LIMIT) {
-      toast.info(t('dash.freeLimit', { n: FREE_POINT_LIMIT }), t('dash.freeLimitSub'))
-      return
-    }
+    if (reachedPointLimit()) return
     setPending(null); setShowModal(true)
   }
 
   // ── モバイル: ＋ で「地図中央のピンで位置決め」モードに入る ──
   function startPlacingPoint() {
-    if (plan === 'free' && fields.length >= FREE_POINT_LIMIT) {
-      toast.info(t('dash.freeLimit', { n: FREE_POINT_LIMIT }), t('dash.freeLimitSub'))
-      return
-    }
+    if (reachedPointLimit()) return
     setSelected(null)
     setMobileSnap('peek')   // 地図をほぼ全画面にして位置を合わせやすく
     setPlacingPoint(true)
@@ -591,10 +594,7 @@ export default function DashboardPage() {
                 </span>
                 <button
                   onClick={() => {
-                    if (plan === 'free' && fields.length >= FREE_POINT_LIMIT) {
-                      toast.info(t('dash.freeLimit', { n: FREE_POINT_LIMIT }), t('dash.freeLimitSub'))
-                      return
-                    }
+                    if (reachedPointLimit()) return
                     setPending({ lat: searchPin.lat, lng: searchPin.lng }); setShowModal(true); setSearchPin(null)
                   }}
                   style={{
