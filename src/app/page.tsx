@@ -401,12 +401,12 @@ export default async function LandingPage() {
 
       {/* ━━━━━ Pricing ━━━━━ */}
       <section style={{ padding: '80px 48px', background: '#fff', borderTop: '1px solid #e9ecf0' }}>
-        <div style={{ maxWidth: 780, margin: '0 auto' }}>
+        <div style={{ maxWidth: 1040, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
             <p style={{ fontSize: 30, fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>{T('lp.price.badge')}</p>
             <p style={{ fontSize: 15, color: '#64748b' }}>{T('lp.price.title')}</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 18 }}>
             {[
               { name: 'Free', price: '¥0', period: T('lp.plan.period'), desc: T('lp.plan.freeDesc'), highlight: false, features: [T('lp.plan.f.points3'),T('lp.plan.f.hourly24'),T('lp.plan.f.daily')], cta: T('lp.plan.ctaFree'), href: '/signup', comingSoon: false },
               { name: 'Standard', price: '¥980', period: T('lp.plan.period'), desc: T('lp.plan.stdDesc'), highlight: true, features: [T('lp.plan.f.points10'),T('lp.plan.f.hourly48'),T('lp.plan.f.bestday'),T('lp.plan.f.radar'),T('lp.plan.f.cameras')], cta: T('lp.plan.ctaStd'), href: '/signup?plan=standard', comingSoon: false },
